@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+<title id="title">Synthetic drift verification failure</title><desc id="desc">Terminal output reports one stale container and one changed port.</desc>
+<rect width="1200" height="420" fill="#0f172a"/><rect x="34" y="30" width="1132" height="360" rx="12" fill="#111827" stroke="#334155"/>
+<circle cx="66" cy="60" r="7" fill="#ef4444"/><circle cx="90" cy="60" r="7" fill="#f59e0b"/><circle cx="114" cy="60" r="7" fill="#22c55e"/>
+<g font-family="monospace" font-size="19"><text x="65" y="115" fill="#cbd5e1">$ bin/verify --fixture /tmp/changed-inventory.json</text><text x="65" y="165" fill="#fca5a5">FAIL: 2 finding(s)</text><text x="85" y="215" fill="#f8fafc">- PORT MISMATCH: demo-dashboard: declared</text><text x="115" y="250" fill="#94a3b8">['127.0.0.1:3000-&gt;3000/tcp'], actual ['127.0.0.1:9999-&gt;3000/tcp']</text><text x="85" y="300" fill="#f8fafc">- STALE CONTAINER: demo-api (01-runtime.yaml)</text></g>
+</svg>

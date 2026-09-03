@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+python -m ruff format --check .
+python -m ruff check .
+python -m pytest -q
+python -m atlas.cli verify
+rm -rf out
+python -m atlas.cli render
+first="$(sha256sum out/atlas.html)"
+python -m atlas.cli render
+second="$(sha256sum out/atlas.html)"
+test "$first" = "$second"
+git diff --check
+printf 'PASS: format, lint, tests, fixture drift, render idempotency, diff check\n'

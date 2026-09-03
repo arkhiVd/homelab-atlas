@@ -1,0 +1,21 @@
+flowchart LR
+  subgraph frontend["demo_frontend path · 172.30.10.0/24"]
+    unit["demo-atlas.service"] -.-> proxy["demo-proxy\n127.0.0.1:8443"]
+    proxy --> dashboard["demo-dashboard\n127.0.0.1:3000"]
+  end
+  subgraph backend["demo_backend data path · 172.30.20.0/24"]
+    api["demo-api"] --> db["demo-db"]
+    timer["demo-backup.timer"] -.-> backup["demo-backup"]
+    backup --> db
+  end
+  proxy --> api
+  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
+  class proxy ingress
+  class dashboard,api app
+  class db,backup data
+  class timer,unit host

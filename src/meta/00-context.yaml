@@ -1,0 +1,11 @@
+id: 00-context
+title: System context
+audience: Operators evaluating the pattern
+summary: A synthetic homelab reachable through a private overlay, with local applications and storage.
+nodes:
+  - {id: user, kind: concept, label: Operator}
+  - {id: overlay, kind: concept, label: Private overlay network}
+  - {id: host, kind: host, label: Demo homelab host}
+  - {id: apps, kind: concept, label: Container applications}
+  - {id: storage, kind: volume, label: Encrypted storage}
+  - {id: services, kind: external, label: External APIs}

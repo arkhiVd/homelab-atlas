@@ -1,0 +1,20 @@
+id: 01-runtime
+title: Demo runtime and backup flow
+audience: Operators learning how sidecars map diagram nodes to system identifiers
+summary: The fixture models five containers, two networks, one service, and one timer. All names and addresses are synthetic.
+nodes:
+  - id: proxy
+    kind: container
+    name: demo-proxy
+    ports: ["127.0.0.1:8443->8443/tcp"]
+  - id: dashboard
+    kind: container
+    name: demo-dashboard
+    ports: ["127.0.0.1:3000->3000/tcp"]
+  - {id: api, kind: container, name: demo-api, ports: []}
+  - {id: db, kind: container, name: demo-db, ports: []}
+  - {id: backup, kind: container, name: demo-backup, ports: []}
+  - {id: frontend, kind: network, name: demo_frontend, subnet: "172.30.10.0/24"}
+  - {id: backend, kind: network, name: demo_backend, subnet: "172.30.20.0/24"}
+  - {id: unit, kind: unit, name: demo-atlas.service}
+  - {id: timer, kind: timer, name: demo-backup.timer}

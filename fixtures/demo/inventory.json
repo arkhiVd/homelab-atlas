@@ -1,0 +1,15 @@
+{
+  "containers": {
+    "demo-dashboard": {"image": "example/dashboard:1.0", "ports": ["127.0.0.1:3000->3000/tcp"]},
+    "demo-proxy": {"image": "example/proxy:1.0", "ports": ["127.0.0.1:8443->8443/tcp"]},
+    "demo-api": {"image": "example/api:1.0", "ports": []},
+    "demo-db": {"image": "example/database:1.0", "ports": []},
+    "demo-backup": {"image": "example/backup:1.0", "ports": []}
+  },
+  "networks": {
+    "demo_frontend": {"subnet": "172.30.10.0/24"},
+    "demo_backend": {"subnet": "172.30.20.0/24"}
+  },
+  "units": ["demo-atlas.service"],
+  "timers": ["demo-backup.timer"]
+}
