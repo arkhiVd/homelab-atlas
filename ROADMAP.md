@@ -1,6 +1,6 @@
 # Homelab Atlas roadmap
 
-Status: public candidate preparation in progress.
+Status: public candidate approved for publication on 2026-09-04.
 
 Change class: Standard. This repository contains offline documentation tooling and synthetic fixtures. Any future live integration remains read-only.
 
