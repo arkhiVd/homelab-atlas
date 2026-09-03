@@ -8,7 +8,7 @@ from atlas.core import SafetyError, safe_output_path, validate_command
 @pytest.mark.parametrize(
     "argv",
     [
-        ["docker", "restart", "demo-api"],
+        ["docker", "restart", "jellyfin"],
         ["docker", "compose", "up"],
         ["docker", "network", "rm", "demo_frontend"],
         ["systemctl", "restart", "demo-backup.service"],

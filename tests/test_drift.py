@@ -25,21 +25,19 @@ def test_undocumented_live_object_fails():
 
 def test_stale_node_and_changed_port_fail():
     inventory = demo()
-    del inventory.containers["demo-api"]
-    inventory.containers["demo-dashboard"]["ports"] = ["127.0.0.1:9999->3000/tcp"]
+    del inventory.containers["jellyfin"]
+    inventory.containers["cloudops"]["ports"] = ["127.0.0.1:9443->8443/tcp"]
     nodes, _ = load_sidecars(REPO / "src/meta")
     findings = compare(nodes, inventory)
-    assert any(item.startswith("STALE CONTAINER: demo-api") for item in findings)
-    assert any(item.startswith("PORT MISMATCH: demo-dashboard") for item in findings)
+    assert any(item.startswith("STALE CONTAINER: jellyfin") for item in findings)
+    assert any(item.startswith("PORT MISMATCH: cloudops") for item in findings)
 
 
 def test_changed_subnet_fails():
     inventory = demo()
-    inventory.networks["demo_backend"]["subnet"] = "172.30.99.0/24"
+    inventory.networks["backend"]["subnet"] = "172.30.99.0/24"
     nodes, _ = load_sidecars(REPO / "src/meta")
-    assert any(
-        item.startswith("SUBNET MISMATCH: demo_backend") for item in compare(nodes, inventory)
-    )
+    assert any(item.startswith("SUBNET MISMATCH: backend") for item in compare(nodes, inventory))
 
 
 def test_renderer_escapes_untrusted_metadata_and_source():

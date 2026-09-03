@@ -2,7 +2,7 @@
 
 Homelab Atlas keeps architecture diagrams readable by hand and checks the facts beside them with code. Mermaid files define the layout. YAML sidecars map diagram nodes to container, network, systemd, timer, port, and subnet identifiers. The verifier reports objects missing from the diagrams, stale nodes, and changed network details.
 
-This public repository contains a small synthetic topology. It does not contain an export of a production inventory.
+This public repository contains a sanitized representative topology: 43 named services, four synthetic networks, three application units, four timers, and 14 architecture views. Public product and project names are retained so the workflows are useful. Real hostnames, host-specific addresses, private paths, account data, runtime observations, and the original inventory structure are not included. Addresses in the demo are reserved synthetic ranges or loopback examples.
 
 ![Synthetic Homelab Atlas overview](docs/atlas-overview.svg)
 
@@ -31,7 +31,7 @@ python3 -m venv .venv
 .venv/bin/python -m atlas.cli render
 ```
 
-Open `out/atlas.html`. The renderer copies the pinned Mermaid 11.16.1 runtime into `out/`, so the diagrams work offline. To prove the drift gate works, copy the fixture and remove `demo-api` or change a published port, then run:
+Open `out/atlas.html`. The renderer copies the pinned Mermaid 11.16.1 runtime into `out/`, so the diagrams work offline. To prove the drift gate works, copy the fixture and remove `jellyfin` or change a declared port, then run:
 
 ```bash
 .venv/bin/python -m atlas.cli verify --fixture /tmp/changed-inventory.json

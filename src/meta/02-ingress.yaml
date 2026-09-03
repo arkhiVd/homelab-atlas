@@ -1,0 +1,36 @@
+id: 02-ingress
+title: Private ingress and authentication
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes:
+- id: proxy
+  kind: container
+  name: cloudops
+  ports: []
+- id: homepage
+  kind: container
+  name: homepage
+  ports: []
+- id: homelab_ui
+  kind: container
+  name: homelab-ui
+  ports: []
+- id: uptime_kuma
+  kind: container
+  name: uptime-kuma
+  ports: []
+- id: librarian
+  kind: container
+  name: librarian
+  ports: []
+- id: laptop
+  kind: concept
+- id: overlay
+  kind: concept
+- id: auth
+  kind: concept
+- id: internet
+  kind: concept
+- id: blocked
+  kind: concept

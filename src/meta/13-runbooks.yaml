@@ -1,0 +1,6 @@
+id: 13-runbooks
+title: Safe verification and rendering runbook
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes: []

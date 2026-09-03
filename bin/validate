@@ -12,4 +12,7 @@ python -m atlas.cli render
 second="$(sha256sum out/atlas.html)"
 test "$first" = "$second"
 git diff --check
-printf 'PASS: format, lint, tests, fixture drift, render idempotency, diff check\n'
+git diff --cached --check
+empty_tree="$(git hash-object -t tree /dev/null)"
+git diff --check "$empty_tree" HEAD -- . ':(exclude)vendor/mermaid.min.js'
+printf 'PASS: format, lint, tests, fixture drift, render idempotency, whitespace checks\n'

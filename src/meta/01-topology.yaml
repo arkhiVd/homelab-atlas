@@ -1,0 +1,34 @@
+id: 01-topology
+title: Host and network topology
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes:
+- id: frontend
+  kind: network
+  name: frontend
+  subnet: 172.30.10.0/24
+- id: backend
+  kind: network
+  name: backend
+  subnet: 172.30.20.0/24
+- id: media_net
+  kind: network
+  name: media
+  subnet: 172.30.30.0/24
+- id: ops_net
+  kind: network
+  name: operations
+  subnet: 172.30.40.0/24
+- id: host
+  kind: concept
+- id: proxy
+  kind: concept
+- id: homepage
+  kind: concept
+- id: databases
+  kind: concept
+- id: media_apps
+  kind: concept
+- id: agents
+  kind: concept

@@ -1,0 +1,30 @@
+id: 05-music
+title: Music discovery, import, and playback
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes:
+- id: portal
+  kind: container
+  name: musicportal
+  ports: []
+- id: lidarr
+  kind: container
+  name: lidarr
+  ports: []
+- id: slskd
+  kind: container
+  name: slskd
+  ports: []
+- id: soularrr
+  kind: container
+  name: soularr
+  ports: []
+- id: navidrome
+  kind: container
+  name: navidrome
+  ports: []
+- id: inbox
+  kind: concept
+- id: library
+  kind: concept

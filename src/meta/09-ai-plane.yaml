@@ -1,0 +1,27 @@
+id: 09-ai-plane
+title: Local agents and guarded tools
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes:
+- id: homelab_mcp
+  kind: unit
+  name: homelab-mcp.service
+- id: jobhunt
+  kind: unit
+  name: jobhunt.service
+- id: dojo
+  kind: unit
+  name: cka-dojo.service
+- id: clients
+  kind: concept
+- id: inventory
+  kind: concept
+- id: vault_tools
+  kind: concept
+- id: llm
+  kind: concept
+- id: notifications
+  kind: concept
+- id: messaging
+  kind: concept

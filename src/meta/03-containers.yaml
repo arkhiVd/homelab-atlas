@@ -1,0 +1,60 @@
+id: 03-containers
+title: Core application groups
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes:
+- id: syncthing
+  kind: container
+  name: syncthing
+  ports: []
+- id: miniflux
+  kind: container
+  name: miniflux
+  ports: []
+- id: miniflux_db
+  kind: container
+  name: miniflux-db
+  ports: []
+- id: hbbs
+  kind: container
+  name: hbbs
+  ports: []
+- id: hbbr
+  kind: container
+  name: hbbr
+  ports: []
+- id: wger_web
+  kind: container
+  name: wger-web
+  ports: []
+- id: wger_worker
+  kind: container
+  name: wger-celery-worker
+  ports: []
+- id: wger_celery_beat
+  kind: container
+  name: wger-celery-beat
+  ports: []
+- id: wger_powersync
+  kind: container
+  name: wger-powersync
+  ports: []
+- id: wger_db
+  kind: container
+  name: wger-db
+  ports: []
+- id: wger_cache
+  kind: container
+  name: wger-cache
+  ports: []
+- id: wger_nginx
+  kind: container
+  name: wger-nginx
+  ports: []
+- id: core
+  kind: concept
+- id: remote
+  kind: concept
+- id: fitness
+  kind: concept

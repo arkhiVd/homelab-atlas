@@ -1,0 +1,6 @@
+id: 11-cka-dojo
+title: Kubernetes practice workflow
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes: []

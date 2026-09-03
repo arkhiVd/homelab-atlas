@@ -5,14 +5,14 @@
   <rect x="36" y="28" width="1128" height="619" rx="12" fill="#fff" stroke="#cbd5e1"/>
   <circle cx="66" cy="57" r="7" fill="#ef4444"/><circle cx="90" cy="57" r="7" fill="#f59e0b"/><circle cx="114" cy="57" r="7" fill="#22c55e"/>
   <text x="60" y="120" font-family="system-ui" font-size="38" font-weight="700" fill="#172033">Homelab Atlas demo</text>
-  <text x="60" y="153" font-family="system-ui" font-size="18" fill="#475569">Synthetic fixture · 5 containers · 2 networks · 0 drift findings</text>
+  <text x="60" y="153" font-family="system-ui" font-size="18" fill="#475569">Synthetic fixture · 43 containers · 14 architecture views · 0 drift findings</text>
   <rect x="70" y="205" width="220" height="82" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/>
-  <text x="180" y="238" text-anchor="middle" font-family="monospace" font-size="17" fill="#1e1b4b">demo-proxy</text><text x="180" y="263" text-anchor="middle" font-family="monospace" font-size="14" fill="#475569">127.0.0.1:8443</text>
-  <rect x="420" y="185" width="700" height="340" rx="12" fill="#f8fafc" stroke="#0d9488" stroke-width="2"/><text x="445" y="220" font-family="monospace" font-size="16" fill="#0f766e">demo_backend · 172.30.20.0/24</text>
-  <rect x="470" y="260" width="190" height="72" rx="8" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/><text x="565" y="303" text-anchor="middle" font-family="monospace" font-size="17">demo-api</text>
-  <rect x="840" y="260" width="190" height="72" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/><text x="935" y="303" text-anchor="middle" font-family="monospace" font-size="17">demo-db</text>
-  <rect x="470" y="410" width="190" height="72" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/><text x="565" y="453" text-anchor="middle" font-family="monospace" font-size="17">demo-backup</text>
+  <text x="180" y="238" text-anchor="middle" font-family="monospace" font-size="17" fill="#1e1b4b">cloudops</text><text x="180" y="263" text-anchor="middle" font-family="monospace" font-size="14" fill="#475569">private ingress</text>
+  <rect x="420" y="185" width="700" height="340" rx="12" fill="#f8fafc" stroke="#0d9488" stroke-width="2"/><text x="445" y="220" font-family="monospace" font-size="16" fill="#0f766e">media workflow · synthetic network</text>
+  <rect x="470" y="260" width="190" height="72" rx="8" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/><text x="565" y="303" text-anchor="middle" font-family="monospace" font-size="17">jellyseerr</text>
+  <rect x="840" y="260" width="190" height="72" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/><text x="935" y="303" text-anchor="middle" font-family="monospace" font-size="17">jellyfin</text>
+  <rect x="470" y="410" width="190" height="72" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/><text x="565" y="453" text-anchor="middle" font-family="monospace" font-size="17">automation</text>
   <path d="M290 246 H380 V296 H470" fill="none" stroke="#475569" stroke-width="3"/><path d="M660 296 H840" fill="none" stroke="#475569" stroke-width="3"/><path d="M660 446 H760 V316 H840" fill="none" stroke="#475569" stroke-width="3"/>
   <polygon points="470,296 456,288 456,304" fill="#475569"/><polygon points="840,296 826,288 826,304" fill="#475569"/>
-  <rect x="70" y="558" width="1050" height="52" rx="6" fill="#172033"/><text x="94" y="591" font-family="monospace" font-size="16" fill="#86efac">PASS: 15 sidecar nodes match fixtures/demo/inventory.json</text>
+  <rect x="70" y="558" width="1050" height="52" rx="6" fill="#172033"/><text x="94" y="591" font-family="monospace" font-size="16" fill="#86efac">PASS: 111 sidecar nodes match fixtures/demo/inventory.json</text>
 </svg>

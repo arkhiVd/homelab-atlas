@@ -1,0 +1,26 @@
+flowchart TD
+  core["Core services"] --> homepage["homepage"]
+  core --> homelab_ui["homelab-ui"]
+  core --> uptime_kuma["uptime-kuma"]
+  core --> syncthing["syncthing"]
+  core --> miniflux["miniflux"]
+  core --> miniflux_db["miniflux-db"]
+  core --> librarian["librarian"]
+  remote["Remote support"] --> hbbs["hbbs"]
+  remote --> hbbr["hbbr"]
+  fitness["Fitness tracking"] --> wger_web["wger-web"]
+  fitness --> wger_worker["wger-celery-worker"]
+  fitness --> wger_celery_beat["wger-celery-beat"]
+  fitness --> wger_powersync["wger-powersync"]
+  fitness --> wger_db["wger-db"]
+  fitness --> wger_cache["wger-cache"]
+  fitness --> wger_nginx["wger-nginx"]
+  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
+  class core,remote,fitness host
+  class homepage,homelab_ui,uptime_kuma,syncthing,miniflux,miniflux_db,librarian,hbbs,hbbr,wger_web,wger_worker,wger_celery_beat,wger_powersync,wger_db,wger_cache,wger_nginx app

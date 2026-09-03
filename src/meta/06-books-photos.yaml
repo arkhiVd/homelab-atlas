@@ -1,0 +1,42 @@
+id: 06-books-photos
+title: Books and photo workflows
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes:
+- id: bookportal
+  kind: container
+  name: bookportal
+  ports: []
+- id: book_vpn
+  kind: container
+  name: gluetun-books
+  ports: []
+- id: kavita
+  kind: container
+  name: kavita
+  ports: []
+- id: immich_server
+  kind: container
+  name: immich-server
+  ports: []
+- id: immich_db
+  kind: container
+  name: immich-db
+  ports: []
+- id: immich_redis
+  kind: container
+  name: immich-redis
+  ports: []
+- id: immich_ml
+  kind: container
+  name: immich-machine-learning
+  ports: []
+- id: sources
+  kind: concept
+- id: books
+  kind: concept
+- id: phone
+  kind: concept
+- id: photos
+  kind: concept

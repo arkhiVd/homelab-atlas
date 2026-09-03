@@ -1,0 +1,22 @@
+flowchart LR
+  bookportal["bookportal"] --> book_vpn["gluetun-books"]
+  book_vpn --> sources["Book sources"]
+  sources --> books["Local book library"]
+  books --> kavita["kavita"]
+  phone["Trusted phone"] --> immich_server["immich-server"]
+  immich_server --> immich_db["immich-db"]
+  immich_server --> immich_redis["immich-redis"]
+  immich_server --> immich_ml["immich-machine-learning"]
+  immich_server --> photos["Local photo library"]
+  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
+  class bookportal,kavita,immich_server,immich_db,immich_redis,immich_ml app
+  class book_vpn secure
+  class sources external
+  class books,photos data
+  class phone ingress

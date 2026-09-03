@@ -1,0 +1,34 @@
+id: 12-automation
+title: Timers, updates, and recurring checks
+audience: Homelab operators and reviewers
+summary: Synthetic topology that demonstrates the architecture pattern without publishing
+  host-specific addresses, paths, or account data.
+nodes:
+- id: watchtower
+  kind: container
+  name: watchtower
+  ports: []
+- id: backup_timer
+  kind: timer
+  name: demo-backup.timer
+- id: jobhunt_timer
+  kind: timer
+  name: jobhunt.timer
+- id: sync_timer
+  kind: timer
+  name: knowledge-sync.timer
+- id: health_timer
+  kind: timer
+  name: atlas-verify.timer
+- id: images
+  kind: concept
+- id: backup
+  kind: concept
+- id: jobhunt
+  kind: concept
+- id: sync
+  kind: concept
+- id: verify
+  kind: concept
+- id: report
+  kind: concept

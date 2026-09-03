@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant T as jobhunt.timer
+  participant D as Discovery worker
+  participant S as Public job sources
+  participant R as Ranking pipeline
+  participant B as Review board
+  T->>D: Start scheduled discovery
+  D->>S: Fetch public listings
+  S-->>D: Listing metadata
+  D->>R: Normalize and score
+  R->>B: Store review candidates
+  B-->>R: Human decision
