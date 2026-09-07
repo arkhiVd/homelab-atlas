@@ -4,6 +4,9 @@ flowchart TD
   imports["Import workspace"] --> books["Book library"]
   uploads["Upload workspace"] --> photos["Photo library"]
   databases["Application data directories"] --> backup["Local backup job"]
+  authoring["Authoritative workstation"] --> hub["Sync hub"]
+  hub --> editable["Versioned editable replica"]
+  hub --> mobile["Receive-only mobile replica"]
   video --> backup
   music --> backup
   books --> backup
@@ -15,6 +18,6 @@ flowchart TD
   classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
   classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
   classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class downloads,imports,uploads host
-  class video,music,books,photos,databases data
+  class downloads,imports,uploads,authoring host
+  class video,music,books,photos,databases,hub,editable,mobile data
   class backup automation

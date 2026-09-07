@@ -1,8 +1,7 @@
 id: 07-storage
 title: Local storage and backup flow
 audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
+summary: Synthetic topology that demonstrates local storage plus an authoritative-workstation sync pattern with an editable hub replica and a receive-only mobile replica. It publishes no host-specific addresses, paths, or account data.
 nodes:
 - id: downloads
   kind: concept
@@ -21,4 +20,12 @@ nodes:
 - id: databases
   kind: concept
 - id: backup
+  kind: concept
+- id: authoring
+  kind: concept
+- id: hub
+  kind: concept
+- id: editable
+  kind: concept
+- id: mobile
   kind: concept
