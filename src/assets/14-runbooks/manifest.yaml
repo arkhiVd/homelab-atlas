@@ -71,15 +71,15 @@ assets:
   attribution: Homelab Atlas
   trademark: Generic
   fallback: hp
-- id: runbook-linux-mint
-  file: 14-runbooks-linux-mint.svg
-  sha256: ddd18c64f005f8b7c3feb33f1b00685c2609571667e897679f5677065ae17e6f
+- id: runbook-debian
+  file: 14-runbooks-debian.svg
+  sha256: a4b33eefa9db5c11af52d6509bed6d2a5c76bc9cf944afb3882fdc13536bc635
   source_url: 'local-authored: atlas runbook identity'
   revision: local asset v1
   license: CC0-1.0
   attribution: Homelab Atlas
   trademark: Generic
-  fallback: linux-mint
+  fallback: debian
 - id: runbook-linux
   file: 14-runbooks-linux.svg
   sha256: dbc5138223fc49f884dc16483585013f2bd32dac10ce2548e7b864199acd4372
