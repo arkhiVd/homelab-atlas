@@ -1,0 +1,119 @@
+%% 11-automation — every systemd unit and timer, and what reports where.
+%% Source of truth: src/11-automation.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 28, "diagramPadding": 34}}}%%
+flowchart TB
+    subgraph boot["Boot"]
+
+        docker_service["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-docker-service.svg' width='52' height='52' alt=''/><br/>docker.service</div>"]
+        homelab_service["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-homelab-service.svg' width='52' height='52' alt=''/><br/>homelab.service<br/>oneshot · compose up -d --remove-orphans<br/>After docker + overlayd</div>"]
+        x_user_manager["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-x-user-manager.svg' width='52' height='52' alt=''/><br/>operator user manager<br/>lingering enabled</div>"]
+        overlayd["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-overlayd.svg' width='52' height='52' alt=''/><br/>overlayd.service</div>"]
+    end
+
+    subgraph always["Always-on services"]
+
+        x_user_units["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-x-user-units.svg' width='52' height='52' alt=''/><br/>user scope: hermes-gateway<br/>claude-bridge · cloudops-chat</div>"]
+        homelab_mcp["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-homelab-mcp.svg' width='52' height='52' alt=''/><br/>homelab-mcp.service</div>"]
+        jobhunt_bot["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-jobhunt-bot.svg' width='52' height='52' alt=''/><br/>jobhunt-bot.service</div>"]
+        invest_dashboard["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-invest-dashboard.svg' width='52' height='52' alt=''/><br/>invest-dashboard.service<br/>authenticated dashboard gateway</div>"]
+        health_connect["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-health-connect.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health-connect.service<br/>localhost webhook · local SQLite</div>"]
+        health_promote_path["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-health-promote-path.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health-promote.path<br/>watches receive-only ingress</div>"]
+    end
+
+    subgraph updates["CLI updates"]
+        t_cli["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-cli.svg' width='52' height='52' alt=''/><br/>homelab-cli-update.timer<br/>daily 03:00</div>"]
+        s_cli["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-s-cli.svg' width='52' height='52' alt=''/><br/>homelab-cli-update.service<br/>mise upgrade → hermes update</div>"]
+        mise["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-mise.svg' width='52' height='52' alt=''/><br/>mise upgrade --yes --prune</div>"]
+        hermes_update["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-hermes-update.svg' width='52' height='52' alt=''/><br/>hermes update --yes<br/>not mise-managed</div>"]
+    end
+    subgraph images["Custom image rebuild"]
+        t_rebuild["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-rebuild.svg' width='52' height='52' alt=''/><br/>homelab-rebuild.timer<br/>Sun 03:30</div>"]
+        s_rebuild["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-s-rebuild.svg' width='52' height='52' alt=''/><br/>rebuild-custom.sh<br/>musicportal + bookportal images</div>"]
+    end
+    subgraph reboot["Staged reboot"]
+        t_reboot["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-reboot.svg' width='52' height='52' alt=''/><br/>homelab-reboot.timer<br/>daily 05:00</div>"]
+        s_reboot["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-s-reboot.svg' width='52' height='52' alt=''/><br/>staged-reboot.sh<br/>stages today, reboots next day</div>"]
+    end
+    subgraph deprecations["Deprecation checks"]
+        t_depcheck["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-depcheck.svg' width='52' height='52' alt=''/><br/>homelab-depcheck.timer<br/>Mon 09:00</div>"]
+        s_depcheck["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-s-depcheck.svg' width='52' height='52' alt=''/><br/>check-deprecations.sh<br/>image and base scan</div>"]
+    end
+    subgraph pipelines["Scheduled application work"]
+        t_health_promote["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-health-promote.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health-promote.timer<br/>fallback poll</div>"]
+        t_jobhunt["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-jobhunt.svg' width='52' height='52' alt=''/><br/>jobhunt-discover.timer<br/>08:00 UTC · persistent · 300s jitter</div>"]
+        t_health_backup["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-health-backup.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health-connect-backup.timer<br/>daily archival backup</div>"]
+        t_invest["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-t-invest.svg' width='52' height='52' alt=''/><br/>invest-mf.timer<br/>nightly market pipeline</div>"]
+        s_health_promote["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-s-health-promote.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health-promote.service<br/>validate · atomic snapshot</div>"]
+        jobhunt_discover["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-jobhunt-discover.svg' width='52' height='52' alt=''/><br/>jobhunt-discover.service<br/>jobhunt.nightly</div>"]
+        s_health_backup["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-s-health-backup.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health-connect-backup.service<br/>consistent SQLite backup</div>"]
+        s_invest["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-s-invest.svg' width='52' height='52' alt=''/><br/>invest-mf.service<br/>market pipeline oneshot</div>"]
+    end
+
+    subgraph watch["Watching"]
+
+        watchtower["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-watchtower.svg' width='52' height='52' alt=''/><br/>watchtower<br/>weekly Sun 04:00 · --cleanup</div>"]
+        uptime_kuma["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-uptime-kuma.svg' width='52' height='52' alt=''/><br/>uptime-kuma :8091</div>"]
+        x_oom["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-x-oom.svg' width='52' height='52' alt=''/><br/>OOM safeguards<br/>4G swap · earlyoom · mem_limits</div>"]
+    end
+
+    x_telegram["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/11-automation/11-automation-x-telegram.svg' width='52' height='52' alt=''/><br/>Telegram — failure reporting</div>"]
+
+    docker_service ==> homelab_service
+    overlayd ==> homelab_service
+    homelab_service ==>|"compose projects"| watch
+    x_user_manager ==> x_user_units
+
+    t_cli ==> s_cli
+    t_rebuild ==> s_rebuild
+    t_reboot ==> s_reboot
+    t_depcheck ==> s_depcheck
+    t_jobhunt ==> jobhunt_discover
+    t_health_promote ==> s_health_promote
+    health_promote_path ==> s_health_promote
+    t_health_backup ==> s_health_backup
+    t_invest ==> s_invest
+
+    s_cli ==>|"one run"| mise
+    s_cli ==> hermes_update
+    s_cli -.->|"restart + verify"| x_user_units
+    s_cli -.->|"restart + verify"| jobhunt_bot
+    s_rebuild -.->|"rebuilds custom images"| homelab_service
+    s_reboot -.->|"reboots the box"| boot
+
+    s_cli -.->|"failure only"| x_telegram
+    s_rebuild ==> x_telegram
+    s_reboot ==> x_telegram
+    s_depcheck ==> x_telegram
+    jobhunt_discover ==> x_telegram
+    uptime_kuma ==> x_telegram
+
+    x_oom -.->|"protects"| always
+
+
+    %% Non-traffic layout constraints between existing inventory cards only.
+    x_user_manager ~~~ homelab_service
+    x_user_units ~~~ homelab_mcp
+    jobhunt_bot ~~~ pm_gateway
+    health_connect ~~~ health_promote_path
+    s_depcheck ~~~ t_jobhunt
+    s_rebuild ~~~ t_depcheck
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class docker_service,overlayd,homelab_service,x_user_manager host
+    class homelab_mcp,jobhunt_bot,health_connect,health_promote_path,x_user_units,hermes_update ai
+    class invest_dashboard ingress
+    class t_cli,t_rebuild,t_reboot,t_jobhunt,t_depcheck,t_health_promote,t_health_backup,t_invest ingress
+    class s_cli,s_rebuild,s_depcheck,jobhunt_discover,s_health_promote,s_health_backup,s_invest,mise media
+    class s_reboot warn
+    class watchtower,uptime_kuma media
+    class x_oom secure
+    class x_telegram external

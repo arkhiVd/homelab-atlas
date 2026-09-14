@@ -1,0 +1,82 @@
+id: 04-media
+title: "Media pipeline \u2014 request to playback"
+audience: Anyone debugging why a download stalled, imported to the wrong place, or never appeared in Jellyfin.
+layer: B
+summary: 'The full path a movie or episode takes: jellyseerr request, radarr/sonarr management, prowlarr search, qbittorrent fetch through the WARP tunnel, unpackerr extraction, import to ./data/media, then jellyfin playback with bazarr subtitles and tdarr transcode.
+
+  '
+notes:
+- I open Jellyseerr in a browser when I want to request a film or series. Jellyseerr sends movie requests to Radarr and television requests to Sonarr, so I do not have to operate each manager for a normal request.
+- Radarr and Sonarr ask Prowlarr to search the configured indexers. Prowlarr can use FlareSolverr when a source requires a browser-style challenge. A selected result is passed to qBittorrent.
+- "qBittorrent shares Gluetun\u2019s network and therefore uses the WARP egress path. Completed files land in the download area. Unpackerr extracts archives, then Radarr or Sonarr imports and names the result in the movie or television library."
+- Jellyfin reads the finished libraries and is the dashboard and app I use for playback. Bazarr adds subtitles. Tdarr is available for server-side media processing. A second Jellyfin library comes from files synchronized from the laptop.
+- Decluttarr cleans stalled download-manager entries. It is housekeeping, not part of a successful request. The normal result of the workflow is a named file in the correct library that appears in Jellyfin.
+nodes:
+- id: x_user
+  kind: concept
+  label: Request
+  lifecycle: observed-live
+- id: jellyseerr
+  kind: container
+  name: jellyseerr
+  lifecycle: observed-live
+- id: radarr
+  kind: container
+  name: radarr
+  lifecycle: observed-live
+- id: sonarr
+  kind: container
+  name: sonarr
+  lifecycle: observed-live
+- id: prowlarr
+  kind: container
+  name: prowlarr
+  lifecycle: observed-live
+- id: flaresolverr
+  kind: container
+  name: flaresolverr
+  lifecycle: observed-live
+- id: gluetun
+  kind: container
+  name: gluetun
+  lifecycle: observed-live
+- id: qbittorrent
+  kind: container
+  name: qbittorrent
+  lifecycle: observed-live
+- id: unpackerr
+  kind: container
+  name: unpackerr
+  lifecycle: observed-live
+- id: decluttarr
+  kind: container
+  name: decluttarr
+  lifecycle: observed-live
+- id: bazarr
+  kind: container
+  name: bazarr
+  lifecycle: observed-live
+- id: tdarr
+  kind: container
+  name: tdarr
+  lifecycle: observed-live
+- id: jellyfin
+  kind: container
+  name: jellyfin
+  lifecycle: observed-live
+- id: v_downloads
+  kind: volume
+  lifecycle: observed-live
+- id: v_movies
+  kind: volume
+  lifecycle: observed-live
+- id: v_tv
+  kind: volume
+  lifecycle: observed-live
+- id: v_syncmedia
+  kind: volume
+  lifecycle: observed-live
+- id: x_indexers
+  kind: external
+  label: Torrent indexers (Knaben, YTS)
+  lifecycle: external-unverified

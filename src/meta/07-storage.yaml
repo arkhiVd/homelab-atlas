@@ -1,31 +1,106 @@
 id: 07-storage
-title: Local storage and backup flow
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates local storage plus an authoritative-workstation sync pattern with an editable hub replica and a receive-only mobile replica. It publishes no host-specific addresses, paths, or account data.
+title: "Storage \u2014 Syncthing as the hub, and who reads what"
+audience: Anyone moving data, planning the rebuild, or about to write into the workspace.
+layer: B
+summary: Shared folders, application state, and read-only consumer relationships across the homelab.
+notes:
+- Syncthing is the bridge between the laptop, phone, and server. I use its web dashboard to check peers and folder health. The Obsidian workspace and selected libraries synchronize between devices, while wearable exports use a one-way phone-to-server pattern.
+- The shared music folder has several roles. Lidarr and Musicportal write it. Navidrome reads it for playback. Syncthing copies it to my devices. The arrows show permissions because write access matters more than the implementation path here.
+- The video libraries are different. Jellyfin reads both the server-managed movie and television folders and a separate folder synchronized from the laptop. The book folder feeds Kavita, while Immich uses its own upload, database, and model-cache storage.
+- The workspace is where Obsidian notes and agent-readable project context live. MCP tools expose controlled search, reading, append, and create operations. Agents do not receive unrestricted filesystem access.
+- The health importers validate phone exports and publish stable snapshots. Grafana mounts those snapshots read-only. This keeps a dashboard query from changing the source health records.
+- 'I use this page to answer two practical questions before changing anything: which service writes this folder, and which devices or applications will see the result.'
 nodes:
-- id: downloads
+- id: workstation
+  kind: device
+  name: workstation
+  lifecycle: observed-live
+- id: mobile_device
+  kind: device
+  name: mobile device
+  lifecycle: observed-live
+- id: syncthing
+  kind: container
+  name: syncthing
+  lifecycle: observed-live
+- id: v_shared-workspace
+  kind: volume
+  lifecycle: observed-live
+- id: v_music
+  kind: volume
+  lifecycle: observed-live
+- id: v_media
+  kind: volume
+  lifecycle: observed-live
+- id: v_cloudops
+  kind: volume
+  lifecycle: observed-live
+- id: v_resume
+  kind: volume
+  lifecycle: observed-live
+- id: v_gadgetbridge_raw
+  kind: volume
+  lifecycle: observed-live
+- id: v_health
+  kind: volume
+  lifecycle: observed-live
+- id: v_mediaroot
+  kind: volume
+  lifecycle: observed-live
+- id: v_books
+  kind: volume
+  lifecycle: observed-live
+- id: v_immich
+  kind: volume
+  lifecycle: observed-live
+- id: v_configs
+  kind: volume
+  lifecycle: observed-live
+- id: navidrome
+  kind: container
+  name: navidrome
+  lifecycle: observed-live
+- id: jellyfin
+  kind: container
+  name: jellyfin
+  lifecycle: observed-live
+- id: cloudops
+  kind: container
+  name: cloudops
+  lifecycle: observed-live
+- id: lidarr
+  kind: container
+  name: lidarr
+  lifecycle: observed-live
+- id: musicportal
+  kind: container
+  name: musicportal
+  lifecycle: observed-live
+- id: slskd
+  kind: container
+  name: slskd
+  lifecycle: observed-live
+- id: kavita
+  kind: container
+  name: kavita
+  lifecycle: observed-live
+- id: immich_server
+  kind: container
+  name: immich-server
+  lifecycle: observed-live
+- id: health_promoter
+  kind: unit
+  name: gadgetbridge-health-promote.service
+  lifecycle: observed-live
+- id: health_receiver
+  kind: unit
+  name: gadgetbridge-health-connect.service
+  lifecycle: observed-live
+- id: grafana
+  kind: container
+  name: grafana
+  lifecycle: observed-live
+- id: x_agents
   kind: concept
-- id: video
-  kind: concept
-- id: music
-  kind: concept
-- id: imports
-  kind: concept
-- id: books
-  kind: concept
-- id: uploads
-  kind: concept
-- id: photos
-  kind: concept
-- id: databases
-  kind: concept
-- id: backup
-  kind: concept
-- id: authoring
-  kind: concept
-- id: hub
-  kind: concept
-- id: editable
-  kind: concept
-- id: mobile
-  kind: concept
+  label: agent plane (detailed in 08-ai-plane)
+  lifecycle: observed-live

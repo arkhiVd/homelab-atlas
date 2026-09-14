@@ -1,0 +1,200 @@
+diagram: 08-ai-plane
+assets:
+- id: telegram
+  file: telegram.svg
+  sha256: 949491b66d35834896660ec8d461a15e87119cd6738344d771006652331f4628
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Telegram is a trademark of Telegram Messenger Inc.; nominative use only
+  fallback: Telegram
+- id: claude
+  file: claude.svg
+  sha256: 7f3a400121b0ca7220ac7e9477303d4e6eef232634cc57ef8cea2982d421269e
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Anthropic and Claude marks belong to Anthropic PBC; nominative use only
+  fallback: Claude
+- id: codex
+  file: codex.svg
+  sha256: d710c4424318f666f2aa63e9a9baeeae28cfa4c636dda8449b12cd6adf09a4aa
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: OpenAI and Codex marks belong to OpenAI; nominative use only
+  fallback: Codex
+- id: pi
+  file: pi.svg
+  sha256: d82978781b824273c55473822c1f243a6ed34fc6e8c2dbfe1a90dfc66ae43ee8
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Pi mark used for identification; rights remain with its owner
+  fallback: Pi
+- id: hermes
+  file: hermes.svg
+  sha256: 02d43c0a91fc2ee41f2684fc39613ff6687de29a4b079665bace5303671dd63b
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Hermes Agent mark used for identification; rights remain with its owner
+  fallback: Hermes
+- id: herdr
+  file: herdr.svg
+  sha256: e954993c7758c4513a0fddd243297764630d1e1d24ee0b18613e6f04eff886b8
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Herdr mark used for identification; rights remain with its owner
+  fallback: Herdr
+- id: sqlite
+  file: sqlite.svg
+  sha256: c9b1490b34532aaa125f7a757297500127788b3950140132eb117920fbd98e36
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Mark used for identification; rights remain with its owner
+  fallback: Sqlite
+- id: nginx
+  file: nginx.svg
+  sha256: 3860f0d399e48fcaa30f2b21d3cd5e0d693267140f1e28cb2d341981ab8d2f4c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Mark used for identification; rights remain with its owner
+  fallback: Nginx
+- id: mcp
+  file: mcp.svg
+  sha256: 8670df38c9558de3cdd98d8b39ee6cbaf1c929377cffc5952e9b02f9bf9429b3
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Mark used for identification; rights remain with its owner
+  fallback: Mcp
+- id: kubernetes
+  file: kubernetes.svg
+  sha256: cb354c94ba42b4201dd5c1da46323df2f98cc30b124a0e280a78d5b3b508018c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Mark used for identification; rights remain with its owner
+  fallback: Kubernetes
+- id: obsidian
+  file: obsidian.svg
+  sha256: 8dd1855430357c5ce6f76e7722b5f6b68a712ad98d2be5be6ba77616bfc69754
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Mark used for identification; rights remain with its owner
+  fallback: Obsidian
+- id: user
+  file: user.svg
+  sha256: a17e5e6993bcce3e092dd7dbeaff63ca699fa088562de281c97f9949169aaee6
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: User
+- id: agent
+  file: agent.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Agent
+- id: timer
+  file: timer.svg
+  sha256: 7891908b5e9f1af14aff43f3bb6c947e8ec961b565594f676fde729c0e53a4d5
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Timer
+- id: package
+  file: package.svg
+  sha256: 9cd43cf6b041c699a694cf90c4b552563e74de57dd57bf8f7e89dffe2f36ac80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Package
+- id: instructions
+  file: instructions.svg
+  sha256: 7faabb192159c6a72481072623e802e0636804c85f6ab85c13a7dc0b83f71a3c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Instructions
+- id: database
+  file: database.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Database
+- id: cloud
+  file: cloud.svg
+  sha256: 68bf26f842dfd2c96aea0bfbea351f9fe2c116ae5484bf557ca2af5848741035
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Cloud
+- id: search
+  file: search.svg
+  sha256: 3d3ce41f882e1f25a80b0a264f39252e24bc4d067d790f393ce1f4a08b35afe2
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Search
+- id: docker
+  file: docker.svg
+  sha256: 7de45e1ea203da32a040c257f47cd39a5711b3a200d27ec72dbccbc5efb1590b
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Mark used for identification; rights remain with its owner
+  fallback: Docker
+- id: github
+  file: github.svg
+  sha256: cdfb82ff14c8c2484eacba9d211d86cd0c993c933855cad2b03633414fa10ddb
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Mark used for identification; rights remain with its owner
+  fallback: Github
+- id: credentials
+  file: credentials.svg
+  sha256: 8fb2bfa899a3ec396dbd0b91aec6dc346e3ed7ee67e08d37c7f1b2eb0c823dcc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Locked credentials

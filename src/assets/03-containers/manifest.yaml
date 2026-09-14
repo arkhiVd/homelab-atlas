@@ -1,0 +1,434 @@
+diagram: 03-containers
+assets:
+- id: 03-containers-homepage
+  file: 03-containers-homepage.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: homepage
+- id: 03-containers-cloudops
+  file: 03-containers-cloudops.svg
+  sha256: 3860f0d399e48fcaa30f2b21d3cd5e0d693267140f1e28cb2d341981ab8d2f4c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: nginx mark used for nominative identification; rights remain with its
+    owner
+  fallback: cloudops
+- id: 03-containers-uptime_kuma
+  file: 03-containers-uptime-kuma.svg
+  sha256: f3caa8a8bac253a77fa2ae7e7bc9b062b55a006abd787b111533714152ec744c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: uptime-kuma mark used for nominative identification; rights remain with
+    its owner
+  fallback: uptime kuma
+- id: 03-containers-homelab_ui
+  file: 03-containers-homelab-ui.svg
+  sha256: 3860f0d399e48fcaa30f2b21d3cd5e0d693267140f1e28cb2d341981ab8d2f4c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: nginx mark used for nominative identification; rights remain with its
+    owner
+  fallback: homelab ui
+- id: 03-containers-grafana
+  file: 03-containers-grafana.svg
+  sha256: 8f32897073ee93594ab2339482ef21ca3767044055da89e2baf9066d25592df7
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: grafana mark used for nominative identification; rights remain with its
+    owner
+  fallback: grafana
+- id: 03-containers-jellyseerr
+  file: 03-containers-jellyseerr.svg
+  sha256: 536b303e73d5e67d52af58583357acd80cc65050d5114ad2fbf5f38414ee1c3a
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: jellyseerr mark used for nominative identification; rights remain with
+    its owner
+  fallback: jellyseerr
+- id: 03-containers-radarr
+  file: 03-containers-radarr.svg
+  sha256: c3d07ecdfab432ca97f26cf01fe06dbfc0993b5cb6093827b3de1c7421a6fb95
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: radarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: radarr
+- id: 03-containers-sonarr
+  file: 03-containers-sonarr.svg
+  sha256: a5debe565281eb16b746d75b9ce72e22f2fb15c19b4f55428fdf62b84be79306
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: sonarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: sonarr
+- id: 03-containers-prowlarr
+  file: 03-containers-prowlarr.svg
+  sha256: cd7736bcef6550ad853e59d4d7205f96e9db8ae44be957ca5b7eae7046f5bc67
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: prowlarr mark used for nominative identification; rights remain with
+    its owner
+  fallback: prowlarr
+- id: 03-containers-flaresolverr
+  file: 03-containers-flaresolverr.svg
+  sha256: c12ad8598f4faa9268557b51970b2c42c39461b8178ae88faef3a08088e44dbb
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: flaresolverr mark used for nominative identification; rights remain with
+    its owner
+  fallback: flaresolverr
+- id: 03-containers-bazarr
+  file: 03-containers-bazarr.svg
+  sha256: b42777ee622ddf85ace15dbe9a70d471a2ca364e745c73ea467da3a0a7586162
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: bazarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: bazarr
+- id: 03-containers-tdarr
+  file: 03-containers-tdarr.svg
+  sha256: f9debe4eca48b60e90e06ac61ccee1054742261d62dc9145012b37621ddce469
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: tdarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: tdarr
+- id: 03-containers-jellyfin
+  file: 03-containers-jellyfin.svg
+  sha256: 7f53cf083dbb3119ec8c5acbd8049c5033227617e461540f70591ac109124306
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: jellyfin mark used for nominative identification; rights remain with
+    its owner
+  fallback: jellyfin
+- id: 03-containers-gluetun
+  file: 03-containers-gluetun.svg
+  sha256: fbebd2faa90213bafb61910f1c4323eec2015b12b09741224625d9ed34241c86
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: gluetun mark used for nominative identification; rights remain with its
+    owner
+  fallback: gluetun
+- id: 03-containers-qbittorrent
+  file: 03-containers-qbittorrent.svg
+  sha256: dc6a5e20879ad37b6e9367ccc9143fdf90351f40eb08c200cd7d003ff1b1c275
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: qbittorrent mark used for nominative identification; rights remain with
+    its owner
+  fallback: qbittorrent
+- id: 03-containers-unpackerr
+  file: 03-containers-unpackerr.svg
+  sha256: fd9191ebbf3be0ac0d76947db8be6f6c094e69b3725c589f5a158a0bc96fac57
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: unpackerr
+- id: 03-containers-decluttarr
+  file: 03-containers-decluttarr.svg
+  sha256: fd9191ebbf3be0ac0d76947db8be6f6c094e69b3725c589f5a158a0bc96fac57
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: decluttarr
+- id: 03-containers-lidarr
+  file: 03-containers-lidarr.svg
+  sha256: 2f55f69450a0ca03621e87550e81ec0f6798c4a578b54e4b988a9a7234a83647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: lidarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: lidarr
+- id: 03-containers-slskd
+  file: 03-containers-slskd.svg
+  sha256: 163133ab1baef9d6088d8a451bc7fd95ac03bdbb1d0ec2c3b089420cf3cd029a
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: slskd mark used for nominative identification; rights remain with its
+    owner
+  fallback: slskd
+- id: 03-containers-soularr
+  file: 03-containers-soularr.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: soularr
+- id: 03-containers-sonobarr
+  file: 03-containers-sonobarr.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: sonobarr
+- id: 03-containers-navidrome
+  file: 03-containers-navidrome.svg
+  sha256: cd8911581c1173c0696dadaeb02f9bb2eb1ff3b6bdf5c64c49b90f7cb70274cf
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: navidrome mark used for nominative identification; rights remain with
+    its owner
+  fallback: navidrome
+- id: 03-containers-musicportal
+  file: 03-containers-musicportal.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: musicportal
+- id: 03-containers-librarian
+  file: 03-containers-librarian.svg
+  sha256: 5556ad8178906ce88d5179f21aa70b3c805f271c9dfafbff533b7d82adaeec80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: librarian
+- id: 03-containers-bookportal
+  file: 03-containers-bookportal.svg
+  sha256: 23477b04f37e5879f61f1c5a65be6a1c5312650c08d7c08a9f8db853c5550261
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: bookportal
+- id: 03-containers-gluetun_books
+  file: 03-containers-gluetun-books.svg
+  sha256: fbebd2faa90213bafb61910f1c4323eec2015b12b09741224625d9ed34241c86
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: gluetun mark used for nominative identification; rights remain with its
+    owner
+  fallback: gluetun books
+- id: 03-containers-kavita
+  file: 03-containers-kavita.svg
+  sha256: f03ab7420b8b36ad6b43e88723f794d76c411f728fb020fbeee470f6e1e7696b
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: kavita mark used for nominative identification; rights remain with its
+    owner
+  fallback: kavita
+- id: 03-containers-immich_server
+  file: 03-containers-immich-server.svg
+  sha256: a5d4a43899e63ffc7e97246034f7f63cdfdc410aa803c5713d545290601c4d89
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: immich mark used for nominative identification; rights remain with its
+    owner
+  fallback: immich server
+- id: 03-containers-immich_machine_learning
+  file: 03-containers-immich-machine-learning.svg
+  sha256: a5d4a43899e63ffc7e97246034f7f63cdfdc410aa803c5713d545290601c4d89
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: immich mark used for nominative identification; rights remain with its
+    owner
+  fallback: immich machine learning
+- id: 03-containers-immich_db
+  file: 03-containers-immich-db.svg
+  sha256: 15392b515335ffd08a5a58cb9ed697772b4cf17f4a6af216900f2c774a951da2
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: postgresql mark used for nominative identification; rights remain with
+    its owner
+  fallback: immich db
+- id: 03-containers-immich_redis
+  file: 03-containers-immich-redis.svg
+  sha256: 9c3d4a6458094687a5b035b1d890b808b3d6d06584625e0cbe38054d24e3b86d
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: redis mark used for nominative identification; rights remain with its
+    owner
+  fallback: immich redis
+- id: 03-containers-miniflux
+  file: 03-containers-miniflux.svg
+  sha256: 132032458a533a14451d8c3a108a2fc98305e804fc4ec721831be8677bd0a8b5
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: miniflux mark used for nominative identification; rights remain with
+    its owner
+  fallback: miniflux
+- id: 03-containers-miniflux_db
+  file: 03-containers-miniflux-db.svg
+  sha256: 15392b515335ffd08a5a58cb9ed697772b4cf17f4a6af216900f2c774a951da2
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: postgresql mark used for nominative identification; rights remain with
+    its owner
+  fallback: miniflux db
+- id: 03-containers-wger_nginx
+  file: 03-containers-wger-nginx.svg
+  sha256: 1a6e75ea5ed61dffce3680e467ea60378fbab56c0455274ef9e26adf33dfb76f
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: wger mark used for nominative identification; rights remain with its
+    owner
+  fallback: wger nginx
+- id: 03-containers-wger_web
+  file: 03-containers-wger-web.svg
+  sha256: 1a6e75ea5ed61dffce3680e467ea60378fbab56c0455274ef9e26adf33dfb76f
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: wger mark used for nominative identification; rights remain with its
+    owner
+  fallback: wger web
+- id: 03-containers-wger_worker
+  file: 03-containers-wger-worker.svg
+  sha256: 1a6e75ea5ed61dffce3680e467ea60378fbab56c0455274ef9e26adf33dfb76f
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: wger mark used for nominative identification; rights remain with its
+    owner
+  fallback: wger worker
+- id: 03-containers-wger_beat
+  file: 03-containers-wger-beat.svg
+  sha256: 1a6e75ea5ed61dffce3680e467ea60378fbab56c0455274ef9e26adf33dfb76f
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: wger mark used for nominative identification; rights remain with its
+    owner
+  fallback: wger beat
+- id: 03-containers-wger_powersync
+  file: 03-containers-wger-powersync.svg
+  sha256: 1a6e75ea5ed61dffce3680e467ea60378fbab56c0455274ef9e26adf33dfb76f
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: wger mark used for nominative identification; rights remain with its
+    owner
+  fallback: wger powersync
+- id: 03-containers-wger_db
+  file: 03-containers-wger-db.svg
+  sha256: 15392b515335ffd08a5a58cb9ed697772b4cf17f4a6af216900f2c774a951da2
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: postgresql mark used for nominative identification; rights remain with
+    its owner
+  fallback: wger db
+- id: 03-containers-wger_cache
+  file: 03-containers-wger-cache.svg
+  sha256: 9c3d4a6458094687a5b035b1d890b808b3d6d06584625e0cbe38054d24e3b86d
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: redis mark used for nominative identification; rights remain with its
+    owner
+  fallback: wger cache
+- id: 03-containers-syncthing
+  file: 03-containers-syncthing.svg
+  sha256: 65d1430f7522bea0507259929f0033d7c62539d14757d7c6f5b62574eb4da2d3
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: syncthing mark used for nominative identification; rights remain with
+    its owner
+  fallback: syncthing
+- id: 03-containers-watchtower
+  file: 03-containers-watchtower.svg
+  sha256: 92108f9ae377b4b34ef4b89537e24c6432d49b28d8ce7433c3dcb56273e9b896
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: watchtower mark used for nominative identification; rights remain with
+    its owner
+  fallback: watchtower
+- id: 03-containers-hbbs
+  file: 03-containers-hbbs.svg
+  sha256: f14e275f8b60adde7a026a54a44a4c5b79ff73ddbc21bcc7a338af04563029ce
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: rustdesk mark used for nominative identification; rights remain with
+    its owner
+  fallback: hbbs
+- id: 03-containers-hbbr
+  file: 03-containers-hbbr.svg
+  sha256: f14e275f8b60adde7a026a54a44a4c5b79ff73ddbc21bcc7a338af04563029ce
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: rustdesk mark used for nominative identification; rights remain with
+    its owner
+  fallback: hbbr

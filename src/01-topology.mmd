@@ -1,23 +1,107 @@
+%% 01-topology — physical host, authenticated overlay, and every docker network.
+%% Source of truth: src/01-topology.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 36, "diagramPadding": 24}}}%%
 flowchart TD
-  host["Linux host"]
-  host --> frontend["frontend network"]
-  host --> backend["backend network"]
-  host --> media_net["media network"]
-  host --> ops_net["operations network"]
-  frontend --> proxy["cloudops"]
-  frontend --> homepage["homepage"]
-  backend --> databases["application databases"]
-  media_net --> media_apps["media applications"]
-  ops_net --> agents["agent services"]
-  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
-  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
-  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
-  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
-  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
-  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class host host
-  class frontend,backend,media_net,ops_net data
-  class proxy ingress
-  class homepage,databases,media_apps app
-  class agents automation
+    subgraph authenticated overlay["Authenticated overlay — overlay.example.test"]
+        workstation["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/laptop-workstation.svg' width='72' height='72' alt=''/><br/>workstation (schematic)<br/>authenticated overlay peer</div>"]
+        mobile_device["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-phone.svg' width='72' height='72' alt=''/><br/>mobile device<br/>authenticated overlay peer</div>"]
+        overlay_host["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-overlay.svg' width='72' height='72' alt=''/><br/>homelab host</div>"]
+    end
+
+    subgraph group_host["Physical host"]
+
+        host["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/hp-operator-800-g3-dm.svg' width='72' height='72' alt=''/><br/>operator — Generic host (schematic) · 7.6 GiB RAM · Linux</div>"]
+        subgraph group_hostnet["Host networking"]
+            hostnet["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-network.svg' width='72' height='72' alt=''/><br/>host network — no NAT, ports land on the host directly</div>"]
+            syncthing["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-syncthing.svg' width='72' height='72' alt=''/><br/>syncthing<br/>8384 UI · 22000 sync · 21027 disc</div>"]
+            hbbs["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-rustdesk.svg' width='72' height='72' alt=''/><br/>hbbs — rustdesk relay<br/>21115-21118</div>"]
+            hbbr["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-rustdesk.svg' width='72' height='72' alt=''/><br/>hbbr — rustdesk relay<br/>21119</div>"]
+        end
+
+        subgraph group_n_homelab["Application network"]
+
+            n_homelab["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-network.svg' width='72' height='72' alt=''/><br/>homelab_homelab — 198.18.1.0/16</div>"]
+            x_homelab_members["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-package.svg' width='72' height='72' alt=''/><br/>application containers<br/>media · books · photos · rss · dashboards<br/>see 03-containers</div>"]
+            gluetun["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-gluetun.svg' width='72' height='72' alt=''/><br/>gluetun — WARP egress<br/>qbittorrent shares this netns</div>"]
+            gluetun_books["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-gluetun.svg' width='72' height='72' alt=''/><br/>gluetun-books — Proton HTTP proxy<br/>internal :8888, no published port</div>"]
+        end
+
+        subgraph group_n_default["Default network"]
+
+            n_default["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-network.svg' width='72' height='72' alt=''/><br/>homelab_default — 198.18.2.0/16</div>"]
+            watchtower["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-watchtower.svg' width='72' height='72' alt=''/><br/>watchtower<br/>sole member · declares no network</div>"]
+        end
+
+        subgraph group_n_wger["Fitness network"]
+
+            n_wger["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-network.svg' width='72' height='72' alt=''/><br/>wger_network — 198.18.3.0/16</div>"]
+            x_wger_members["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-wger.svg' width='72' height='72' alt=''/><br/>wger stack<br/>web · worker · scheduler · sync · db · cache · nginx</div>"]
+        end
+
+
+        subgraph n_unused["built-in, unused by these stacks"]
+            x_net_bridge["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-network.svg' width='72' height='72' alt=''/><br/>bridge — 198.18.0.0/16</div>"]
+            x_net_none["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-none.svg' width='72' height='72' alt=''/><br/>none</div>"]
+        end
+
+        x_docker_gw["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-gateway.svg' width='72' height='72' alt=''/><br/>container-to-host gateway<br/>internal service seam</div>"]
+        x_hostproc["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-gear.svg' width='72' height='72' alt=''/><br/>host processes<br/>homelab-mcp :8830 · gateway :9995 · invest :8502<br/>claude-bridge :8787 · cloudops-chat bridge :8788<br/>Health Connect receiver 127.0.0.1:8788</div>"]
+    end
+    x_internet["<div style='width:260px;min-height:170px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/topology-cloud.svg' width='72' height='72' alt=''/><br/>Internet</div>"]
+
+    workstation ==> overlay_host
+    mobile_device ==> overlay_host
+    overlay_host ==>|"authenticated application access"| n_homelab
+    overlay_host ==> n_wger
+    overlay_host ==> x_hostproc
+    overlay_host --> hostnet
+
+    x_internet -.->|"direct protocols"| host
+    x_internet --> hostnet
+
+    n_homelab -.->|"nginx auth_request<br/>and /api proxy"| x_docker_gw
+    x_docker_gw -.-> x_hostproc
+
+    gluetun ==>|"WireGuard"| x_internet
+    gluetun_books ==> x_internet
+
+
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class workstation,mobile_device,overlay_host host
+    class syncthing,hbbs,hbbr data
+    class x_homelab_members media
+    class watchtower media
+    class x_wger_members media
+    class gluetun vpn
+    class gluetun_books vpn
+    class x_net_bridge,x_net_none external
+    class x_docker_gw ingress
+    class x_hostproc ai
+    class x_internet external
+
+    class host host
+    class hostnet,n_homelab,n_default,n_wger ingress
+
+    %% Membership layout only. These invisible constraints are not traffic.
+    n_homelab ~~~ x_homelab_members
+    n_homelab ~~~ gluetun
+    n_homelab ~~~ gluetun_books
+    hostnet ~~~ syncthing
+    hostnet ~~~ hbbs
+    hostnet ~~~ hbbr
+    n_default ~~~ watchtower
+    n_wger ~~~ x_wger_members
+
+    %% Layout-only placement of dormant inventory after active host services.
+    x_wger_members ~~~ n_default
+    watchtower ~~~ x_net_bridge

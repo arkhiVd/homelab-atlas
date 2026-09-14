@@ -1,0 +1,64 @@
+%% 10-cka-dojo — the only off-box footprint, parked when not studying.
+%% Source of truth: src/10-cka-dojo.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 24, "rankSpacing": 38, "diagramPadding": 20}}}%%
+flowchart TB
+    x_user["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-x-user.svg' width='52' height='52' alt=''/><br/>dojo up / dojo down</div>"]
+
+    subgraph local["operator — control side"]
+        dojo_cli["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-dojo-cli.svg' width='52' height='52' alt=''/><br/>bin/dojo</div>"]
+        terraform["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-terraform.svg' width='52' height='52' alt=''/><br/>Terraform<br/>infra/*.tf · local tfstate</div>"]
+        scenarios["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-scenarios.svg' width='52' height='52' alt=''/><br/>17 break/fix scenarios</div>"]
+        dojo_db["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-dojo-db.svg' width='52' height='52' alt=''/><br/>state/dojo.db<br/>attempt history</div>"]
+    end
+
+    subgraph aws["AWS example-region-1 — created on demand"]
+        vpc["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-vpc.svg' width='52' height='52' alt=''/><br/>VPC + subnets<br/>network.tf</div>"]
+        sg["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-sg.svg' width='52' height='52' alt=''/><br/>Security groups<br/>zero inbound</div>"]
+        iam["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-iam.svg' width='52' height='52' alt=''/><br/>IAM roles<br/>iam.tf</div>"]
+        ec2["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-ec2.svg' width='52' height='52' alt=''/><br/>EC2 kubeadm cluster<br/>control plane + workers</div>"]
+        ami["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-ami.svg' width='52' height='52' alt=''/><br/>Parked AMIs<br/>cluster state between sessions</div>"]
+    end
+
+    x_ssm["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/10-cka-dojo/10-cka-dojo-x-ssm.svg' width='52' height='52' alt=''/><br/>AWS SSM Session Manager<br/>the only way in — no SSH, no public port</div>"]
+
+    x_user ==> dojo_cli
+    dojo_cli ==> terraform
+    dojo_cli ==> scenarios
+    dojo_cli ==> dojo_db
+    terraform ==> vpc
+    terraform ==> sg
+    terraform ==> iam
+    terraform ==> ec2
+    vpc --> ec2
+    sg --> ec2
+    iam --> x_ssm
+    x_ssm ==> ec2
+    scenarios -.->|"inject faults via SSM"| ec2
+    ec2 <==>|"dojo down parks,<br/>dojo up restores"| ami
+
+    %% Layout-only ranks: keep IAM directly below Terraform and put the SSM
+    %% access route beneath EC2, away from the scenario fault-injection edge.
+    terraform ~~~ iam
+    ec2 ~~~ x_ssm
+
+    %% Round only Terraform's AWS fan-out and the SSM access return. Keep the
+    %% rest of the diagram's established linear routing unchanged.
+    linkStyle 4,5,6,7,11 interpolate monotoneY
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_user host
+    class dojo_cli,terraform,scenarios ai
+    class dojo_db data
+    class vpc,ec2 external
+    class sg,iam secure
+    class ami data
+    class x_ssm ingress

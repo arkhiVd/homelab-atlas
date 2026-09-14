@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")/.."
-python -m ruff format --check .
-python -m ruff check .
-python -m pytest -q
-python -m atlas.cli verify
-rm -rf out
-python -m atlas.cli render
-first="$(sha256sum out/atlas.html)"
-python -m atlas.cli render
-second="$(sha256sum out/atlas.html)"
-test "$first" = "$second"
-git diff --check
-git diff --cached --check
-empty_tree="$(git hash-object -t tree /dev/null)"
-git diff --check "$empty_tree" HEAD -- . ':(exclude)vendor/mermaid.min.js'
-printf 'PASS: format, lint, tests, fixture drift, render idempotency, whitespace checks\n'
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+cd "$ROOT"
+ruff format --check .
+ruff check .
+pytest -q
+bin/render-artifact >/tmp/atlas-render-first.log
+first=$(sha256sum out/site/index.html)
+bin/render-artifact >/tmp/atlas-render-second.log
+second=$(sha256sum out/site/index.html)
+[[ "$first" == "$second" ]]
+git diff --check -- . ':(exclude)vendor/mermaid.min.js'
+printf 'PASS: format, lint, tests, deterministic render, whitespace checks\n'

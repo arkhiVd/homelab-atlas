@@ -1,0 +1,174 @@
+diagram: 04-media
+assets:
+- id: 04-media-x_user
+  file: 04-media-x-user.svg
+  sha256: c45a7698dbf9a72a89c20f7c00d2863684a64ba660a42c5513c200d01a780647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: firefox mark used for nominative identification; rights remain with its
+    owner
+  fallback: x user
+- id: 04-media-jellyseerr
+  file: 04-media-jellyseerr.svg
+  sha256: 536b303e73d5e67d52af58583357acd80cc65050d5114ad2fbf5f38414ee1c3a
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: jellyseerr mark used for nominative identification; rights remain with
+    its owner
+  fallback: jellyseerr
+- id: 04-media-radarr
+  file: 04-media-radarr.svg
+  sha256: c3d07ecdfab432ca97f26cf01fe06dbfc0993b5cb6093827b3de1c7421a6fb95
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: radarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: radarr
+- id: 04-media-sonarr
+  file: 04-media-sonarr.svg
+  sha256: a5debe565281eb16b746d75b9ce72e22f2fb15c19b4f55428fdf62b84be79306
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: sonarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: sonarr
+- id: 04-media-prowlarr
+  file: 04-media-prowlarr.svg
+  sha256: cd7736bcef6550ad853e59d4d7205f96e9db8ae44be957ca5b7eae7046f5bc67
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: prowlarr mark used for nominative identification; rights remain with
+    its owner
+  fallback: prowlarr
+- id: 04-media-flaresolverr
+  file: 04-media-flaresolverr.svg
+  sha256: c12ad8598f4faa9268557b51970b2c42c39461b8178ae88faef3a08088e44dbb
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: flaresolverr mark used for nominative identification; rights remain with
+    its owner
+  fallback: flaresolverr
+- id: 04-media-x_indexers
+  file: 04-media-x-indexers.svg
+  sha256: 6d99477fa8deb6d540b997561e7a9a979ece5ac3a18a3146da3e82e17c597095
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: x indexers
+- id: 04-media-gluetun
+  file: 04-media-gluetun.svg
+  sha256: fbebd2faa90213bafb61910f1c4323eec2015b12b09741224625d9ed34241c86
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: gluetun mark used for nominative identification; rights remain with its
+    owner
+  fallback: gluetun
+- id: 04-media-qbittorrent
+  file: 04-media-qbittorrent.svg
+  sha256: dc6a5e20879ad37b6e9367ccc9143fdf90351f40eb08c200cd7d003ff1b1c275
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: qbittorrent mark used for nominative identification; rights remain with
+    its owner
+  fallback: qbittorrent
+- id: 04-media-unpackerr
+  file: 04-media-unpackerr.svg
+  sha256: 00d080bf49f434f7efd6602df74d77ff58e012bdc243b1aa75436e8ab32a0c3e
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: unpackerr
+- id: 04-media-decluttarr
+  file: 04-media-decluttarr.svg
+  sha256: c016298ddebb9020f8e05758103ac9621f3690e90aaab1c9f427cf1c832e2d7a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: decluttarr
+- id: 04-media-v_downloads
+  file: 04-media-v-downloads.svg
+  sha256: add2106effb04c49fcce6296af8a9ba1f44af9120c86ec0ad3664cc0d2704d2d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v downloads
+- id: 04-media-v_movies
+  file: 04-media-v-movies.svg
+  sha256: 943f2d15b0a821db181f8113972701bd4cb7f83d266011e3866ef115f81340de
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v movies
+- id: 04-media-v_tv
+  file: 04-media-v-tv.svg
+  sha256: 3942af9e6e1113718d74b7319a6d8ef39b935d98c27a9292325b22f2dd7cd501
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v tv
+- id: 04-media-bazarr
+  file: 04-media-bazarr.svg
+  sha256: b42777ee622ddf85ace15dbe9a70d471a2ca364e745c73ea467da3a0a7586162
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: bazarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: bazarr
+- id: 04-media-tdarr
+  file: 04-media-tdarr.svg
+  sha256: 45a4757e84553eb58c6559ae25e0a7d8a044e22b018f5bd9ccfa553767100872
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: tdarr
+- id: 04-media-jellyfin
+  file: 04-media-jellyfin.svg
+  sha256: 7f53cf083dbb3119ec8c5acbd8049c5033227617e461540f70591ac109124306
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: jellyfin mark used for nominative identification; rights remain with
+    its owner
+  fallback: jellyfin
+- id: 04-media-v_syncmedia
+  file: 04-media-v-syncmedia.svg
+  sha256: d657453838a79620103431172cf2e67669a1b0a24cdbd6d11361b306fad7ea0b
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v syncmedia

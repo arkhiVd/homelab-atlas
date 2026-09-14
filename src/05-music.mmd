@@ -1,17 +1,71 @@
+%% 05-music — two independent paths into one library.
+%% Source of truth: src/05-music.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 38, "diagramPadding": 34}}}%%
 flowchart LR
-  portal["musicportal"] --> lidarr["lidarr"]
-  lidarr --> slskd["slskd"]
-  soularrr["soularr"] -.-> slskd
-  slskd --> inbox["Music import inbox"]
-  inbox --> library["Local music library"]
-  lidarr --> library
-  library --> navidrome["navidrome"]
-  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
-  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
-  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
-  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
-  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
-  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class portal,lidarr,slskd,soularrr,navidrome app
-  class inbox,library data
+    x_user["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-x-user.svg' width='52' height='52' alt=''/><br/>Request</div>"]
+
+    subgraph disco["Discovery"]
+        sonobarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-sonobarr.svg' width='52' height='52' alt=''/><br/>sonobarr :5000<br/>Last.fm recommendations<br/>needs LAST_FM key</div>"]
+        x_lastfm["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-x-lastfm.svg' width='52' height='52' alt=''/><br/>Last.fm</div>"]
+    end
+
+    subgraph pathA["Path A — Lidarr + Soulseek"]
+        lidarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-lidarr.svg' width='52' height='52' alt=''/><br/>lidarr :8686<br/>library manager</div>"]
+        soularr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-soularr.svg' width='52' height='52' alt=''/><br/>soularr<br/>polls lidarr wanted list</div>"]
+        slskd["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-slskd.svg' width='52' height='52' alt=''/><br/>slskd :5030<br/>Soulseek client</div>"]
+        v_slskd_dl["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-v-slskd-dl.svg' width='52' height='52' alt=''/><br/>data/media/downloads/slskd</div>"]
+        x_soulseek["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-x-soulseek.svg' width='52' height='52' alt=''/><br/>Soulseek P2P<br/>music discovery network</div>"]
+    end
+
+    subgraph pathB["Path B — direct"]
+        musicportal["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-musicportal.svg' width='52' height='52' alt=''/><br/>musicportal :8100<br/>custom · JioSaavn</div>"]
+        x_saavn["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-x-saavn.svg' width='52' height='52' alt=''/><br/>JioSaavn</div>"]
+    end
+
+    subgraph lib["data/syncthing/music — the one library"]
+        v_music["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-v-music.svg' width='52' height='52' alt=''/><br/>music/<br/>synced to laptop and mobile device</div>"]
+    end
+
+    navidrome["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-navidrome.svg' width='52' height='52' alt=''/><br/>navidrome :4533<br/>mounts music read-only</div>"]
+    librarian["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/05-music/05-music-librarian.svg' width='52' height='52' alt=''/><br/>librarian :8300<br/>the only delete path<br/>plan → typed confirm → execute</div>"]
+
+    x_user --> sonobarr
+    x_user --> musicportal
+    sonobarr --> x_lastfm
+    sonobarr ==>|"adds artists"| lidarr
+
+    lidarr ==>|"wanted list"| soularr
+    soularr <==>|"search and queue"| slskd
+    slskd <==> x_soulseek
+    slskd ==> v_slskd_dl
+    v_slskd_dl ==>|"soularr imports"| lidarr
+    lidarr ==>|"writes tagged files"| v_music
+
+    musicportal ==> x_saavn
+    musicportal ==>|"writes directly"| v_music
+
+    v_music ==>|"read-only mount"| navidrome
+    slskd -.->|"shares library read-only"| v_music
+
+    x_user --> librarian
+    librarian ==>|"deletes files"| v_music
+    librarian ==>|"unmonitor albums,<br/>retire artists"| lidarr
+    librarian -.->|"purges leftovers"| v_slskd_dl
+
+    %% Non-traffic lane ordering between existing cards.
+    v_slskd_dl ~~~ x_soulseek
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_user host
+    class sonobarr,lidarr,soularr,slskd,musicportal,navidrome,librarian media
+    class v_slskd_dl,v_music data
+    class x_lastfm,x_soulseek,x_saavn external

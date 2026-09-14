@@ -1,60 +1,194 @@
 id: 03-containers
-title: Core application groups
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
+title: "Container map \u2014 running containers grouped by purpose"
+audience: The reference view. Answers 'what is this container and what port is it on'.
+layer: B
+summary: Running containers grouped by function, with published ports. RustDesk and Syncthing appear under Platform because they use host networking.
+notes:
+- I use Homepage as the front page and Uptime Kuma to see whether important endpoints respond. CloudOps is a study and operations interface. Grafana is the dashboard for wearable data. Each front end connects to a smaller set of backend services shown by the arrows.
+- The video workflow starts in Jellyseerr. Movie requests go to Radarr and series requests go to Sonarr. Both use Prowlarr for search and send downloads to qBittorrent through Gluetun. Unpackerr extracts completed downloads. Jellyfin plays the resulting library, while Bazarr manages subtitles and Tdarr handles planned transcode work.
+- 'The music workflow has two inputs. Lidarr, Soularr, and slskd cooperate on wanted music. Musicportal is a custom service for JioSaavn searches and downloads. Navidrome reads the shared music library for playback. Librarian is my controlled cleanup tool: it previews a deletion plan, requires typed confirmation, removes files, and updates the relevant library manager.'
+- Bookportal is a custom FastAPI search and download interface. It writes normalized files into the book library, and Kavita is the reader. Immich handles phone photo backup. Its server uses PostgreSQL for metadata, Redis for jobs, and a machine-learning worker for search and face features.
+- Miniflux is the RSS reader and stores subscriptions in PostgreSQL. Wger is the fitness application. Its web process, worker, scheduler, sync process, database, cache, and Nginx entry point form one application even though they run as separate containers.
+- Watchtower checks container images on its weekly schedule. Syncthing handles device replication. The RustDesk relay supports remote access. These platform containers are separate from the application request chains.
 nodes:
-- id: syncthing
+- id: homepage
+  lifecycle: observed-live
   kind: container
-  name: syncthing
-  ports: []
+  name: homepage
+- id: cloudops
+  lifecycle: observed-live
+  kind: container
+  name: cloudops
+- id: uptime_kuma
+  lifecycle: observed-live
+  kind: container
+  name: uptime-kuma
+- id: homelab_ui
+  lifecycle: observed-live
+  kind: container
+  name: homelab-ui
+- id: grafana
+  lifecycle: observed-live
+  kind: container
+  name: grafana
+- id: jellyseerr
+  lifecycle: observed-live
+  kind: container
+  name: jellyseerr
+- id: radarr
+  lifecycle: observed-live
+  kind: container
+  name: radarr
+- id: sonarr
+  lifecycle: observed-live
+  kind: container
+  name: sonarr
+- id: prowlarr
+  lifecycle: observed-live
+  kind: container
+  name: prowlarr
+- id: flaresolverr
+  lifecycle: observed-live
+  kind: container
+  name: flaresolverr
+- id: bazarr
+  lifecycle: observed-live
+  kind: container
+  name: bazarr
+- id: tdarr
+  lifecycle: observed-live
+  kind: container
+  name: tdarr
+- id: jellyfin
+  lifecycle: observed-live
+  kind: container
+  name: jellyfin
+- id: qbittorrent
+  lifecycle: observed-live
+  kind: container
+  name: qbittorrent
+- id: unpackerr
+  lifecycle: observed-live
+  kind: container
+  name: unpackerr
+- id: decluttarr
+  lifecycle: observed-live
+  kind: container
+  name: decluttarr
+- id: lidarr
+  lifecycle: observed-live
+  kind: container
+  name: lidarr
+- id: soularr
+  lifecycle: observed-live
+  kind: container
+  name: soularr
+- id: sonobarr
+  lifecycle: observed-live
+  kind: container
+  name: sonobarr
+- id: navidrome
+  lifecycle: observed-live
+  kind: container
+  name: navidrome
+- id: musicportal
+  lifecycle: observed-live
+  kind: container
+  name: musicportal
+- id: librarian
+  lifecycle: observed-live
+  kind: container
+  name: librarian
+- id: bookportal
+  lifecycle: observed-live
+  kind: container
+  name: bookportal
+- id: kavita
+  lifecycle: observed-live
+  kind: container
+  name: kavita
+- id: immich_server
+  lifecycle: observed-live
+  kind: container
+  name: immich-server
+- id: immich_machine_learning
+  lifecycle: observed-live
+  kind: container
+  name: immich-machine-learning
+- id: immich_db
+  lifecycle: observed-live
+  kind: container
+  name: immich-db
+- id: immich_redis
+  lifecycle: observed-live
+  kind: container
+  name: immich-redis
 - id: miniflux
+  lifecycle: observed-live
   kind: container
   name: miniflux
-  ports: []
 - id: miniflux_db
+  lifecycle: observed-live
   kind: container
   name: miniflux-db
-  ports: []
-- id: hbbs
+- id: wger_nginx
+  lifecycle: observed-live
   kind: container
-  name: hbbs
-  ports: []
-- id: hbbr
-  kind: container
-  name: hbbr
-  ports: []
+  name: wger-nginx
+  image: docker.io/nginx@sha256:46ccc48fbb1f5a43167f2ee2c279c122b96eec5d976e7f4e1e0780f59a51b4d6
+  compose_project: wger
+  network_mode: wger_network
+  networks:
+  - wger_network
 - id: wger_web
   kind: container
   name: wger-web
-  ports: []
+  lifecycle: observed-live
 - id: wger_worker
   kind: container
   name: wger-celery-worker
-  ports: []
-- id: wger_celery_beat
+  lifecycle: observed-live
+- id: wger_beat
   kind: container
   name: wger-celery-beat
-  ports: []
+  lifecycle: observed-live
 - id: wger_powersync
   kind: container
   name: wger-powersync
-  ports: []
+  lifecycle: observed-live
 - id: wger_db
   kind: container
   name: wger-db
-  ports: []
+  lifecycle: observed-live
 - id: wger_cache
   kind: container
   name: wger-cache
-  ports: []
-- id: wger_nginx
-  kind: container
-  name: wger-nginx
-  ports: []
-- id: core
+  lifecycle: observed-live
+- id: gluetun
   kind: concept
-- id: remote
+  label: Mermaid node gluetun
+  lifecycle: observed-live
+- id: gluetun_books
   kind: concept
-- id: fitness
+  label: Mermaid node gluetun_books
+  lifecycle: observed-live
+- id: hbbr
   kind: concept
+  label: Mermaid node hbbr
+  lifecycle: observed-live
+- id: hbbs
+  kind: concept
+  label: Mermaid node hbbs
+  lifecycle: observed-live
+- id: slskd
+  kind: concept
+  label: Mermaid node slskd
+  lifecycle: observed-live
+- id: syncthing
+  kind: concept
+  label: Mermaid node syncthing
+  lifecycle: observed-live
+- id: watchtower
+  kind: concept
+  label: Mermaid node watchtower
+  lifecycle: observed-live

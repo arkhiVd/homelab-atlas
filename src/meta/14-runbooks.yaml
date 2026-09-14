@@ -1,0 +1,25 @@
+id: 14-runbooks
+title: "Runbooks \u2014 seven operational sequences"
+audience: Whoever is holding the box at the time, including a future session with no context.
+layer: C
+summary: Six sequence diagrams cover boot ordering, deployment, memory pressure, sync conflicts, CLI updates, and provider or guarded-operation incidents.
+diagrams:
+- file: 14-runbooks.mmd
+  topic: cold boot order
+- file: 14-runbooks-deploy.mmd
+  topic: deploy gate (no CI, no staging)
+- file: 14-runbooks-incident.mmd
+  topic: memory pressure
+- file: 14-runbooks-syncconflict.mmd
+  topic: Syncthing conflict in the workspace
+- file: 14-runbooks-cli-update.mmd
+  topic: CLI update failure or partial restart
+- file: 14-runbooks-agent-incident.mmd
+  topic: provider/config outage and MCP guard refusal
+notes:
+- These sequences are the procedures I follow when normal architecture is not enough. The boot runbook shows which service managers start each part and where to check when the dashboard is unavailable after a restart.
+- The deployment runbook keeps code changes, validation, human approval, service restart, and post-deploy health checks in order. An agent may prepare and validate a change, but I explicitly approve any restart and keep control of merge and deployment.
+- The memory-pressure runbook checks the largest process first, lowers priority where possible, and asks before stopping work. The sync-conflict runbook stops automated edits and preserves both copies for human review.
+- The CLI update runbook covers mise-managed tools, the separate Hermes update, service verification, and Telegram failure reporting. The agent-incident runbook distinguishes provider trouble from an MCP guard refusal, so a failed model route is not mistaken for permission to bypass a data guard.
+- I keep the notes under each sequence because the diagram gives the order while the notes explain the decision points and expected result.
+nodes: []

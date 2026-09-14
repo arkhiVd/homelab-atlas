@@ -1,0 +1,34 @@
+%% 14-runbooks-incident — memory pressure on a 7.6 GiB box.
+%% Source of truth: src/14-runbooks-incident.mmd. Generated outputs are never hand-edited.
+sequenceDiagram
+    autonumber
+    %% atlas-participant K uptime-kuma
+    participant K as uptime-kuma
+    %% atlas-participant T telegram
+    participant T as Telegram
+    %% atlas-participant Y linux-mint
+    participant Y as User
+    %% atlas-participant E linux
+    participant E as earlyoom
+    %% atlas-participant C docker
+    participant C as containers
+
+    Note over K,C: 7.6 GiB RAM,<br/>swap can run close to capacity.
+    C-->>E: memory climbs
+    alt earlyoom fires first
+        E->>C: kill the largest offender
+        K->>T: service down alert
+    else probe fails first
+        K->>T: service down alert
+    end
+    T->>Y: notification
+    Y->>C: docker stats — find the offender
+    Note over Y,C: do NOT stop a container to free memory.<br/>Prefer cpu-shares / renice first.<br/>Preserve stateful job queues.
+    alt a heavy job is running
+        Y->>C: renice / lower cpu-shares
+    else genuinely stuck
+        Y->>Y: get explicit OK before stopping anything
+        Y->>C: stop the single offender only
+    end
+    Y->>K: confirm probes green again
+    Note over Y: record it in the workspace —<br/>operations log is the running log

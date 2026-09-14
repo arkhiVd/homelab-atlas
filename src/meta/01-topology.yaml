@@ -1,34 +1,125 @@
 id: 01-topology
-title: Host and network topology
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
+title: "Topology \u2014 host, authenticated overlay, and active Docker networks"
+audience: Anyone about to change networking, publish a port, or debug why a container cannot reach something.
+layer: A
+summary: 'The network skeleton: authenticated clients reach dashboards through the overlay, while container networks and direct protocols remain separate paths.'
+notes:
+- The laptop and phone join the authenticated overlay as clients. I do not need to expose each dashboard to the public internet. Once a device is authenticated, it can reach the host and the application routes intended for that device.
+- Containers are split by workload. Most applications share the main application network so related services can call each other by container name. The fitness stack has its own network. Syncthing and the remote-desktop relay use the host network because their protocols need direct host connectivity.
+- "qBittorrent deliberately shares Gluetun\u2019s network namespace. It has no independent route to the internet. If Gluetun stops, download traffic stops with it. The books proxy is separate because only the book lookup workflow should use that ProtonVPN route."
+- Some small APIs run as host services instead of containers. The authenticated proxy forwards requests to them without making those APIs general public endpoints. This is how the CloudOps chat API, MCP gateway, investment dashboard, and health receiver fit beside Docker services.
+- I use the topology view when a dashboard opens but its backend does not respond. It shows whether to check device access, the host route, a Docker network, a shared network namespace, or a host-side service.
 nodes:
-- id: frontend
-  kind: network
-  name: frontend
-  subnet: 172.30.10.0/24
-- id: backend
-  kind: network
-  name: backend
-  subnet: 172.30.20.0/24
-- id: media_net
-  kind: network
-  name: media
-  subnet: 172.30.30.0/24
-- id: ops_net
-  kind: network
-  name: operations
-  subnet: 172.30.40.0/24
 - id: host
+  lifecycle: observed-live
+  kind: host
+  name: operator
+  identity: topology-desktop
+- id: workstation
+  lifecycle: observed-live
+  kind: device
+  name: workstation
+  identity: topology-laptop
+- id: mobile_device
+  lifecycle: observed-live
+  kind: device
+  name: mobile device
+  identity: topology-mobile device
+- id: overlay_host
+  lifecycle: observed-live
+  kind: host
+  name: operator
+  identity: topology-overlay
+- id: n_homelab
+  lifecycle: observed-live
+  kind: network
+  name: homelab_homelab
+  identity: topology-network
+  subnet: 198.18.1.0/16
+- id: n_default
+  lifecycle: observed-live
+  kind: network
+  name: homelab_default
+  identity: topology-network
+  subnet: 198.18.2.0/16
+- id: n_wger
+  lifecycle: observed-live
+  kind: network
+  name: wger_network
+  identity: topology-network
+  subnet: 198.18.3.0/16
+- id: x_wger_members
+  lifecycle: observed-live
   kind: concept
-- id: proxy
+  label: wger application stack
+  identity: topology-wger
+- id: x_net_bridge
+  lifecycle: observed-live
+  kind: network
+  name: bridge
+  identity: topology-network
+  subnet: 198.18.0.0/16
+- id: x_net_none
+  lifecycle: observed-live
+  kind: network
+  name: none
+  identity: topology-none
+- id: hostnet
+  lifecycle: observed-live
+  kind: network
+  name: host
+  identity: topology-network
+- id: syncthing
+  lifecycle: observed-live
+  kind: container
+  name: syncthing
+  identity: topology-syncthing
+  network_mode: host
+- id: hbbs
+  lifecycle: observed-live
+  kind: container
+  name: hbbs
+  identity: topology-rustdesk
+  network_mode: host
+- id: hbbr
+  lifecycle: observed-live
+  kind: container
+  name: hbbr
+  identity: topology-rustdesk
+  network_mode: host
+- id: gluetun
+  lifecycle: observed-live
+  kind: container
+  name: gluetun
+  identity: topology-gluetun
+- id: gluetun_books
+  lifecycle: observed-live
+  kind: container
+  name: gluetun-books
+  identity: topology-gluetun
+  note: Publishes no host port; serves an HTTP proxy on :8888 inside homelab_homelab for bookportal only.
+- id: watchtower
+  lifecycle: observed-live
+  kind: container
+  name: watchtower
+  identity: topology-watchtower
+- id: x_docker_gw
+  lifecycle: observed-live
   kind: concept
-- id: homepage
+  label: container-to-host gateway
+  identity: topology-gateway
+- id: x_hostproc
+  lifecycle: observed-live
   kind: concept
-- id: databases
+  label: host-side listeners
+  identity: topology-gear
+- id: x_homelab_members
+  lifecycle: observed-live
   kind: concept
-- id: media_apps
-  kind: concept
-- id: agents
-  kind: concept
+  label: application containers on homelab_homelab (detailed in 03-containers)
+  identity: topology-package
+- id: x_internet
+  lifecycle: external-unverified
+  kind: external
+  label: Internet
+  identity: topology-cloud

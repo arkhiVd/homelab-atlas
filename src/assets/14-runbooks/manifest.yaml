@@ -1,0 +1,172 @@
+assets:
+- id: runbook-caddy
+  file: 14-runbooks-caddy.svg
+  sha256: c59f2d66b5c4038625a38b19e9d27de63d639dc80e56865ff8f92d7d4da3941f
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: caddy
+- id: runbook-claude
+  file: 14-runbooks-claude.svg
+  sha256: 9e6623e9c03462c51f0cf71f24e38bec8e6e1b93092363e63df580a6f0a4dbe0
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: claude
+- id: runbook-docker
+  file: 14-runbooks-docker.svg
+  sha256: 7de45e1ea203da32a040c257f47cd39a5711b3a200d27ec72dbccbc5efb1590b
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: docker
+- id: runbook-firefox
+  file: 14-runbooks-firefox.svg
+  sha256: c45a7698dbf9a72a89c20f7c00d2863684a64ba660a42c5513c200d01a780647
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: firefox
+- id: runbook-git
+  file: 14-runbooks-git.svg
+  sha256: 85e3e8c8e95285f4f4007fb29e3adb1ea85a6c0390aa706389e5c1aa9e6ac31b
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: git
+- id: runbook-github-copilot
+  file: 14-runbooks-github-copilot.svg
+  sha256: 29f16e99e13e16c315a0a24c2700efaaa7813f0f888c57bc0f05bd482378d9a8
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: github-copilot
+- id: runbook-hermes
+  file: 14-runbooks-hermes.svg
+  sha256: 02d43c0a91fc2ee41f2684fc39613ff6687de29a4b079665bace5303671dd63b
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: hermes
+- id: runbook-hp
+  file: 14-runbooks-hp.svg
+  sha256: 78609cdf37821a3df16eb2de023fb9c5d4dbb38eaeb7df8e78628167dd74a4ae
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: hp
+- id: runbook-linux-mint
+  file: 14-runbooks-linux-mint.svg
+  sha256: ddd18c64f005f8b7c3feb33f1b00685c2609571667e897679f5677065ae17e6f
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: linux-mint
+- id: runbook-linux
+  file: 14-runbooks-linux.svg
+  sha256: dbc5138223fc49f884dc16483585013f2bd32dac10ce2548e7b864199acd4372
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: linux
+- id: runbook-mcp
+  file: 14-runbooks-mcp.svg
+  sha256: 8670df38c9558de3cdd98d8b39ee6cbaf1c929377cffc5952e9b02f9bf9429b3
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: mcp
+- id: runbook-obsidian
+  file: 14-runbooks-obsidian.svg
+  sha256: 8dd1855430357c5ce6f76e7722b5f6b68a712ad98d2be5be6ba77616bfc69754
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: obsidian
+- id: runbook-openrouter
+  file: 14-runbooks-openrouter.svg
+  sha256: e705301b68b810399d5cd72f96dee045b1b2de4d076fd8aa96c898732b3ec285
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: openrouter
+- id: runbook-syncthing
+  file: 14-runbooks-syncthing.svg
+  sha256: 65d1430f7522bea0507259929f0033d7c62539d14757d7c6f5b62574eb4da2d3
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: syncthing
+- id: runbook-tailscale
+  file: 14-runbooks-tailscale.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: tailscale
+- id: runbook-telegram
+  file: 14-runbooks-telegram.svg
+  sha256: 29edf9cfe2d4c80eb0acd087312eaabba8f7b4c14a4651ccaab51c35b3bb608c
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: telegram
+- id: runbook-terminal
+  file: 14-runbooks-terminal.svg
+  sha256: 242c44f08a64a261d31eba9f8b2bae49951c0db15d9cbd4b4ff548e57c126898
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: terminal
+- id: runbook-uptime-kuma
+  file: 14-runbooks-uptime-kuma.svg
+  sha256: f3caa8a8bac253a77fa2ae7e7bc9b062b55a006abd787b111533714152ec744c
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: uptime-kuma
+- id: runbook-vault
+  file: 14-runbooks-vault.svg
+  sha256: 24b1cf96d949c6fa1811f9c14b2ee5697a347ec077a56d301fa01f51a5a3d0a5
+  source_url: 'local-authored: atlas runbook identity'
+  revision: local asset v1
+  license: CC0-1.0
+  attribution: Homelab Atlas
+  trademark: Generic
+  fallback: vault

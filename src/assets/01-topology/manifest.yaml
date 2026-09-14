@@ -1,0 +1,145 @@
+diagram: 01-topology
+assets:
+- id: laptop-workstation
+  file: laptop-workstation.svg
+  sha256: 927ab6734db67cf88731e69ac48faf689942024eed544e9d9e23f94e0720a23f
+  source_url: local-authored
+  revision: projection-local
+  license: CC0-1.0
+  attribution: Local authored representative illustration
+  trademark: Laptop and workstation are referenced by adjacent text; illustration
+    is not an official mark
+  fallback: Laptop laptop running workstation
+- id: hp-operator-800-g3-dm
+  file: hp-operator-800-g3-dm.svg
+  sha256: 9e2de1cd87b91f4e41d48ca45db528924d3da0aaec19dd384c9a6a1de1906740
+  source_url: local-authored
+  revision: projection-local
+  license: CC0-1.0
+  attribution: Local authored representative illustration
+  trademark: HP Workstation is referenced by adjacent text; illustration is not an
+    official mark
+  fallback: Generic workstation
+- id: topology-overlay
+  file: topology-overlay.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: overlay mark used for nominative identification; rights remain with its
+    owner
+  fallback: Authenticated overlay
+- id: topology-syncthing
+  file: topology-syncthing.svg
+  sha256: 65d1430f7522bea0507259929f0033d7c62539d14757d7c6f5b62574eb4da2d3
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: syncthing mark used for nominative identification; rights remain with
+    its owner
+  fallback: Syncthing
+- id: topology-rustdesk
+  file: topology-rustdesk.svg
+  sha256: f14e275f8b60adde7a026a54a44a4c5b79ff73ddbc21bcc7a338af04563029ce
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: rustdesk mark used for nominative identification; rights remain with
+    its owner
+  fallback: Rustdesk
+- id: topology-gluetun
+  file: topology-gluetun.svg
+  sha256: fbebd2faa90213bafb61910f1c4323eec2015b12b09741224625d9ed34241c86
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: gluetun mark used for nominative identification; rights remain with its
+    owner
+  fallback: Gluetun
+- id: topology-watchtower
+  file: topology-watchtower.svg
+  sha256: 92108f9ae377b4b34ef4b89537e24c6432d49b28d8ce7433c3dcb56273e9b896
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: watchtower mark used for nominative identification; rights remain with
+    its owner
+  fallback: Watchtower
+- id: topology-wger
+  file: topology-wger.svg
+  sha256: 1a6e75ea5ed61dffce3680e467ea60378fbab56c0455274ef9e26adf33dfb76f
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: wger mark used for nominative identification; rights remain with its
+    owner
+  fallback: Wger
+- id: topology-mobile device
+  file: topology-phone.svg
+  sha256: 01a3a9289757288c17e41e77f511a3a2054996ce8da8a624d59b49041385d94b
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Phone
+- id: topology-package
+  file: topology-package.svg
+  sha256: 9cd43cf6b041c699a694cf90c4b552563e74de57dd57bf8f7e89dffe2f36ac80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Package
+- id: topology-network
+  file: topology-network.svg
+  sha256: 22d5958462fbda1a5c41457223848300a5effa3af533a44111800a6e79e9c798
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Network
+- id: topology-none
+  file: topology-none.svg
+  sha256: f2f0864283829d3228bae8a50746cb18a26def711e8ac6a14e3b0bc3ae7dd6dd
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: None
+- id: topology-gateway
+  file: topology-gateway.svg
+  sha256: 496532fcd920abade6e1bb1e1d3b7140f8bca7ecfc81acb1a8eada20f2a7cc8e
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Gateway
+- id: topology-gear
+  file: topology-gear.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Gear
+- id: topology-cloud
+  file: topology-cloud.svg
+  sha256: 68bf26f842dfd2c96aea0bfbea351f9fe2c116ae5484bf557ca2af5848741035
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Cloud

@@ -1,0 +1,73 @@
+%% 13-health-data — wearable ingress, validation, snapshots, and Grafana reads.
+%% Source of truth: src/13-health-data.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 30, "rankSpacing": 38, "diagramPadding": 34}}}%%
+flowchart LR
+    subgraph devices["Wearable data sources"]
+        x_miband["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-x-miband.svg' width='58' height='58' alt=''/><br/>Wearable device</div>"]
+        x_gadgetbridge["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-x-gadgetbridge.svg' width='58' height='58' alt=''/><br/>Wearable client<br/>primary steps and heart rate</div>"]
+        x_health_connect["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-x-health-connect.svg' width='58' height='58' alt=''/><br/>Health Connect exporter<br/>supplementary records</div>"]
+    end
+
+    subgraph gadgetbridge_ingress["Gadgetbridge receive-only ingress"]
+        syncthing["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-syncthing.svg' width='58' height='58' alt=''/><br/>Syncthing<br/>mobile device send-only · server receive-only</div>"]
+        gb_source["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-gb-source.svg' width='58' height='58' alt=''/><br/>Gadgetbridge SQLite export</div>"]
+        promote_path["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-promote-path.svg' width='58' height='58' alt=''/><br/>gadgetbridge-health-promote.path<br/>watches canonical export</div>"]
+        promote_timer["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-promote-timer.svg' width='58' height='58' alt=''/><br/>gadgetbridge-health-promote.timer<br/>15-minute fallback poll</div>"]
+    end
+
+    subgraph validation["Validation and last-good publication"]
+        promote_service["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-promote-service.svg' width='58' height='58' alt=''/><br/>gadgetbridge-health-promote.service<br/>stable source · schema · quick_check</div>"]
+        gb_current["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-gb-current.svg' width='58' height='58' alt=''/><br/>current/Gadgetbridge<br/>atomic validated snapshot</div>"]
+        gb_archive["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-gb-archive.svg' width='58' height='58' alt=''/><br/>promoted archive<br/>last-good retention</div>"]
+        promotion_state["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-promotion-state.svg' width='58' height='58' alt=''/><br/>promotion state<br/>hash · schema · freshness</div>"]
+    end
+
+    subgraph hc_ingress["Token-authenticated Health Connect ingress"]
+        x_overlay_access["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-x-overlay-access.svg' width='58' height='58' alt=''/><br/>Authenticated overlay Serve<br/>/health-connect</div>"]
+        hc_receiver["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-hc-receiver.svg' width='58' height='58' alt=''/><br/>gadgetbridge-health-connect.service<br/>127.0.0.1:8788</div>"]
+        hc_source["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-hc-source.svg' width='58' height='58' alt=''/><br/>source.sqlite<br/>raw payload preservation</div>"]
+        hc_snapshot["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-hc-snapshot.svg' width='58' height='58' alt=''/><br/>health-connect.sqlite<br/>verified atomic snapshot</div>"]
+        hc_backup_timer["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-hc-backup-timer.svg' width='58' height='58' alt=''/><br/>gadgetbridge-health-connect-backup.timer<br/>daily + jitter</div>"]
+        hc_backup_service["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-hc-backup-service.svg' width='58' height='58' alt=''/><br/>gadgetbridge-health-connect-backup.service<br/>transaction-consistent backup</div>"]
+        hc_backups["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-hc-backups.svg' width='58' height='58' alt=''/><br/>archival backup retention</div>"]
+    end
+
+    subgraph read_path["Read-only dashboard path"]
+        source_policy["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-source-policy.svg' width='58' height='58' alt=''/><br/>conservative source policy<br/>Gadgetbridge primary · duplicate HC excluded<br/>sleep remains gated</div>"]
+        grafana["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-grafana.svg' width='58' height='58' alt=''/><br/>Grafana<br/>read-only health mounts</div>"]
+        x_health_ui["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/13-health-data/13-health-data-x-health-ui.svg' width='58' height='58' alt=''/><br/>Authenticated overlay /health<br/>health dashboards</div>"]
+    end
+
+    x_miband ==> x_gadgetbridge ==> syncthing ==> gb_source
+    gb_source ==> promote_path ==> promote_service
+    promote_timer ==> promote_service
+    promote_service ==>|"validated atomic replace"| gb_current
+    gb_current -.->|"previous valid copy"| gb_archive
+    promote_service --> promotion_state
+
+    x_health_connect ==> x_overlay_access ==> hc_receiver
+    hc_receiver ==> hc_source
+    hc_receiver ==>|"quick_check then atomic replace"| hc_snapshot
+    hc_backup_timer ==> hc_backup_service ==> hc_backups
+    hc_source ==> hc_backup_service
+
+    gb_current ==> source_policy
+    hc_snapshot ==> source_policy
+    source_policy ==> grafana ==> x_health_ui
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_miband,x_gadgetbridge,x_health_connect external
+    class syncthing,grafana media
+    class gb_source,gb_current,gb_archive,promotion_state,hc_snapshot,hc_backups data
+    class promote_path,promote_timer,x_overlay_access,hc_backup_timer,x_health_ui ingress
+    class promote_service,hc_receiver,hc_backup_service,source_policy host
+    class hc_source secure

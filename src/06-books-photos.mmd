@@ -1,22 +1,64 @@
-flowchart LR
-  bookportal["bookportal"] --> book_vpn["gluetun-books"]
-  book_vpn --> sources["Book sources"]
-  sources --> books["Local book library"]
-  books --> kavita["kavita"]
-  phone["Trusted phone"] --> immich_server["immich-server"]
-  immich_server --> immich_db["immich-db"]
-  immich_server --> immich_redis["immich-redis"]
-  immich_server --> immich_ml["immich-machine-learning"]
-  immich_server --> photos["Local photo library"]
-  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
-  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
-  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
-  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
-  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
-  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class bookportal,kavita,immich_server,immich_db,immich_redis,immich_ml app
-  class book_vpn secure
-  class sources external
-  class books,photos data
-  class phone ingress
+%% 06-books-photos — two small self-contained stacks.
+%% Source of truth: src/06-books-photos.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 38, "diagramPadding": 34}}}%%
+flowchart TB
+    subgraph photosflow["Photos"]
+        direction LR
+        x_user_p["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-x-user-p.svg' width='52' height='52' alt=''/><br/>Immich app<br/>mobile device auto-backup</div>"]
+        immich_server["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-immich-server.svg' width='52' height='52' alt=''/><br/>immich-server :2283</div>"]
+        immich_machine_learning["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-immich-machine-learning.svg' width='52' height='52' alt=''/><br/>immich-machine-learning<br/>CLIP search, face detection</div>"]
+        immich_db["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-immich-db.svg' width='52' height='52' alt=''/><br/>immich-db<br/>postgres 14 + pgvector/vectorchord</div>"]
+        immich_redis["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-immich-redis.svg' width='52' height='52' alt=''/><br/>immich-redis<br/>job queue</div>"]
+        v_upload["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-v-upload.svg' width='52' height='52' alt=''/><br/>data/immich/upload</div>"]
+        v_model["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-v-model.svg' width='52' height='52' alt=''/><br/>data/immich/model-cache</div>"]
+        v_immich_db["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-v-immich-db.svg' width='52' height='52' alt=''/><br/>data/immich/db</div>"]
+    end
+
+
+    subgraph booksflow["Books"]
+        direction LR
+        x_user_b["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-x-user-b.svg' width='52' height='52' alt=''/><br/>Search</div>"]
+        bookportal["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-bookportal.svg' width='52' height='52' alt=''/><br/>bookportal :8200<br/>custom FastAPI · python:3.12-slim<br/>dns 1.1.1.1</div>"]
+        gluetun_books["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-gluetun-books.svg' width='52' height='52' alt=''/><br/>gluetun-books<br/>ProtonVPN · HTTP proxy :8888</div>"]
+        x_libgen["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-x-libgen.svg' width='52' height='52' alt=''/><br/>Libgen</div>"]
+        x_annas["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-x-annas.svg' width='52' height='52' alt=''/><br/>Anna's Archive<br/>reached only via the proxy</div>"]
+        v_books["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-v-books.svg' width='52' height='52' alt=''/><br/>data/books</div>"]
+        kavita["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/06-books-photos/06-books-photos-kavita.svg' width='52' height='52' alt=''/><br/>kavita :5001→5000<br/>reader</div>"]
+    end
+
+    x_user_b ==> bookportal
+    bookportal ==>|"direct"| x_libgen
+    bookportal -.->|"HTTP_PROXY"| gluetun_books
+    gluetun_books ==> x_annas
+    bookportal ==>|"normalises filenames"| v_books
+    v_books ==> kavita
+
+    x_user_p ==> immich_server
+    immich_server ==> v_upload
+    immich_server --> immich_db
+    immich_db --> v_immich_db
+    immich_server -->|"queues jobs"| immich_redis
+    immich_server -->|"embeddings, faces"| immich_machine_learning
+    immich_machine_learning --> v_model
+    immich_machine_learning -.->|"vectors"| immich_db
+
+    %% Non-traffic ordering keeps Books below Photos on narrow and wide views.
+    v_model ~~~ x_user_b
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_user_b,x_user_p host
+    class bookportal,kavita,immich_server media
+    class gluetun_books vpn
+    class immich_machine_learning ai
+    class immich_db,immich_redis data
+    class v_books,v_upload,v_model,v_immich_db data
+    class x_libgen,x_annas external

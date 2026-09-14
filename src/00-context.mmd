@@ -1,21 +1,73 @@
-flowchart LR
-  operator["Operator"] --> overlay["Private overlay network"]
-  overlay --> host["Homelab host"]
-  host --> core["Dashboards and monitoring"]
-  host --> media["Media and personal apps"]
-  host --> automation["Automation and agent tools"]
-  media --> local["Local application data"]
-  automation -.-> external["Cloud and messaging APIs"]
-  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
-  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
-  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
-  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
-  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
-  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class operator,overlay ingress
-  class host host
-  class core,media app
-  class automation automation
-  class local data
-  class external external
+%% 00-context — system context. What this box is, who talks to it, what it depends on.
+%% Source of truth: src/00-context.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 42, "rankSpacing": 48, "diagramPadding": 18}}}%%
+flowchart TB
+    subgraph people["People and devices"]
+
+        x_user["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/user.svg' width='72' height='72' alt=''/><br/><b>User · User</b></div>"]
+        workstation["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/01-topology/laptop-workstation.svg' width='72' height='72' alt=''/><br/><b>workstation — laptop</b><br/>authenticated workstation</div>"]
+        mobile_device["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/phone.svg' width='72' height='72' alt=''/><br/><b>Phone</b><br/>authenticated mobile client</div>"]
+    end
+
+    subgraph edge["Current ingress"]
+
+        x_overlay_access["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/overlay.svg' width='72' height='72' alt=''/><br/><b>Authenticated overlay access</b><br/>overlay.example.test<br/><b>application access</b></div>"]
+        x_lan["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/internet.svg' width='72' height='72' alt=''/><br/><b>LAN / WAN</b><br/>ssh 22 · slskd 50300 only</div>"]
+    end
+
+    subgraph box["operator — Generic host · 7.6 GiB RAM"]
+
+        x_stack_homelab["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/docker.svg' width='72' height='72' alt=''/><br/><b>homelab compose project</b></div>"]
+        x_agent_plane["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/agent.svg' width='72' height='72' alt=''/><br/><b>agent plane</b><br/>Pi · Herdr · Hermes · homelab-mcp</div>"]
+        x_stack_rustdesk["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/rustdesk.svg' width='72' height='72' alt=''/><br/><b>rustdesk relay · host net</b></div>"]
+        x_storage["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/storage.svg' width='72' height='72' alt=''/><br/><b>storage</b><br/>media · music · books · photos · workspace</div>"]
+    end
+
+    subgraph ext["External dependencies"]
+
+        x_vpn_egress["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/vpn.svg' width='72' height='72' alt=''/><br/><b>Cloudflare WARP</b><br/>+ ProtonVPN</div>"]
+        x_anthropic["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/agent.svg' width='72' height='72' alt=''/><br/><b>Models through Pi</b><br/>Codex · Grok · Antigravity<br/>Claude<br/>via Pro subscription</div>"]
+        x_telegram["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/telegram.svg' width='72' height='72' alt=''/><br/><b>Telegram</b><br/>bots and alerts</div>"]
+        x_aws["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/aws.svg' width='72' height='72' alt=''/><br/><b>AWS example-region-1</b><br/>cka-dojo · on demand only</div>"]
+        x_content["<div style='width:220px;min-height:160px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/00-context/search.svg' width='72' height='72' alt=''/><br/><b>Indexers · Soulseek</b><br/>Anna's Archive · job sources</div>"]
+    end
+
+    x_user --> workstation
+    x_user --> mobile_device
+    workstation ==> x_overlay_access
+    mobile_device ==> x_overlay_access
+
+    x_overlay_access ==> x_stack_homelab
+    x_overlay_access ==> x_agent_plane
+    x_lan --> x_stack_rustdesk
+    x_lan --> x_stack_homelab
+
+    x_stack_homelab --> x_storage
+    x_agent_plane --> x_storage
+
+    x_stack_homelab ---->|"download traffic"| x_vpn_egress
+    x_vpn_egress --> x_content
+    x_agent_plane ---->|"LLM calls"| x_anthropic
+    x_agent_plane ---->|"digests and alerts"| x_telegram
+    x_agent_plane -...->|"terraform, parked when idle"| x_aws
+
+    %% Keep cross-group edges attached to nodes: do not override group direction.
+
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_user,workstation,mobile_device host
+    class x_overlay_access,x_lan ingress
+    class x_stack_homelab,x_stack_rustdesk media
+    class x_agent_plane ai
+    class x_storage data
+    class x_vpn_egress vpn
+    class x_anthropic,x_telegram,x_content,x_aws external

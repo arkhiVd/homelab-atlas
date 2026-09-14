@@ -1,0 +1,205 @@
+diagram: 09-jobhunt
+assets:
+- id: 09-jobhunt-x_ats
+  file: 09-jobhunt-x-ats.svg
+  sha256: 413189f576ee27dd4f599ab75d30410dd190fcc5a4feaf299965dda545b4d929
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x ats
+- id: 09-jobhunt-x_apis
+  file: 09-jobhunt-x-apis.svg
+  sha256: 22d5958462fbda1a5c41457223848300a5effa3af533a44111800a6e79e9c798
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x apis
+- id: 09-jobhunt-x_local
+  file: 09-jobhunt-x-local.svg
+  sha256: 413189f576ee27dd4f599ab75d30410dd190fcc5a4feaf299965dda545b4d929
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x local
+- id: 09-jobhunt-x_serpapi
+  file: 09-jobhunt-x-serpapi.svg
+  sha256: 44d601fe76f060a0bd415f3e005702392e821306d60b5ef390ba9acc54a07716
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x serpapi
+- id: 09-jobhunt-x_disabled
+  file: 09-jobhunt-x-disabled.svg
+  sha256: bcf326874efb3542868763dee94ea0f21a94d5d77ded24763613498d7a904485
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x disabled
+- id: 09-jobhunt-jobhunt_timer
+  file: 09-jobhunt-jobhunt-timer.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: jobhunt timer
+- id: 09-jobhunt-jobhunt_discover
+  file: 09-jobhunt-jobhunt-discover.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: jobhunt discover
+- id: 09-jobhunt-resume
+  file: 09-jobhunt-resume.svg
+  sha256: 8dd1855430357c5ce6f76e7722b5f6b68a712ad98d2be5be6ba77616bfc69754
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: obsidian mark used for nominative identification; rights remain with
+    its owner
+  fallback: resume
+- id: 09-jobhunt-leads
+  file: 09-jobhunt-leads.svg
+  sha256: 9138a3586d90bbcfaa3f55298a6f8720500cc18f3ed4b3d1fe9f7ff41eb07698
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: leads
+- id: 09-jobhunt-prefilter
+  file: 09-jobhunt-prefilter.svg
+  sha256: 44d601fe76f060a0bd415f3e005702392e821306d60b5ef390ba9acc54a07716
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: prefilter
+- id: 09-jobhunt-score
+  file: 09-jobhunt-score.svg
+  sha256: 1970c905674dd518e218ce6e8d80db3a4032e7f2af94ea4b3c739a8d25387b63
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: score
+- id: 09-jobhunt-db
+  file: 09-jobhunt-db.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: db
+- id: 09-jobhunt-funnel
+  file: 09-jobhunt-funnel.svg
+  sha256: dd77868dfa5dfbe11da5405dbe867f1c37af43cd796507f33a56ed12d7e8ace1
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon owner
+  fallback: funnel
+- id: 09-jobhunt-hermes
+  file: 09-jobhunt-hermes.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: hermes
+- id: 09-jobhunt-settings
+  file: 09-jobhunt-settings.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon owner
+  fallback: settings
+- id: 09-jobhunt-claude_fallback
+  file: 09-jobhunt-claude-fallback.svg
+  sha256: c72c04462402ed4bd3d4d2170a4be4c5f59a5cf669eafe7d6aeeffb6980bf90c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: claude fallback
+- id: 09-jobhunt-providers
+  file: 09-jobhunt-providers.svg
+  sha256: 8a6030406f34ee761c3d60dd95cc49af8c3ca1c9f45b61a3d8648d60c91cba62
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: openai mark used for nominative identification; rights remain with its
+    owner
+  fallback: providers
+- id: 09-jobhunt-digest
+  file: 09-jobhunt-digest.svg
+  sha256: 1ac355ac2c1dccb68f055a1f5922614e852a98d0dad5ea3bee1782edd77fda7c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: digest
+- id: 09-jobhunt-jobhunt_bot
+  file: 09-jobhunt-jobhunt-bot.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: jobhunt bot
+- id: 09-jobhunt-board
+  file: 09-jobhunt-board.svg
+  sha256: 8dd1855430357c5ce6f76e7722b5f6b68a712ad98d2be5be6ba77616bfc69754
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: obsidian mark used for nominative identification; rights remain with
+    its owner
+  fallback: board
+- id: 09-jobhunt-prep
+  file: 09-jobhunt-prep.svg
+  sha256: 8dd1855430357c5ce6f76e7722b5f6b68a712ad98d2be5be6ba77616bfc69754
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: obsidian mark used for nominative identification; rights remain with
+    its owner
+  fallback: prep
+- id: 09-jobhunt-x_telegram
+  file: 09-jobhunt-x-telegram.svg
+  sha256: 29edf9cfe2d4c80eb0acd087312eaabba8f7b4c14a4651ccaab51c35b3bb608c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: telegram mark used for nominative identification; rights remain with
+    its owner
+  fallback: x telegram

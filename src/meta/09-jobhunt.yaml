@@ -1,0 +1,106 @@
+id: 09-jobhunt
+title: "jobhunt \u2014 discovery, bounded scoring, and user actions"
+audience: Anyone changing a source, filter, model selection, notification, or board output.
+layer: C
+summary: 'A persistent timer runs discovery, normalization, deduplication, deterministic filtering, bounded model scoring through Hermes, notifications, and board generation. SQLite remains the canonical job store; the workspace contains generated user-facing outputs.
+
+  '
+notes:
+- A persistent system timer starts discovery each day, even if the machine was asleep at the nominal time. The discovery service reads the configured job boards and APIs, converts their different responses into one shape, deduplicates repeated listings, and stores jobs in SQLite.
+- Cheap deterministic rules run before any model call. Clear mismatches are recorded and stop there. Plausible and uncertain roles continue to bounded model scoring. This keeps cost and runtime controlled and leaves failed model calls available for a later retry.
+- Hermes selects the configured provider and model for scoring and bot conversations. The canonical resume gives the scorer the experience it should compare against. Provider output adds a score and explanation, but it does not submit an application.
+- I use Telegram for the digest and quick actions. The bot can show a job, prepare tailored material, and change its model. The workspace kanban is the longer review view. SQLite remains the source of truth for status.
+- The human gate is deliberate. The workflow finds, sorts, and prepares work. I decide what to shortlist, what material to use, and whether to apply. No recruiter message or application is sent automatically.
+nodes:
+- id: x_ats
+  kind: external
+  label: ATS boards
+  lifecycle: external-unverified
+- id: x_apis
+  kind: external
+  label: Job APIs
+  lifecycle: external-unverified
+- id: x_local
+  kind: external
+  label: Regional board A and Regional board B
+  lifecycle: external-unverified
+- id: x_serpapi
+  kind: external
+  label: SerpAPI pilot
+  lifecycle: external-unverified
+  class: warn
+  note: Enabled, but recent production attempts failed or timed out.
+- id: x_disabled
+  kind: external
+  label: Jooble and JSearch
+  lifecycle: configured-inactive
+  class: warn
+  note: Both adapters remain configured but disabled.
+- id: jobhunt_timer
+  kind: timer
+  name: jobhunt-discover.timer
+  lifecycle: observed-live
+  on_calendar:
+  - '*-*-* 08:00:00 UTC'
+  persistent: true
+  randomized_delay_usec: 5min
+- id: jobhunt_discover
+  kind: unit
+  name: jobhunt-discover.service
+  lifecycle: observed-live
+- id: resume
+  kind: volume
+  lifecycle: observed-live
+- id: leads
+  kind: concept
+  label: fetch, normalize, insert and deduplicate
+  lifecycle: observed-live
+- id: prefilter
+  kind: concept
+  label: PASS, REVIEW and HARD_REJECT filter
+  lifecycle: observed-live
+- id: score
+  kind: concept
+  label: bounded model scoring
+  lifecycle: observed-live
+- id: db
+  kind: volume
+  lifecycle: observed-live
+- id: funnel
+  kind: volume
+  lifecycle: observed-live
+- id: hermes
+  kind: concept
+  label: Hermes CLI model backend
+  lifecycle: observed-live
+- id: settings
+  kind: volume
+  lifecycle: observed-live
+- id: claude_fallback
+  kind: concept
+  label: direct Claude CLI fallback
+  lifecycle: configured-inactive
+  class: warn
+  note: Used only when a Claude-family Hermes call fails or LLM_PROVIDER explicitly selects the direct CLI.
+- id: providers
+  kind: external
+  label: Hermes-configured model providers
+  lifecycle: external-unverified
+- id: digest
+  kind: concept
+  label: Telegram digest and cards
+  lifecycle: observed-live
+- id: x_telegram
+  kind: external
+  label: Telegram
+  lifecycle: external-unverified
+- id: jobhunt_bot
+  kind: unit
+  name: jobhunt-bot.service
+  lifecycle: observed-live
+- id: board
+  kind: volume
+  lifecycle: observed-live
+- id: prep
+  kind: volume
+  lifecycle: observed-live

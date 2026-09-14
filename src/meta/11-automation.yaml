@@ -1,0 +1,165 @@
+id: 11-automation
+title: "Automation \u2014 every unit, every timer, and where it reports"
+audience: Anyone debugging a job that did not run, or wondering what changed the box overnight.
+layer: C
+summary: 'Boot order, always-on services, user-scope units, and recurring timers. The health pipeline adds a path-triggered Gadgetbridge promoter, a fallback promotion timer, a Health Connect receiver, and a daily consistent backup.
+
+  '
+notes:
+- At boot, the overlay service and Docker start before homelab.service brings up the Compose projects. The user service manager separately starts Hermes Gateway, Claude Bridge, and CloudOps Chat. This split lets container applications and user-owned AI processes have different permissions and restart policies.
+- "The CLI update timer runs each day. Its service updates tools managed by mise, updates Hermes through Hermes\u2019s own updater, restarts the affected agent services, verifies them, and sends a Telegram message if a step fails. The result is one checked update run rather than several unrelated background updaters."
+- The custom-image timer rebuilds Musicportal and Bookportal each week so their application images pick up current source and base-image changes. Watchtower handles published container-image updates on its own weekly schedule. These jobs are separate because locally built images and registry images need different update methods.
+- The staged reboot timer checks each morning. It records the need for a reboot first and performs it on the following run, leaving time to cancel. The dependency checker runs weekly and reports stale image or base references before they become surprise breakage.
+- Application timers run the daily job discovery, health snapshot promotion, health database backup, and nightly investment research. Each timer starts a short-lived service, and that service exits when the work is complete. An inactive oneshot is usually waiting for its next timer, not broken.
+- Uptime Kuma watches important endpoints and Telegram receives failure reports. Swap, earlyoom, and container memory limits reduce the chance that one workload makes the whole host unusable.
+nodes:
+- id: docker_service
+  kind: unit
+  name: docker.service
+  lifecycle: observed-live
+- id: overlayd
+  kind: unit
+  name: overlayd.service
+  lifecycle: observed-live
+- id: homelab_service
+  kind: unit
+  name: homelab.service
+  lifecycle: observed-live
+- id: x_user_manager
+  kind: concept
+  label: operator user manager with lingering
+  lifecycle: observed-live
+- id: homelab_mcp
+  kind: unit
+  name: homelab-mcp.service
+  lifecycle: observed-live
+- id: jobhunt_bot
+  kind: unit
+  name: jobhunt-bot.service
+  lifecycle: observed-live
+- id: health_connect
+  kind: unit
+  name: gadgetbridge-health-connect.service
+  lifecycle: observed-live
+- id: health_promote_path
+  kind: path
+  name: gadgetbridge-health-promote.path
+  label: Gadgetbridge promotion path activation
+  lifecycle: observed-live
+- id: invest_dashboard
+  kind: unit
+  name: invest-dashboard.service
+  lifecycle: observed-live
+- id: x_user_units
+  kind: concept
+  label: user-scope units (detailed in 08-ai-plane)
+  lifecycle: observed-live
+- id: t_cli
+  kind: timer
+  name: homelab-cli-update.timer
+  schedule: daily 03:00
+  on_calendar:
+  - '*-*-* 03:00:00'
+  persistent: true
+  lifecycle: observed-live
+- id: t_rebuild
+  kind: timer
+  name: homelab-rebuild.timer
+  schedule: Sun 03:30
+  lifecycle: observed-live
+- id: t_reboot
+  kind: timer
+  name: homelab-reboot.timer
+  schedule: daily 05:00
+  lifecycle: observed-live
+- id: t_jobhunt
+  kind: timer
+  name: jobhunt-discover.timer
+  schedule: 08:00 UTC
+  on_calendar:
+  - '*-*-* 08:00:00 UTC'
+  persistent: true
+  randomized_delay_usec: 5min
+  lifecycle: observed-live
+- id: t_depcheck
+  kind: timer
+  name: homelab-depcheck.timer
+  schedule: Mon 09:00
+  lifecycle: observed-live
+- id: t_health_promote
+  kind: timer
+  name: gadgetbridge-health-promote.timer
+  schedule: fallback poll
+  lifecycle: observed-live
+- id: t_health_backup
+  kind: timer
+  name: gadgetbridge-health-connect-backup.timer
+  schedule: daily
+  lifecycle: observed-live
+- id: t_invest
+  lifecycle: observed-live
+  kind: timer
+  name: invest-mf.timer
+  schedule: nightly
+  on_calendar:
+  - '*-*-* 21:30:00 UTC'
+  persistent: true
+  randomized_delay_usec: 5min
+- id: s_cli
+  kind: unit
+  name: homelab-cli-update.service
+  lifecycle: observed-live
+- id: mise
+  kind: concept
+  label: mise upgrade --yes --prune
+  lifecycle: observed-live
+- id: hermes_update
+  kind: concept
+  label: hermes update --yes
+  lifecycle: observed-live
+- id: s_rebuild
+  kind: unit
+  name: homelab-rebuild.service
+  lifecycle: observed-live
+- id: s_reboot
+  lifecycle: observed-live
+  kind: unit
+  name: homelab-reboot.service
+  class: warn
+  note: The only scheduled job that reboots the machine. staged-reboot.sh stages one day and reboots the next, so there is a window to cancel.
+- id: s_depcheck
+  kind: unit
+  name: homelab-depcheck.service
+  lifecycle: observed-live
+- id: jobhunt_discover
+  kind: unit
+  name: jobhunt-discover.service
+  lifecycle: observed-live
+- id: s_health_promote
+  kind: unit
+  name: gadgetbridge-health-promote.service
+  lifecycle: observed-live
+- id: s_health_backup
+  kind: unit
+  name: gadgetbridge-health-connect-backup.service
+  lifecycle: observed-live
+- id: s_invest
+  kind: unit
+  name: invest-mf.service
+  lifecycle: observed-live
+- id: watchtower
+  kind: container
+  name: watchtower
+  lifecycle: observed-live
+- id: uptime_kuma
+  kind: container
+  name: uptime-kuma
+  lifecycle: observed-live
+- id: x_oom
+  kind: concept
+  label: OOM safeguards (4G swap, earlyoom, mem_limits)
+  lifecycle: observed-live
+- id: x_telegram
+  kind: external
+  label: Telegram via hermes send
+  lifecycle: external-unverified

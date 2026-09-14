@@ -1,0 +1,73 @@
+%% 12-invest — authenticated Authenticated overlay dashboard and nightly investment research pipeline.
+%% Source of truth: src/12-invest.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 30, "rankSpacing": 38, "diagramPadding": 34}}}%%
+flowchart TD
+    subgraph ingress["Authenticated overlay dashboard ingress"]
+        x_overlay_access["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-overlay-access.svg' width='58' height='58' alt=''/><br/>Authenticated overlay Serve /invest</div>"]
+        invest_dashboard["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-invest-dashboard.svg' width='58' height='58' alt=''/><br/>invest-dashboard.service<br/>authenticated gateway</div>"]
+        x_streamlit["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-streamlit.svg' width='58' height='58' alt=''/><br/>Streamlit dashboard<br/>loopback only</div>"]
+    end
+
+    subgraph schedule["Nightly systemd execution"]
+        invest_mf_timer["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-invest-mf-timer.svg' width='58' height='58' alt=''/><br/>invest-mf.timer<br/>21:30 UTC + jitter</div>"]
+        invest_mf_service["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-invest-mf-service.svg' width='58' height='58' alt=''/><br/>invest-mf.service<br/>oneshot · maintenance lock</div>"]
+    end
+
+    subgraph pipeline["17-stage contract"]
+        x_mf_refresh["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-mf-refresh.svg' width='58' height='58' alt=''/><br/>1-6 MF refresh, metrics, export, workspace sync, alerts</div>"]
+        x_market_data["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-market-data.svg' width='58' height='58' alt=''/><br/>7-11 prices, XBRL chip, fundamentals, screens, watchlist</div>"]
+        x_bounded_models["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-bounded-models.svg' width='58' height='58' alt=''/><br/>12-13 bounded survivor research + headline sentiment</div>"]
+        x_outputs["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-outputs.svg' width='58' height='58' alt=''/><br/>14-16 tracking, digest, ranking</div>"]
+        ui_projection["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-ui-projection.svg' width='58' height='58' alt=''/><br/>17 verified read-only UI projection<br/>atomic replace · 0600</div>"]
+    end
+
+    subgraph state["Local state and outputs"]
+        invest_db["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-invest-db.svg' width='58' height='58' alt=''/><br/>data/invest.duckdb<br/>writer state</div>"]
+        invest_ui_db["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-invest-ui-db.svg' width='58' height='58' alt=''/><br/>data/ui/invest-ui.duckdb<br/>safe UI projection</div>"]
+        x_workspace_exports["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-workspace-exports.svg' width='58' height='58' alt=''/><br/>shared-workspace Projects/invest-exports</div>"]
+        x_telegram["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-telegram.svg' width='58' height='58' alt=''/><br/>Telegram change alerts and digest</div>"]
+        x_stale["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-stale.svg' width='58' height='58' alt=''/><br/>fail-open chips retain last-good data<br/>warnings and stale/missing state remain visible</div>"]
+    end
+
+    subgraph sources["Read-only external sources"]
+        x_mf_sources["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-mf-sources.svg' width='58' height='58' alt=''/><br/>TigZig · MFAPI · NSE</div>"]
+        x_stock_sources["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-stock-sources.svg' width='58' height='58' alt=''/><br/>NSE filings · bhavcopy · market data</div>"]
+        x_claude_bridge["<div style='width:190px;min-height:132px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/12-invest/12-invest-x-claude-bridge.svg' width='58' height='58' alt=''/><br/>claude-bridge<br/>bounded model calls</div>"]
+    end
+
+    x_overlay_access --> invest_dashboard --> x_streamlit
+    invest_ui_db -->|"read-only queries"| x_streamlit
+    invest_mf_timer ==> invest_mf_service
+    invest_mf_service ==> x_mf_refresh ==> x_market_data ==> x_bounded_models ==> x_outputs ==> ui_projection
+    x_mf_refresh --> invest_db
+    x_market_data --> invest_db
+    x_bounded_models --> invest_db
+    x_outputs --> invest_db
+    ui_projection ==> invest_ui_db
+    x_mf_refresh --> x_workspace_exports
+    x_outputs --> x_telegram
+    x_mf_sources --> x_mf_refresh
+    x_stock_sources --> x_market_data
+    x_claude_bridge --> x_bounded_models
+    x_market_data -.-> x_stale
+    x_bounded_models -.-> x_stale
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_overlay_access,invest_dashboard ingress
+    class x_streamlit host
+    class invest_mf_timer ingress
+    class invest_mf_service host
+    class x_mf_refresh,x_market_data,x_outputs media
+    class x_bounded_models,x_claude_bridge ai
+    class ui_projection,invest_db,invest_ui_db,x_workspace_exports data
+    class x_mf_sources,x_stock_sources,x_telegram external
+    class x_stale warn

@@ -1,0 +1,29 @@
+%% 14-runbooks-syncconflict — a Syncthing conflict in the workspace.
+%% Source of truth: src/14-runbooks-syncconflict.mmd. Generated outputs are never hand-edited.
+sequenceDiagram
+    autonumber
+    %% atlas-participant L linux-mint
+    participant L as workstation
+    %% atlas-participant S syncthing
+    participant S as syncthing
+    %% atlas-participant E obsidian
+    participant E as operator workspace
+    %% atlas-participant A github-copilot
+    participant A as Agent
+    %% atlas-participant Y linux-mint
+    participant Y as User
+
+    L->>S: edit note
+    E->>S: agent appends to the same note
+    S-->>E: cannot merge
+    S->>E: writes <name>.sync-conflict-<date>-<device>.md
+    A->>E: session start — check for conflicts
+    alt conflict file present
+        A->>Y: STOP and report the filename
+        Note over A: never resolve a sync-conflict file silently,<br/>never delete either side
+        Y->>E: reconcile by hand
+    else clean
+        A->>E: proceed — append only
+    end
+    Note over A,E: why appends: two devices editing<br/>whole-file rewrites is what creates conflicts.<br/>Appending rarely collides.
+    A->>E: never touch .obsidian/ .trash/ .stfolder Archive/ *.bak*

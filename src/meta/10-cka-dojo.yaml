@@ -1,0 +1,54 @@
+id: 10-cka-dojo
+title: "cka-dojo \u2014 the only off-box footprint"
+audience: Anyone about to run dojo up, or checking whether AWS is currently costing money.
+layer: C
+summary: "A CKA break/fix trainer. Terraform builds a kubeadm cluster in example-region-1 on demand, 17 scenarios inject faults over SSM, and dojo down parks the cluster as AMIs so nothing bills while idle. Access is SSM-only \u2014 no SSH, no public ingress.\n"
+notes:
+- I run the Dojo from the laptop when I want a CKA break-and-fix practice session. The dojo command asks Terraform to create or restore a small kubeadm cluster, then applies one of the practice scenarios that intentionally breaks part of Kubernetes.
+- I connect through AWS Systems Manager rather than opening SSH or a public Kubernetes endpoint. The scenario gives me the symptoms and a bounded environment. My attempt and topic result are written to the local Dojo database so later drills can focus on weak areas.
+- The 17 scenarios cover practical cluster faults. Terraform owns the temporary network, roles, instances, and security rules. The command wrapper keeps startup, scenario selection, result recording, and shutdown in one workflow.
+- When I finish, dojo down turns the instances into parked machine images and removes the running cluster. This preserves the practice state while avoiding charges for idle compute. The useful result is the attempt history and a cluster image that can be restored for the next session.
+nodes:
+- id: x_user
+  kind: concept
+  label: dojo up / dojo down
+  lifecycle: observed-live
+- id: dojo_cli
+  kind: concept
+  label: bin/dojo
+  lifecycle: observed-live
+- id: terraform
+  kind: concept
+  label: Terraform infra/*.tf
+  lifecycle: observed-live
+- id: scenarios
+  kind: concept
+  label: 17 break/fix scenarios
+  lifecycle: observed-live
+- id: dojo_db
+  kind: volume
+  lifecycle: observed-live
+- id: vpc
+  kind: external
+  label: AWS VPC + subnets
+  lifecycle: external-unverified
+- id: sg
+  kind: external
+  label: Security groups (zero inbound)
+  lifecycle: external-unverified
+- id: iam
+  kind: external
+  label: IAM roles
+  lifecycle: external-unverified
+- id: ec2
+  kind: external
+  label: EC2 kubeadm cluster
+  lifecycle: external-unverified
+- id: ami
+  kind: external
+  label: Parked AMIs
+  lifecycle: external-unverified
+- id: x_ssm
+  kind: external
+  label: AWS SSM Session Manager
+  lifecycle: external-unverified

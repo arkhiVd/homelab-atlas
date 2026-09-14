@@ -1,0 +1,628 @@
+#!/usr/bin/env python3
+"""Render the static Atlas dashboard from Mermaid and sidecars only.
+
+Committed fixture evidence is used for deterministic, offline public builds.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import html
+import json
+import re
+import sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import yaml
+
+REPO = Path(__file__).resolve().parent.parent
+SRC, META, OUT = REPO / "src", REPO / "src" / "meta", REPO / "out"
+FONT_DIR = REPO / "vendor" / "fonts"
+FONT_FILES = ("jetbrains-mono-latin.woff2", "space-grotesk-latin.woff2")
+ASSETS_ROOT = SRC / "assets"
+IDENTITY_FALLBACKS = {"user": "👤", "agent": "🤖", "phone": "📱", "device": "🖥️"}
+
+LAYERS = {"A": "Layer A", "B": "Layer B", "C": "Layer C"}
+STACKS = (("foundations", "Foundations"), ("workloads", "Workloads"), ("operations", "Operations"))
+LIFECYCLES = (
+    "observed-live",
+    "configured-inactive",
+    "dormant",
+    "external-unverified",
+    "historical",
+)
+FRESHNESS_HOURS = 24
+EVIDENCE_FIXTURE = REPO / "fixtures" / "demo" / "evidence.json"
+
+
+def esc(value: object) -> str:
+    return html.escape(str(value), quote=True)
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load_identity_assets() -> dict[str, dict]:
+    """Load all locally hashed, inert SVG identities without output-name collisions."""
+    required = {
+        "id",
+        "file",
+        "sha256",
+        "source_url",
+        "revision",
+        "license",
+        "attribution",
+        "trademark",
+        "fallback",
+    }
+    loaded: dict[str, dict] = {}
+    output_hashes: dict[str, str] = {}
+    for manifest_path in sorted(ASSETS_ROOT.glob("*/manifest.yaml")):
+        asset_dir = manifest_path.parent
+        manifest = yaml.safe_load(manifest_path.read_text()) or {}
+        assets = manifest.get("assets")
+        if not isinstance(assets, list):
+            raise ValueError(f"{manifest_path}: asset manifest requires an assets list")
+        for asset in assets:
+            if not isinstance(asset, dict) or required - asset.keys():
+                raise ValueError(f"{manifest_path}: asset manifest entry is incomplete")
+            file = asset_dir / str(asset["file"])
+            if file.parent != asset_dir or file.suffix.lower() != ".svg" or not file.is_file():
+                raise ValueError(f"invalid local SVG asset: {asset.get('file')}")
+            body = file.read_text(encoding="utf-8")
+            digest = sha256(file)
+            if digest != asset["sha256"]:
+                raise ValueError(f"asset checksum mismatch: {file.name}")
+            if re.search(
+                r"<script|<foreignObject|\bon\w+\s*=|(?:href|src)\s*=\s*['\"](?:https?:|//|data:)",
+                body,
+                re.I,
+            ):
+                raise ValueError(f"unsafe SVG asset: {file.name}")
+            if int(asset.get("sanitized_bytes", len(body.encode()))) > 100 * 1024:
+                raise ValueError(f"SVG asset exceeds 100 KiB: {file.name}")
+            identity = str(asset["id"])
+            output_name = file.relative_to(ASSETS_ROOT).as_posix()
+            if identity in loaded and loaded[identity]["sha256"] != digest:
+                raise ValueError(f"conflicting identity asset: {identity}")
+            if output_name in output_hashes and output_hashes[output_name] != digest:
+                raise ValueError(f"conflicting output asset filename: {output_name}")
+            output_hashes[output_name] = digest
+            loaded[identity] = {
+                **asset,
+                "url": f"./assets/{output_name}",
+                "output_name": output_name,
+                "source_path": file,
+            }
+    return loaded
+
+
+def identity_html(node: dict, identities: dict[str, dict]) -> str:
+    identity = node.get("identity")
+    if identity in identities:
+        return f'<img class="atlas-identity" src="{esc(identities[identity]["url"])}" alt="" aria-hidden="true">'
+    return f'<span class="atlas-identity-symbol" aria-hidden="true">{IDENTITY_FALLBACKS.get(identity, "🤖")}</span>'
+
+
+def mermaid_node_ids(source: str) -> set[str]:
+    return set(re.findall(r"(?m)^\s*([A-Za-z][\w-]*)\s*(?:\[|\()", source))
+
+
+def mermaid_edges(source: str) -> list[str]:
+    return re.findall(r"(?m)^\s*[A-Za-z][\w-]*\s*(?:-->|==>|-.->).*?$", source)
+
+
+def slug(value: str) -> str:
+    return "".join(ch.lower() if ch.isalnum() else "-" for ch in value).strip("-")
+
+
+def stack_for(diagram_id: str) -> tuple[str, str]:
+    number = int(diagram_id.split("-", 1)[0])
+    return STACKS[0] if number <= 2 else STACKS[1] if number <= 8 else STACKS[2]
+
+
+def capabilities(node: dict) -> list[str]:
+    tags, kind = set(), node.get("kind")
+    if kind in {"container", "unit", "timer", "path"}:
+        tags.add("runtime")
+    if kind == "container":
+        tags.add("container")
+    if kind in {"unit", "timer", "path"}:
+        tags.add("systemd")
+    if kind in {"volume", "device"} or node.get("mounts"):
+        tags.add("storage")
+    if kind == "external":
+        tags.add("external")
+    if node.get("listen") or node.get("ports") or node.get("serve_routes"):
+        tags.add("ingress")
+    if node.get("networks") or node.get("network_mode") or node.get("subnet"):
+        tags.add("network")
+    if node.get("class") == "warn":
+        tags.add("degraded")
+    return sorted(tags)
+
+
+def path_values(value: object) -> list[str]:
+    """Recursively extract string claims without inventing relationships."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [item for entry in value.values() for item in path_values(entry)]
+    if isinstance(value, list):
+        return [item for entry in value for item in path_values(entry)]
+    return []
+
+
+def metadata_for(node: dict, doc: dict, field: str) -> str:
+    """Architecture metadata is explicit in sidecars, never inferred from mounts."""
+    return str(node.get(field) or doc.get(field) or "unknown (not declared)")
+
+
+def ingress_for(node: dict) -> list[str]:
+    claims = path_values({key: node.get(key) for key in ("listen", "ports", "serve_routes")})
+    return sorted(set(claims)) or ["none declared"]
+
+
+def service_record(node: dict, doc: dict, ordinal: int) -> dict | None:
+    name = node.get("name") or node.get("label")
+    if not name or node.get("kind") not in {
+        "container",
+        "unit",
+        "timer",
+        "path",
+        "volume",
+        "device",
+    }:
+        return None
+    repository = metadata_for(node, doc, "repository")
+    own_storage = path_values({key: node.get(key) for key in ("path", "mounts")})
+    related = sorted(set(own_storage)) or ["none declared"]
+    return {
+        "id": f"service-{slug(doc['id'])}-{slug(str(node['id']))}-{ordinal}",
+        "name": str(name),
+        "kind": str(node.get("kind")),
+        "lifecycle": node["lifecycle"],
+        "state": str(node.get("sub_state") or node.get("active_state") or node["lifecycle"]),
+        "ingress": ingress_for(node),
+        "repository": repository,
+        "storage": related,
+        "owner": metadata_for(node, doc, "owner"),
+        "source": doc["source"],
+        "diagram": doc["id"],
+        "layer": doc["layer"],
+        "stack_key": doc["stack_key"],
+        "stack": doc["stack"],
+        "capabilities": capabilities(node),
+    }
+
+
+def normalize(doc: dict, path: Path) -> dict:
+    nodes = doc.get("nodes") or []
+    if any(node.get("lifecycle") not in LIFECYCLES for node in nodes):
+        raise ValueError(f"{path.name}: dashboard catalog requires valid node lifecycle values")
+    diagram_id, layer = str(doc["id"]), str(doc.get("layer", ""))
+    if layer not in LAYERS:
+        raise ValueError(f"{path.name}: unknown layer {layer!r}")
+    listed = doc.get("diagrams")
+    pairs = (
+        [(SRC / item["file"], item.get("topic", "")) for item in listed]
+        if listed
+        else [(SRC / f"{diagram_id}.mmd", "")]
+    )
+    missing = [str(source.relative_to(REPO)) for source, _ in pairs if not source.exists()]
+    if missing:
+        raise FileNotFoundError(f"{path.name}: missing Mermaid source: {', '.join(missing)}")
+    stack_key, stack = stack_for(diagram_id)
+    record = {
+        "id": diagram_id,
+        "anchor": f"atlas-diagram-{slug(diagram_id)}",
+        "title": str(doc.get("title", diagram_id)),
+        "layer": layer,
+        "stack_key": stack_key,
+        "stack": stack,
+        "summary": str(doc.get("summary", "")).strip(),
+        "audience": str(doc.get("audience", "")),
+        "notes": [" ".join(str(note).split()) for note in doc.get("notes", [])],
+        "screenshots": [
+            {
+                "src": str(item["src"]),
+                "alt": str(item["alt"]),
+                "caption": str(item.get("caption", "")),
+            }
+            for item in doc.get("screenshots", [])
+        ],
+        "repository": doc.get("repository"),
+        "owner": doc.get("owner"),
+        "source": f"src/meta/{path.name}",
+        "bodies": [(topic, source.read_text().rstrip()) for source, topic in pairs],
+        "nodes": nodes,
+        "lifecycle": sorted({node["lifecycle"] for node in nodes}),
+        "capabilities": sorted({tag for node in nodes for tag in capabilities(node)}),
+    }
+    record["services"] = [
+        service
+        for ordinal, node in enumerate(nodes)
+        if (service := service_record(node, record, ordinal))
+    ]
+    return record
+
+
+def load() -> list[dict]:
+    return [
+        normalize(yaml.safe_load(path.read_text()) or {}, path)
+        for path in sorted(META.glob("*.yaml"))
+    ]
+
+
+def load_fixture_evidence() -> dict:
+    """Load committed, deterministic public demonstration evidence."""
+    try:
+        evidence = json.loads(EVIDENCE_FIXTURE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"invalid evidence fixture: {EVIDENCE_FIXTURE}") from error
+    required = {
+        "captured_at",
+        "host",
+        "source_commit",
+        "dirty",
+        "gate",
+        "findings",
+        "freshness_hours",
+        "evidence_sources",
+        "stats",
+    }
+    if required - evidence.keys():
+        raise ValueError("evidence fixture is incomplete")
+    if not isinstance(evidence["stats"], list) or not isinstance(
+        evidence["evidence_sources"], list
+    ):
+        raise ValueError("evidence fixture has invalid collections")
+    return evidence
+
+
+def evidence_fingerprint(evidence: dict) -> str:
+    stable = {key: value for key, value in evidence.items() if key not in {"captured_at", "reused"}}
+    return hashlib.sha256(
+        json.dumps(stable, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
+def embedded_evidence(path: Path) -> dict | None:
+    """Read only the previous generated fragment's safe snapshot metadata."""
+    try:
+        match = re.search(r'id="atlas-root"[^>]*data-snapshot="([^"]+)"', path.read_text())
+        return json.loads(html.unescape(match.group(1))) if match else None
+    except (OSError, AttributeError, json.JSONDecodeError):
+        return None
+
+
+def stabilize_evidence(current: dict, previous: dict | None, now: datetime | None = None) -> dict:
+    """Reuse an embedded timestamp only for equal, still-fresh evidence."""
+    current = dict(current)
+    fingerprint = evidence_fingerprint(current)
+    if previous and previous.get("fingerprint") == fingerprint and not is_stale(previous, now):
+        current["captured_at"] = previous["captured_at"]
+    current["fingerprint"] = fingerprint
+    return current
+
+
+def is_stale(metadata: dict, now: datetime | None = None) -> bool:
+    captured = datetime.fromisoformat(metadata["captured_at"].replace("Z", "+00:00"))
+    return (now or datetime.now(timezone.utc)) > captured + timedelta(
+        hours=int(metadata["freshness_hours"])
+    )
+
+
+def badge(value: str) -> str:
+    return f'<span class="atlas-badge">{esc(value.replace("-", " "))}</span>'
+
+
+RESOURCE_LINKS = {
+    "00-context": [
+        ("Atlas source", "https://github.com/arkhiVd/homelab-atlas"),
+        ("Docker", "https://www.docker.com/"),
+        ("Tailscale", "https://tailscale.com/"),
+        ("Syncthing", "https://syncthing.net/"),
+    ],
+    "01-topology": [
+        ("Docker networking", "https://docs.docker.com/engine/network/"),
+        ("Tailscale", "https://tailscale.com/"),
+        ("Gluetun", "https://github.com/qdm12/gluetun"),
+    ],
+    "02-ingress": [
+        ("Tailscale Serve", "https://tailscale.com/kb/1242/tailscale-serve"),
+        ("Nginx", "https://nginx.org/"),
+        ("Model Context Protocol", "https://modelcontextprotocol.io/"),
+    ],
+    "03-containers": [
+        ("Docker", "https://www.docker.com/"),
+        ("Homepage", "https://gethomepage.dev/"),
+        ("Grafana", "https://grafana.com/"),
+        ("Uptime Kuma", "https://github.com/louislam/uptime-kuma"),
+        ("Jellyfin", "https://jellyfin.org/"),
+        ("Immich", "https://immich.app/"),
+        ("Miniflux", "https://miniflux.app/"),
+        ("wger", "https://wger.de/"),
+    ],
+    "04-media": [
+        ("Jellyfin", "https://jellyfin.org/"),
+        ("Jellyseerr", "https://github.com/Fallenbagel/jellyseerr"),
+        ("Radarr", "https://radarr.video/"),
+        ("Sonarr", "https://sonarr.tv/"),
+        ("Prowlarr", "https://prowlarr.com/"),
+        ("qBittorrent", "https://www.qbittorrent.org/"),
+        ("Gluetun", "https://github.com/qdm12/gluetun"),
+        ("Bazarr", "https://www.bazarr.media/"),
+        ("Tdarr", "https://home.tdarr.io/"),
+    ],
+    "05-music": [
+        ("Librarian source", "https://github.com/arkhiVd/librarian"),
+        ("Navidrome", "https://www.navidrome.org/"),
+        ("Lidarr", "https://lidarr.audio/"),
+        ("slskd", "https://github.com/slskd/slskd"),
+        ("Soularr", "https://github.com/mrusse/soularr"),
+        ("Last.fm", "https://www.last.fm/"),
+    ],
+    "06-books-photos": [
+        ("Immich", "https://immich.app/"),
+        ("Kavita", "https://www.kavitareader.com/"),
+        ("FastAPI", "https://fastapi.tiangolo.com/"),
+        ("Gluetun", "https://github.com/qdm12/gluetun"),
+    ],
+    "07-storage": [
+        ("Syncthing", "https://syncthing.net/"),
+        ("Obsidian", "https://obsidian.md/"),
+        ("Grafana", "https://grafana.com/"),
+    ],
+    "08-ai-plane": [
+        ("Agent Workbench source", "https://github.com/arkhiVd/agent-workbench"),
+        ("Pi", "https://github.com/badlogic/pi-mono"),
+        ("mise", "https://mise.jdx.dev/"),
+        ("Claude Code", "https://github.com/anthropics/claude-code"),
+        ("Codex", "https://github.com/openai/codex"),
+        ("Model Context Protocol", "https://modelcontextprotocol.io/"),
+        ("Obsidian", "https://obsidian.md/"),
+    ],
+    "09-jobhunt": [
+        ("Greenhouse", "https://www.greenhouse.com/"),
+        ("Lever", "https://www.lever.co/"),
+        ("Ashby", "https://www.ashbyhq.com/"),
+        ("Remotive", "https://remotive.com/"),
+        ("Jobicy", "https://jobicy.com/"),
+        ("Arbeitnow", "https://www.arbeitnow.com/"),
+        ("Remote OK", "https://remoteok.com/"),
+        ("Adzuna", "https://www.adzuna.com/"),
+        ("SerpAPI", "https://serpapi.com/"),
+    ],
+    "10-cka-dojo": [
+        ("Kubernetes", "https://kubernetes.io/"),
+        ("Terraform", "https://developer.hashicorp.com/terraform"),
+        ("AWS Systems Manager", "https://aws.amazon.com/systems-manager/"),
+    ],
+    "11-automation": [
+        (
+            "systemd timers",
+            "https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html",
+        ),
+        ("mise", "https://mise.jdx.dev/"),
+        ("Watchtower", "https://containrrr.dev/watchtower/"),
+        ("Uptime Kuma", "https://github.com/louislam/uptime-kuma"),
+    ],
+    "12-invest": [
+        ("Invest Pipeline source", "https://github.com/arkhiVd/invest-pipeline"),
+        ("Streamlit", "https://streamlit.io/"),
+        ("DuckDB", "https://duckdb.org/"),
+    ],
+    "13-health-data": [
+        ("Gadgetbridge", "https://gadgetbridge.org/"),
+        ("Gadgetbridge source", "https://codeberg.org/Freeyourgadget/Gadgetbridge"),
+        (
+            "Health Connect",
+            "https://developer.android.com/health-and-fitness/guides/health-connect",
+        ),
+        ("Grafana", "https://grafana.com/"),
+        ("Syncthing", "https://syncthing.net/"),
+    ],
+    "14-runbooks": [
+        (
+            "Agent Workbench workflows",
+            "https://github.com/arkhiVd/agent-workbench/tree/main/workflows",
+        ),
+        ("systemd", "https://systemd.io/"),
+    ],
+}
+
+
+def build(docs: list[dict], evidence: dict, now: datetime | None = None) -> str:
+    stale = is_stale(evidence, now)
+    identities = load_identity_assets()
+    services = [service for doc in docs for service in doc["services"]]
+    meta = json.dumps(
+        {key: value for key, value in evidence.items() if key not in {"stats", "reused"}},
+        separators=(",", ":"),
+    )
+    stat_html = "".join(
+        f'<div class="atlas-stat atlas-{esc(state)}"><b>{esc(value)}</b><span>{esc(label)}</span></div>'
+        for value, label, state in evidence["stats"]
+    )
+    controls = "".join(
+        f'<label><input type="checkbox" data-filter="lifecycle" value="{state}">{esc(state.replace("-", " "))}</label>'
+        for state in LIFECYCLES
+    )
+    tags = sorted({tag for service in services for tag in service["capabilities"]})
+    capabilities_html = "".join(
+        f'<label><input type="checkbox" data-filter="capability" value="{tag}">{esc(tag)}</label>'
+        for tag in tags
+    )
+    layer_buttons = "".join(
+        f'<button type="button" class="atlas-layer" data-layer="{key}" aria-pressed="false">{esc(value)}</button>'
+        for key, value in LAYERS.items()
+    )
+    stack_options = "".join(f'<option value="{key}">{esc(value)}</option>' for key, value in STACKS)
+    rail = "".join(
+        f'<li><a href="#{esc(doc["anchor"])}" data-target="{esc(doc["anchor"])}">{esc(doc["id"])} {esc(doc["title"].split(" — ")[0])}</a></li>'
+        for doc in docs
+    )
+    cards = []
+    for doc in docs:
+        heading, _, sub = doc["title"].partition(" — ")
+        diagram_name = f"{heading}{': ' + sub if sub else ''}"
+
+        def participant_assets(body: str) -> str:
+            pairs = re.findall(
+                r"^\s*%% atlas-participant (\w+) ([a-z0-9-]+)\s*$", body, re.MULTILINE
+            )
+            return esc(json.dumps(dict(pairs), separators=(",", ":"))) if pairs else ""
+
+        bodies = "".join(
+            f'{f"<h3>{esc(topic)}</h3>" if topic else ""}<div class="atlas-sheet"><button class="atlas-zoom" type="button" aria-label="Zoom {esc(diagram_name)}{": " + esc(topic) if topic else ""}">zoom</button><pre class="mermaid" data-atlas-participants="{participant_assets(body)}">{esc(body)}</pre></div>'
+            for topic, body in doc["bodies"]
+        )
+        note_items = "".join(f"<li>{esc(note)}</li>" for note in doc["notes"])
+        screenshots = doc.get("screenshots", [])
+        note_images = "".join(
+            f'<figure><img src="{esc(item["src"])}" alt="{esc(item["alt"])}" loading="lazy"><figcaption>{esc(item["caption"])}</figcaption></figure>'
+            for item in screenshots
+        )
+        notes = (
+            f'<section class="atlas-notes" aria-label="Notes"><h3>Notes</h3><ul>{note_items}</ul>{note_images}</section>'
+            if doc["notes"] or screenshots
+            else ""
+        )
+        links = RESOURCE_LINKS.get(doc["id"], [])
+        resources = (
+            ""
+            if not links
+            else '<p class="atlas-resources"><strong>Sources:</strong> '
+            + " · ".join(f'<a href="{esc(url)}">{esc(label)}</a>' for label, url in links)
+            + "</p>"
+        )
+        cards.append(
+            f'<section class="atlas-diagram" id="{esc(doc["anchor"])}" data-layer="{esc(doc["layer"])}" data-stack="{esc(doc["stack_key"])}"><p>{esc(doc["id"])} · {esc(doc["stack"])}</p><h2>{esc(heading)}</h2><p>{esc(sub)}</p><p>{esc(doc["summary"])}</p>{resources}{bodies}{notes}</section>'
+        )
+    overview = "A self-hosted environment organized around authenticated remote access, containerized applications, synchronized storage, automation, observability, and agent-assisted workflows. Follow the diagrams from system context to individual application pipelines to see which clients open each dashboard, which services exchange data, and where durable state is kept."
+    return (
+        f"""<title>Public Architecture Atlas</title><style>
+#atlas-root{{--atlas-ink:#12141c;--atlas-soft:#4d5561;--atlas-ground:#fbfbfd;--atlas-panel:#fff;--atlas-line:#ccd0df;--atlas-accent:#4f46e5;--atlas-sheet:#f7f8fb;--atlas-warn:#986206;font:16px/1.55 'Space Grotesk',system-ui,sans-serif;color:var(--atlas-ink);background:var(--atlas-ground);max-width:96rem;margin:auto;padding:1.25rem}}#atlas-root .atlas-skip{{position:fixed;left:1rem;top:1rem;z-index:50;transform:translateY(-200%);padding:.5rem .75rem;background:var(--atlas-panel);color:var(--atlas-accent);border:1px solid var(--atlas-accent)}}#atlas-root .atlas-skip:focus{{transform:none}}#atlas-root[data-theme="dark"]{{--atlas-ink:#e9f6ee;--atlas-soft:#b6c7be;--atlas-ground:#05080a;--atlas-panel:#0a1311;--atlas-line:#34413d;--atlas-accent:#a5b4fc;--atlas-sheet:#dfe3ec;--atlas-warn:#ffb02e}}@media(prefers-color-scheme:dark){{#atlas-root:not([data-theme]){{--atlas-ink:#e9f6ee;--atlas-soft:#b6c7be;--atlas-ground:#05080a;--atlas-panel:#0a1311;--atlas-line:#34413d;--atlas-accent:#a5b4fc;--atlas-sheet:#dfe3ec;--atlas-warn:#ffb02e}}}}#atlas-root *,#atlas-root *::before,#atlas-root *::after{{box-sizing:border-box}}#atlas-root button,#atlas-root input,#atlas-root select{{font:inherit}}#atlas-root button{{cursor:pointer}}#atlas-root .atlas-grid{{display:grid;grid-template-columns:15rem minmax(0,1fr);gap:1.5rem}}#atlas-root .atlas-head,#atlas-root .atlas-snapshot,#atlas-root .atlas-stats,#atlas-root .atlas-toolbar,#atlas-root .atlas-footer{{grid-column:1/-1}}#atlas-root .atlas-head,#atlas-root .atlas-snapshot,#atlas-root .atlas-toolbar,#atlas-root .atlas-service,#atlas-root .atlas-diagram{{border:1px solid var(--atlas-line);background:var(--atlas-panel);padding:1rem}}#atlas-root h1,#atlas-root h2,#atlas-root h3{{line-height:1.15}}#atlas-root .atlas-meta,#atlas-root dt{{font:12px 'JetBrains Mono',ui-monospace,monospace;color:var(--atlas-soft);text-transform:uppercase}}#atlas-root .atlas-stale{{border-color:var(--atlas-warn)}}#atlas-root .atlas-stats{{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:1px;background:var(--atlas-line)}}#atlas-root .atlas-stat{{background:var(--atlas-panel);padding:.75rem}}#atlas-root .atlas-stat b,#atlas-root .atlas-stat span{{display:block}}#atlas-root .atlas-toolbar{{display:grid;gap:.6rem}}#atlas-root .atlas-toolbar fieldset{{border:0;margin:0;padding:0;display:flex;gap:.5rem;flex-wrap:wrap}}#atlas-root .atlas-toolbar input[type=search],#atlas-root button,#atlas-root select{{border:1px solid var(--atlas-line);border-radius:3px;padding:.35rem;background:var(--atlas-panel);color:var(--atlas-ink)}}#atlas-root .atlas-layer[aria-pressed="true"]{{border-color:var(--atlas-accent);color:var(--atlas-accent)}}#atlas-root .atlas-rail{{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}}#atlas-root .atlas-rail ul{{list-style:none;margin:0;padding:0}}#atlas-root .atlas-rail a{{display:block;padding:.35rem;color:var(--atlas-soft);text-decoration:none}}#atlas-root .atlas-rail a[hidden]{{display:none}}#atlas-root .atlas-content{{display:grid;gap:1rem;min-width:0}}#atlas-root .atlas-services{{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:1rem}}#atlas-root .atlas-service[hidden],#atlas-root .atlas-diagram[hidden]{{display:none}}#atlas-root .atlas-service h3{{margin-top:0}}#atlas-root dl{{display:grid;grid-template-columns:7rem 1fr;gap:.35rem;margin:1rem 0}}#atlas-root dd{{margin:0;overflow-wrap:anywhere}}#atlas-root .atlas-badge{{display:inline-block;border:1px solid var(--atlas-line);border-radius:2px;padding:.1rem .3rem;font:11px 'JetBrains Mono',ui-monospace,monospace}}#atlas-root .atlas-evidence{{display:grid;gap:.2rem;font:12px 'JetBrains Mono',ui-monospace,monospace;color:var(--atlas-soft)}}#atlas-root .atlas-diagram{{scroll-margin-top:1rem}}#atlas-root .atlas-sheet{{position:relative;overflow:auto;background:var(--atlas-sheet);padding:1.75rem .75rem .75rem;margin-top:1rem;cursor:zoom-in;touch-action:manipulation}}#atlas-root .atlas-sheet svg{{max-width:100%;height:auto}}#atlas-root .atlas-zoom{{position:absolute;right:.5rem;top:.4rem}}#atlas-root .atlas-notes{{margin-top:1rem}}#atlas-root .atlas-dialog{{border:1px solid var(--atlas-line);background:var(--atlas-panel);color:var(--atlas-ink);max-width:min(48rem,calc(100% - 2rem))}}#atlas-root #atlas-zoom{{width:calc(100vw - 2rem);max-width:none;height:calc(100vh - 2rem)}}#atlas-root #atlas-zoom-content{{--atlas-zoom-scale:1.75;overflow:auto;height:calc(100% - 3rem);cursor:grab;touch-action:none;overscroll-behavior:contain;user-select:none;background:var(--atlas-sheet)}}#atlas-root #atlas-zoom-content.atlas-dragging{{cursor:grabbing}}#atlas-root #atlas-zoom-content svg .flowchart-link{{stroke:#303744!important;stroke-width:2px!important}}#atlas-root #atlas-zoom-content svg marker path{{fill:#303744!important;stroke:#303744!important}}#atlas-root #atlas-zoom-content svg .edgeLabel{{color:#111827!important;background:#f7f8fb!important}}#atlas-root #atlas-zoom-content svg .edgeLabel rect{{fill:#f7f8fb!important;opacity:.96!important}}#atlas-root #atlas-zoom-content svg{{display:block;max-width:none!important;width:calc(var(--atlas-zoom-scale) * 100%)!important;min-width:calc(var(--atlas-zoom-scale) * 100%);height:auto!important}}#atlas-root .atlas-zoom-bar{{display:flex;gap:.4rem;align-items:center;margin-bottom:.5rem}}#atlas-root .atlas-pan{{display:flex;gap:.4rem;margin-left:auto}}#atlas-root :focus-visible{{outline:2px solid var(--atlas-accent);outline-offset:2px}}@media(prefers-reduced-motion:reduce){{#atlas-root *{{animation:none!important;transition:none!important;scroll-behavior:auto!important}}}}@media(max-width:60rem){{#atlas-root .atlas-grid{{grid-template-columns:1fr}}#atlas-root .atlas-rail{{position:static;max-height:none}}#atlas-root .atlas-rail ul{{display:flex;flex-wrap:wrap}}}}
+/* Restore the established atlas layout and shared homelab indigo system. */
+#atlas-root{{--atlas-faint:#6f8479;--atlas-accent-soft:hsl(240 60% 68%/.12);max-width:96rem;padding:0 2rem;background:var(--atlas-ground)}}
+#atlas-root .atlas-grid{{grid-template-columns:16rem minmax(0,1fr);gap:0 3rem}}
+#atlas-root .atlas-head{{grid-column:1/-1;padding:4.5rem 0 2rem;border:0;border-bottom:1px solid var(--atlas-line);background:transparent}}
+#atlas-root .atlas-head h1{{font:600 clamp(1.9rem,4vw,3rem)/1.1 'JetBrains Mono',ui-monospace,monospace;letter-spacing:-.035em;margin:.7rem 0}}
+#atlas-root .atlas-head .atlas-meta{{max-width:78ch;margin:.5rem 0;text-transform:none;letter-spacing:0}}
+#atlas-root .atlas-snapshot{{grid-column:1/-1;border:0;border-left:2px solid var(--atlas-line);background:transparent;padding:.25rem 1rem;margin:1.5rem 0 0}}
+#atlas-root .atlas-snapshot p{{display:inline;margin:0 1rem 0 0;color:var(--atlas-soft);font-size:.82rem}}
+/* Wrap HTML icon cards before Mermaid measures foreignObject geometry. */
+#atlas-root .nodeLabel div{{white-space:normal!important;overflow-wrap:anywhere;line-height:1.4}}#atlas-root svg.atlas-sequence-decorated{{display:block;width:100%!important;max-width:100%!important;height:auto}}#atlas-root .atlas-sequence-icon{{pointer-events:none}}
+#atlas-root .atlas-stats{{grid-column:1/-1;margin:1.5rem 0 0;border:1px solid var(--atlas-line);border-radius:3px;overflow:hidden}}
+#atlas-root .atlas-stat{{padding:.8rem 1rem}}#atlas-root .atlas-stat b{{font:600 1.35rem 'JetBrains Mono',monospace}}#atlas-root .atlas-stat span{{font-size:.68rem;color:var(--atlas-faint)}}
+#atlas-root .atlas-rail{{grid-column:1;padding:2.5rem 0}}#atlas-root .atlas-rail a{{border-left:2px solid transparent;padding:.32rem .55rem;font-size:.84rem}}#atlas-root .atlas-rail a:hover,#atlas-root .atlas-rail a:focus{{background:var(--atlas-accent-soft);color:var(--atlas-accent);border-left-color:var(--atlas-accent)}}
+#atlas-root .atlas-content{{grid-column:2;padding:2.5rem 0 6rem;gap:3.5rem}}
+#atlas-root #atlas-diagrams>h2{{font:600 1rem 'JetBrains Mono',monospace;color:var(--atlas-soft);margin:0 0 2rem}}
+#atlas-root .atlas-diagram{{border:0;background:transparent;padding:0;margin:0 0 4rem}}#atlas-root .atlas-diagram>p:first-child{{font:12px 'JetBrains Mono',monospace;color:var(--atlas-accent);margin:0;text-transform:none}}#atlas-root .atlas-diagram>h2{{font:600 1.45rem 'JetBrains Mono',monospace;letter-spacing:-.03em;margin:.35rem 0}}#atlas-root .atlas-diagram>p{{max-width:72ch;color:var(--atlas-soft)}}
+#atlas-root .atlas-sheet{{border:1px solid var(--atlas-line);border-radius:4px;padding:2.25rem 1.5rem 1.5rem;margin-top:1.5rem}}#atlas-root .atlas-sheet svg{{overflow:visible}}
+#atlas-root .atlas-evidence{{border-left:2px solid var(--atlas-line);padding-left:1rem;text-transform:none}}
+#atlas-root #atlas-catalog{{grid-column:2;border-top:1px solid var(--atlas-line);padding:1.5rem 0 4rem}}#atlas-root #atlas-catalog>summary,#atlas-root .atlas-filters>summary{{cursor:pointer;font:600 1rem 'JetBrains Mono',monospace;color:var(--atlas-ink)}}#atlas-root #atlas-catalog>p{{color:var(--atlas-soft);max-width:72ch}}
+#atlas-root .atlas-toolbar{{border:0;background:transparent;padding:0;margin:1.25rem 0}}#atlas-root .atlas-filters{{border:1px solid var(--atlas-line);border-radius:4px;padding:.75rem 1rem}}#atlas-root .atlas-filters[open]>summary{{margin-bottom:1rem}}#atlas-root .atlas-toolbar fieldset{{margin:.65rem 0}}#atlas-root .atlas-toolbar label{{font-size:.82rem;color:var(--atlas-soft)}}
+#atlas-root .atlas-services{{display:block;border-top:1px solid var(--atlas-line)}}#atlas-root .atlas-service{{display:grid;grid-template-columns:minmax(10rem,1fr) 2fr auto;align-items:center;gap:1rem;border:0;border-bottom:1px solid var(--atlas-line);background:transparent;padding:.8rem 0}}#atlas-root .atlas-service h3{{font:600 .9rem 'JetBrains Mono',monospace;margin:0}}#atlas-root .atlas-service>p{{margin:0;font-size:.76rem}}#atlas-root .atlas-service dl{{display:none}}#atlas-root .atlas-service button{{padding:.25rem .55rem;font-size:.76rem}}
+#atlas-root .atlas-dialog{{border-radius:6px;padding:1rem}}#atlas-root #atlas-theme{{position:fixed;right:1.25rem;bottom:1.25rem;z-index:20}}
+#atlas-root .cluster rect{{rx:8px;ry:8px}}
+#atlas-root .cluster-label text,#atlas-root .cluster-label span{{font-weight:700}}
+#atlas-root .atlas-notes figure{{margin:1rem 0}}#atlas-root .atlas-notes img{{display:block;max-width:100%;height:auto;border:1px solid var(--atlas-line);border-radius:4px}}#atlas-root .atlas-notes figcaption{{color:var(--atlas-soft);font-size:.85rem;margin-top:.4rem}}
+@media(max-width:60rem){{#atlas-root{{padding:0 1.25rem}}#atlas-root .atlas-grid{{grid-template-columns:1fr}}#atlas-root .atlas-content,#atlas-root .atlas-rail,#atlas-root #atlas-catalog{{grid-column:1}}#atlas-root .atlas-head{{padding-top:3rem}}#atlas-root .atlas-rail{{overflow-x:auto;padding:1.25rem 0;border-bottom:1px solid var(--atlas-line)}}#atlas-root .atlas-rail ul{{display:flex;flex-wrap:nowrap;gap:.25rem;width:max-content}}#atlas-root .atlas-rail a{{white-space:nowrap;border-left:0;border-bottom:2px solid transparent}}#atlas-root .atlas-rail a:hover,#atlas-root .atlas-rail a:focus{{border-left:0;border-bottom-color:var(--atlas-accent)}}#atlas-root .atlas-content{{padding-top:2rem}}#atlas-root .atlas-service{{grid-template-columns:1fr auto}}#atlas-root .atlas-service>p{{grid-column:1/-1}}}}
+</style><div id="atlas-root"><a class="atlas-skip atlas-skip-diagrams" href="#atlas-diagrams">Skip to diagrams</a><div class="atlas-grid"><header class="atlas-head"><p class="atlas-meta">architecture guide</p><h1>Homelab Atlas</h1><p>{esc(overview)}</p></header><nav class="atlas-rail" aria-label="Diagrams"><ul>{rail}</ul></nav><main class="atlas-content"><section id="atlas-diagrams" tabindex="-1"><h2>Architecture and workflows</h2>{"".join(cards)}</section></main><footer class="atlas-footer">Architecture diagrams, operating workflows, and upstream project references.</footer></div><dialog id="atlas-zoom" class="atlas-dialog" aria-label="Diagram zoom"><div class="atlas-zoom-bar"><button type="button" data-close="atlas-zoom">close</button><button type="button" data-zoom-action="out" aria-label="Zoom out">−</button><button type="button" data-zoom-action="reset">100%</button><button type="button" data-zoom-action="fit">fit</button><button type="button" data-zoom-action="in" aria-label="Zoom in">+</button><span class="atlas-pan"><button type="button" data-pan-action="left" aria-label="Pan left">←</button><button type="button" data-pan-action="right" aria-label="Pan right">→</button></span></div><div id="atlas-zoom-content"></div></dialog></div>"""
+        + DASHBOARD_SCRIPT
+    )
+
+
+DASHBOARD_SCRIPT = r"""<script>
+(function(){var root=document.getElementById('atlas-root');if(!root)return;var q=function(s){return root.querySelector(s)},qa=function(s){return[].slice.call(root.querySelectorAll(s))};function decorateParticipants(){qa('.mermaid[data-atlas-participants]').forEach(function(host){var sheet=host.closest('.atlas-sheet'),svg=host.matches('svg')?host:host.querySelector('svg')||(sheet&&sheet.querySelector('svg'));if(!svg||svg.dataset.atlasDecorated)return;var assets;try{assets=JSON.parse(host.dataset.atlasParticipants||'{}')}catch(e){return}Object.keys(assets).forEach(function(id){svg.querySelectorAll('rect.actor[name="'+id+'"]').forEach(function(rect){var x=+rect.getAttribute('x'),y=+rect.getAttribute('y'),w=+rect.getAttribute('width'),image=document.createElementNS('http://www.w3.org/2000/svg','image');image.setAttribute('href','./assets/14-runbooks/14-runbooks-'+assets[id]+'.svg');image.setAttribute('x',String(x+(w-52)/2));image.setAttribute('y',String(y+1));image.setAttribute('width','52');image.setAttribute('height','52');svg.appendChild(image)})});svg.dataset.atlasDecorated='true'})}document.addEventListener('atlas:mermaid-rendered',decorateParticipants);var zoom=q('#atlas-zoom'),content=q('#atlas-zoom-content'),scale=1.75;function setZoom(v){scale=Math.max(.2,Math.min(4,v));content.style.setProperty('--atlas-zoom-scale',scale);var b=q('[data-zoom-action="reset"]');if(b)b.textContent=Math.round(scale*100)+'%'}function open(sheet){var source=sheet.querySelector('svg,pre');if(!source)return;content.replaceChildren(source.cloneNode(true));setZoom(1.75);zoom.showModal()}qa('.atlas-zoom').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();open(b.parentElement)})});qa('[data-zoom-action]').forEach(function(b){b.addEventListener('click',function(){setZoom(b.dataset.zoomAction==='in'?scale+.25:b.dataset.zoomAction==='out'?scale-.25:1)})});qa('[data-pan-action]').forEach(function(b){b.addEventListener('click',function(){content.scrollBy({left:(b.dataset.panAction==='right'?1:-1)*Math.max(180,content.clientWidth*.6)})})});qa('[data-close]').forEach(function(b){b.addEventListener('click',function(){q('#'+b.dataset.close).close()})});q('.atlas-skip-diagrams').addEventListener('click',function(e){e.preventDefault();q('#atlas-diagrams').scrollIntoView();var b=q('.atlas-zoom');if(b)b.focus()})})();
+</script>"""
+
+
+def standalone(inner: str) -> str:
+    fonts = "<style>@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('./fonts/jetbrains-mono-latin.woff2') format('woff2')}@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 600;font-display:swap;src:url('./fonts/space-grotesk-latin.woff2') format('woff2')}</style>"
+    script = "<script>(function(){var r=document.getElementById('atlas-root'),saved;try{saved=localStorage.getItem('atlas-theme')}catch(e){}r.dataset.theme=saved||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var b=document.getElementById('atlas-theme');function themeState(){b.setAttribute('aria-pressed',String(r.dataset.theme==='dark'))}themeState();b.addEventListener('click',function(){r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';themeState();try{localStorage.setItem('atlas-theme',r.dataset.theme)}catch(e){}});mermaid.initialize({startOnLoad:false,securityLevel:'loose',flowchart:{htmlLabels:true,useMaxWidth:true},sequence:{useMaxWidth:true}});mermaid.run({nodes:document.querySelectorAll('.mermaid')}).then(function(){setTimeout(function(){document.dispatchEvent(new Event('atlas:mermaid-rendered'))},0)})})();</script>"
+    themed = (
+        inner.rsplit("</div>", 1)[0]
+        + '<button id="atlas-theme" type="button" aria-label="Toggle dark theme" aria-pressed="false">theme</button></div>'
+        + inner.rsplit("</div>", 1)[1]
+    )
+    return f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">{fonts}</head><body>{themed}<script src="./mermaid.min.js"></script>{script}</body></html>\n'
+
+
+def write_if_changed(path: Path, content: str) -> bool:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    changed = not path.exists() or path.read_text() != content
+    if changed:
+        path.write_text(content)
+    return changed
+
+
+def copy_if_changed(source: Path, target: Path) -> bool:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    content = source.read_bytes()
+    changed = not target.exists() or target.read_bytes() != content
+    if changed:
+        target.write_bytes(content)
+    return changed
+
+
+def main() -> int:
+    docs = load()
+    identities = load_identity_assets()
+    evidence = stabilize_evidence(load_fixture_evidence(), embedded_evidence(OUT / "atlas.html"))
+    inner = build(docs, evidence)
+    vendored = REPO / "vendor" / "mermaid.min.js"
+    if not vendored.exists():
+        print("ERROR: vendor/mermaid.min.js missing; refusing standalone render", file=sys.stderr)
+        return 1
+    missing_fonts = [name for name in FONT_FILES if not (FONT_DIR / name).exists()]
+    if missing_fonts:
+        print(
+            f"ERROR: missing standalone font asset(s): {', '.join(missing_fonts)}", file=sys.stderr
+        )
+        return 1
+    OUT.mkdir(parents=True, exist_ok=True)
+    for path, content, label in (
+        (OUT / "atlas.html", inner, "artifact fragment"),
+        (OUT / "site" / "index.html", standalone(inner), "standalone"),
+        (OUT / "site" / "mermaid.min.js", vendored.read_text(), "mermaid runtime"),
+    ):
+        print(
+            f"{'wrote' if write_if_changed(path, content) else 'unchanged'}: {path.relative_to(REPO)} [{label}]"
+        )
+    for name in FONT_FILES:
+        target = OUT / "site" / "fonts" / name
+        print(
+            f"{'wrote' if copy_if_changed(FONT_DIR / name, target) else 'unchanged'}: {target.relative_to(REPO)} [font asset]"
+        )
+    # Mermaid sources reference page-scoped assets directly. Copy every asset
+    # covered by a validated manifest, including files whose identity ID is
+    # shared with another page.
+    for manifest_path in sorted(ASSETS_ROOT.glob("*/manifest.yaml")):
+        manifest = yaml.safe_load(manifest_path.read_text()) or {}
+        for asset in manifest["assets"]:
+            source = manifest_path.parent / asset["file"]
+            relative = source.relative_to(ASSETS_ROOT)
+            target = OUT / "site" / "assets" / relative
+            print(
+                f"{'wrote' if copy_if_changed(source, target) else 'unchanged'}: {target.relative_to(REPO)} [identity asset]"
+            )
+    for doc in docs:
+        for screenshot in doc.get("screenshots", []):
+            relative = Path(screenshot["src"].removeprefix("./"))
+            source = SRC / relative
+            if not source.is_file() or source.parent != SRC / "screenshots":
+                raise ValueError(f"invalid local screenshot: {screenshot['src']}")
+            target = OUT / "site" / relative
+            print(
+                f"{'wrote' if copy_if_changed(source, target) else 'unchanged'}: {target.relative_to(REPO)} [note screenshot]"
+            )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,36 +1,78 @@
 id: 02-ingress
-title: Private ingress and authentication
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
+title: "Ingress \u2014 current access paths and the auth hop"
+audience: Anyone publishing a port, debugging a 302 to /login.html, or assessing exposure.
+layer: A
+summary: 'Current access is through device-authenticated Authenticated overlay or a small set of deliberate direct listeners. Also documents the container-to-host seam: nginx in the cloudops container calls back to a host process on the Docker gateway IP for auth and chat.'
+notes:
+- From the laptop or phone, I first connect through the authenticated overlay. The HTTPS router then maps friendly paths to Homepage, the atlas, Grafana, the investment dashboard, and the Health Connect receiver. Funnel is off, so those routes are not public web entry points.
+- Homepage is my starting dashboard. It links to the applications I use regularly. The atlas explains how they fit together. Grafana shows wearable data, and the investment path opens the read-only Streamlit dashboard.
+- CloudOps has its own login check. Nginx asks the CloudOps Chat service whether the browser session is valid before serving the site or proxying an API request. The browser never calls the internal chat process directly.
+- The MCP endpoint is for configured AI clients rather than a browser dashboard. Clients authenticate, then call a limited set of workspace, job-search, training, and read-only operations tools.
+- SSH, remote-desktop relay traffic, and Soulseek are protocols rather than browser dashboards. They take the direct protocol path shown separately from the HTTPS application routes.
 nodes:
-- id: proxy
+- id: x_browser
+  lifecycle: observed-live
+  kind: concept
+  label: Browser or client
+- id: x_overlay_access
+  lifecycle: observed-live
+  kind: concept
+  label: Authenticated overlay
+- id: x_serve
+  lifecycle: observed-live
+  kind: concept
+  label: overlay serve :443
+- id: x_sshd
+  lifecycle: observed-live
+  kind: concept
+  label: SSH service
+- id: x_slskd_p2p
+  lifecycle: observed-live
   kind: container
-  name: cloudops
-  ports: []
+  name: slskd
+- id: x_rustdesk_p
+  lifecycle: observed-live
+  kind: concept
+  label: rustdesk relay 21115-21119 (hbbs/hbbr, host network)
 - id: homepage
+  lifecycle: observed-live
   kind: container
   name: homepage
-  ports: []
-- id: homelab_ui
+- id: cloudops
+  lifecycle: observed-live
   kind: container
-  name: homelab-ui
-  ports: []
-- id: uptime_kuma
+  name: cloudops
+- id: x_others
+  lifecycle: observed-live
+  kind: concept
+  label: the other published services (detailed in 03-containers)
+- id: x_mcp
+  lifecycle: observed-live
+  kind: unit
+  name: homelab-mcp.service
+- id: grafana
+  lifecycle: observed-live
   kind: container
-  name: uptime-kuma
-  ports: []
-- id: librarian
-  kind: container
-  name: librarian
-  ports: []
-- id: laptop
+  name: grafana
+- id: cloudops_chat
+  lifecycle: observed-live
+  kind: unit
+  name: cloudops-chat.service
+  scope: user
+- id: claude_bridge
+  lifecycle: observed-live
+  kind: unit
+  name: claude-bridge.service
+  scope: user
+- id: health_connect
+  lifecycle: observed-live
+  kind: unit
+  name: gadgetbridge-health-connect.service
+- id: invest_dashboard
+  lifecycle: observed-live
   kind: concept
-- id: overlay
+  label: invest dashboard on loopback port 8502
+- id: x_atlas
   kind: concept
-- id: auth
-  kind: concept
-- id: internet
-  kind: concept
-- id: blocked
-  kind: concept
+  label: Mermaid node x_atlas
+  lifecycle: observed-live

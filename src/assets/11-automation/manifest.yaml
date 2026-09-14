@@ -1,0 +1,297 @@
+diagram: 11-automation
+assets:
+- id: 11-automation-docker_service
+  file: 11-automation-docker-service.svg
+  sha256: 7de45e1ea203da32a040c257f47cd39a5711b3a200d27ec72dbccbc5efb1590b
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: docker mark used for nominative identification; rights remain with its
+    owner
+  fallback: docker service
+- id: 11-automation-overlayd
+  file: 11-automation-overlayd.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: overlay mark used for nominative identification; rights remain with its
+    owner
+  fallback: overlayd
+- id: 11-automation-homelab_service
+  file: 11-automation-homelab-service.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: homelab service
+- id: 11-automation-x_user_manager
+  file: 11-automation-x-user-manager.svg
+  sha256: ddd18c64f005f8b7c3feb33f1b00685c2609571667e897679f5677065ae17e6f
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: linux-mint mark used for nominative identification; rights remain with
+    its owner
+  fallback: x user manager
+- id: 11-automation-homelab_mcp
+  file: 11-automation-homelab-mcp.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: homelab mcp
+- id: 11-automation-jobhunt_bot
+  file: 11-automation-jobhunt-bot.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: jobhunt bot
+- id: 11-automation-health_connect
+  file: 11-automation-health-connect.svg
+  sha256: 1970c905674dd518e218ce6e8d80db3a4032e7f2af94ea4b3c739a8d25387b63
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health connect
+- id: 11-automation-health_promote_path
+  file: 11-automation-health-promote-path.svg
+  sha256: 9138a3586d90bbcfaa3f55298a6f8720500cc18f3ed4b3d1fe9f7ff41eb07698
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health promote path
+- id: 11-automation-invest_dashboard
+  file: 11-automation-invest-dashboard.svg
+  sha256: dd77868dfa5dfbe11da5405dbe867f1c37af43cd796507f33a56ed12d7e8ace1
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: invest dashboard
+- id: 11-automation-x_user_units
+  file: 11-automation-x-user-units.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x user units
+- id: 11-automation-t_cli
+  file: 11-automation-t-cli.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t cli
+- id: 11-automation-t_rebuild
+  file: 11-automation-t-rebuild.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t rebuild
+- id: 11-automation-t_reboot
+  file: 11-automation-t-reboot.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t reboot
+- id: 11-automation-t_jobhunt
+  file: 11-automation-t-jobhunt.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t jobhunt
+- id: 11-automation-t_depcheck
+  file: 11-automation-t-depcheck.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t depcheck
+- id: 11-automation-t_health_promote
+  file: 11-automation-t-health-promote.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t health promote
+- id: 11-automation-t_health_backup
+  file: 11-automation-t-health-backup.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t health backup
+- id: 11-automation-t_invest
+  file: 11-automation-t-invest.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t invest
+- id: 11-automation-s_cli
+  file: 11-automation-s-cli.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s cli
+- id: 11-automation-mise
+  file: 11-automation-mise.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: mise
+- id: 11-automation-hermes_update
+  file: 11-automation-hermes-update.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: hermes update
+- id: 11-automation-s_rebuild
+  file: 11-automation-s-rebuild.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s rebuild
+- id: 11-automation-s_reboot
+  file: 11-automation-s-reboot.svg
+  sha256: c72c04462402ed4bd3d4d2170a4be4c5f59a5cf669eafe7d6aeeffb6980bf90c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s reboot
+- id: 11-automation-s_depcheck
+  file: 11-automation-s-depcheck.svg
+  sha256: 44d601fe76f060a0bd415f3e005702392e821306d60b5ef390ba9acc54a07716
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s depcheck
+- id: 11-automation-jobhunt_discover
+  file: 11-automation-jobhunt-discover.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: jobhunt discover
+- id: 11-automation-s_health_promote
+  file: 11-automation-s-health-promote.svg
+  sha256: 1970c905674dd518e218ce6e8d80db3a4032e7f2af94ea4b3c739a8d25387b63
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s health promote
+- id: 11-automation-s_health_backup
+  file: 11-automation-s-health-backup.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s health backup
+- id: 11-automation-s_invest
+  file: 11-automation-s-invest.svg
+  sha256: dd77868dfa5dfbe11da5405dbe867f1c37af43cd796507f33a56ed12d7e8ace1
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s invest
+- id: 11-automation-watchtower
+  file: 11-automation-watchtower.svg
+  sha256: 92108f9ae377b4b34ef4b89537e24c6432d49b28d8ce7433c3dcb56273e9b896
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: watchtower mark used for nominative identification; rights remain with
+    its owner
+  fallback: watchtower
+- id: 11-automation-uptime_kuma
+  file: 11-automation-uptime-kuma.svg
+  sha256: f3caa8a8bac253a77fa2ae7e7bc9b062b55a006abd787b111533714152ec744c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: uptime-kuma mark used for nominative identification; rights remain with
+    its owner
+  fallback: uptime kuma
+- id: 11-automation-x_oom
+  file: 11-automation-x-oom.svg
+  sha256: b3a1f13373a691cde24d3b79c39a9b37cb83d1fec10d9798d16a1e879af98955
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: netdata mark used for nominative identification; rights remain with its
+    owner
+  fallback: x oom
+- id: 11-automation-x_telegram
+  file: 11-automation-x-telegram.svg
+  sha256: 29edf9cfe2d4c80eb0acd087312eaabba8f7b4c14a4651ccaab51c35b3bb608c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: telegram mark used for nominative identification; rights remain with
+    its owner
+  fallback: x telegram

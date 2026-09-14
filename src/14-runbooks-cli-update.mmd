@@ -1,0 +1,33 @@
+%% 14-runbooks-cli-update — scheduled CLI update failure or partial restart.
+%% Source of truth: src/14-runbooks-cli-update.mmd. Generated outputs are never hand-edited.
+sequenceDiagram
+    autonumber
+    %% atlas-participant T linux
+    participant T as homelab-cli-update.timer
+    %% atlas-participant U terminal
+    participant U as update-cli-tools.sh
+    %% atlas-participant M terminal
+    participant M as mise
+    %% atlas-participant H hermes
+    participant H as hermes update
+    %% atlas-participant S linux
+    participant S as systemd
+    %% atlas-participant G telegram
+    participant G as Telegram
+    %% atlas-participant Y linux-mint
+    participant Y as User
+
+    T->>U: daily 03:00 run
+    U->>M: mise upgrade --yes --prune
+    U->>H: hermes update --yes
+    U->>S: restart and verify user units<br/>hermes-gateway, claude-bridge, cloudops-chat
+    U->>S: restart and verify system jobhunt-bot
+    alt upgrade or any verification fails
+        U->>G: send failure report
+        G->>Y: CLI update needs attention
+        Y->>S: inspect unit status and safe logs
+        Note over Y,S: Do not retry restarts blindly. Identify the failed update or unit first.
+        Y->>Y: choose rollback or a deliberate repair
+    else all units active
+        U-->>T: successful update run
+    end

@@ -1,23 +1,93 @@
-flowchart TD
-  downloads["Download workspace"] --> video["Video library"]
-  downloads --> music["Music library"]
-  imports["Import workspace"] --> books["Book library"]
-  uploads["Upload workspace"] --> photos["Photo library"]
-  databases["Application data directories"] --> backup["Local backup job"]
-  authoring["Authoritative workstation"] --> hub["Sync hub"]
-  hub --> editable["Versioned editable replica"]
-  hub --> mobile["Receive-only mobile replica"]
-  video --> backup
-  music --> backup
-  books --> backup
-  photos --> backup
-  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
-  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
-  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
-  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
-  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
-  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class downloads,imports,uploads,authoring host
-  class video,music,books,photos,databases,hub,editable,mobile data
-  class backup automation
+%% 07-storage — Syncthing is the replication hub for shared content.
+%% Source of truth: src/07-storage.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 34, "diagramPadding": 34}}}%%
+flowchart TB
+    subgraph peers["Syncthing peers"]
+        workstation["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-workstation.svg' width='52' height='52' alt=''/><br/>workstation</div>"]
+        mobile_device["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-phone.svg' width='52' height='52' alt=''/><br/>mobile device</div>"]
+    end
+
+    syncthing["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-syncthing.svg' width='52' height='52' alt=''/><br/>syncthing — host network<br/>:8384 UI · :22000 sync · :21027 discovery</div>"]
+
+      subgraph synced["./data/syncthing — Syncthing-backed, multi-device"]
+        v_shared-workspace["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-shared-workspace.svg' width='52' height='52' alt=''/><br/>shared-workspace/<br/>Obsidian workspace · append-only for agents</div>"]
+        v_resume["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-resume.svg' width='52' height='52' alt=''/><br/>resume/<br/>workstation + homelab writers · mobile device receive-only</div>"]
+        v_music["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-music.svg' width='52' height='52' alt=''/><br/>music/</div>"]
+        v_media["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-media.svg' width='52' height='52' alt=''/><br/>Media/</div>"]
+        v_cloudops["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-cloudops.svg' width='52' height='52' alt=''/><br/>cloudops/<br/>static study site</div>"]
+        v_gadgetbridge_raw["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-gadgetbridge-raw.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health/<br/>mobile device send-only · server receive-only</div>"]
+      end
+      subgraph local["./data — local only, not synced"]
+        v_mediaroot["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-mediaroot.svg' width='52' height='52' alt=''/><br/>media/<br/>movies · tv · downloads</div>"]
+        v_books["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-books.svg' width='52' height='52' alt=''/><br/>books/</div>"]
+        v_immich["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-immich.svg' width='52' height='52' alt=''/><br/>immich/<br/>upload · db · model-cache</div>"]
+        v_configs["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-configs.svg' width='52' height='52' alt=''/><br/>per-service config dirs<br/>radarr, sonarr, jellyfin, …</div>"]
+        v_health["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-v-health.svg' width='52' height='52' alt=''/><br/>gadgetbridge-health/<br/>validated Gadgetbridge + Health Connect<br/>atomic Grafana snapshots · backups</div>"]
+      end
+
+      subgraph music_consumers["Music"]
+        navidrome["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-navidrome.svg' width='52' height='52' alt=''/><br/>navidrome · music :ro</div>"]
+        lidarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-lidarr.svg' width='52' height='52' alt=''/><br/>lidarr · music rw</div>"]
+        musicportal["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-musicportal.svg' width='52' height='52' alt=''/><br/>musicportal · music rw</div>"]
+        slskd["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-slskd.svg' width='52' height='52' alt=''/><br/>slskd · music :ro</div>"]
+      end
+      subgraph video_consumers["Video"]
+        jellyfin["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-jellyfin.svg' width='52' height='52' alt=''/><br/>jellyfin · Media + movies + tv</div>"]
+      end
+      subgraph library_consumers["Books and photos"]
+        kavita["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-kavita.svg' width='52' height='52' alt=''/><br/>kavita · books</div>"]
+        immich_server["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-immich-server.svg' width='52' height='52' alt=''/><br/>immich-server · upload</div>"]
+      end
+      subgraph agent_consumers["Agents and study"]
+        cloudops["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-cloudops.svg' width='52' height='52' alt=''/><br/>cloudops · cloudops :ro</div>"]
+        x_agents["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-x-agents.svg' width='52' height='52' alt=''/><br/>agent plane<br/>homelab-mcp · jobhunt · Hermes</div>"]
+      end
+      subgraph health_consumers["Health"]
+        health_promoter["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-health-promoter.svg' width='52' height='52' alt=''/><br/>Gadgetbridge validator/promoter</div>"]
+        health_receiver["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-health-receiver.svg' width='52' height='52' alt=''/><br/>Health Connect receiver</div>"]
+        grafana["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/07-storage/07-storage-grafana.svg' width='52' height='52' alt=''/><br/>Grafana · snapshots :ro</div>"]
+      end
+
+    workstation <==>|"replicates"| syncthing
+    mobile_device <==>|"replicates"| syncthing
+    syncthing ==>|"syncs"| v_shared-workspace
+    syncthing ==>|"syncs"| v_music
+    syncthing ==>|"syncs"| v_media
+    syncthing ==>|"syncs"| v_cloudops
+    syncthing ==>|"syncs"| v_resume
+    syncthing ==>|"receives"| v_gadgetbridge_raw
+
+    v_music ==>|":ro"| navidrome
+    v_music ==>|"rw"| lidarr
+    v_music ==>|"rw"| musicportal
+    v_music -.->|":ro"| slskd
+    v_mediaroot --> jellyfin
+    v_media ==>|"reads"| jellyfin
+    v_cloudops ==>|":ro"| cloudops
+    v_shared-workspace <==>|"guarded writes only"| x_agents
+    v_gadgetbridge_raw ==> health_promoter
+    health_promoter ==> v_health
+    health_receiver ==> v_health
+    v_health ==> grafana
+
+    v_books ==> kavita
+    v_immich ==> immich_server
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class workstation,mobile_device host
+    class syncthing data
+    class v_shared-workspace,v_music,v_media,v_cloudops,v_resume,v_gadgetbridge_raw data
+    class v_mediaroot,v_books,v_immich,v_configs,v_health data
+    class navidrome,jellyfin,lidarr,musicportal,slskd,kavita,immich_server media
+    class cloudops ingress
+    class health_promoter,health_receiver,grafana media
+    class x_agents ai

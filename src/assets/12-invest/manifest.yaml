@@ -1,0 +1,170 @@
+diagram: 12-invest
+assets:
+- id: 12-invest-x_overlay_access
+  file: 12-invest-x-overlay-access.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: overlay mark used for nominative identification; rights remain with its
+    owner
+  fallback: overlayd
+- id: 12-invest-invest_dashboard
+  file: 12-invest-invest-dashboard.svg
+  sha256: dd77868dfa5dfbe11da5405dbe867f1c37af43cd796507f33a56ed12d7e8ace1
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: invest dashboard
+- id: 12-invest-x_streamlit
+  file: 12-invest-x-streamlit.svg
+  sha256: 3860f0d399e48fcaa30f2b21d3cd5e0d693267140f1e28cb2d341981ab8d2f4c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: nginx mark used for nominative identification; rights remain with its
+    owner
+  fallback: homelab ui
+- id: 12-invest-invest_mf_timer
+  file: 12-invest-invest-mf-timer.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t invest
+- id: 12-invest-invest_mf_service
+  file: 12-invest-invest-mf-service.svg
+  sha256: dd77868dfa5dfbe11da5405dbe867f1c37af43cd796507f33a56ed12d7e8ace1
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s invest
+- id: 12-invest-x_mf_refresh
+  file: 12-invest-x-mf-refresh.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: jobhunt discover
+- id: 12-invest-x_market_data
+  file: 12-invest-x-market-data.svg
+  sha256: 1970c905674dd518e218ce6e8d80db3a4032e7f2af94ea4b3c739a8d25387b63
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: score
+- id: 12-invest-x_bounded_models
+  file: 12-invest-x-bounded-models.svg
+  sha256: 8a6030406f34ee761c3d60dd95cc49af8c3ca1c9f45b61a3d8648d60c91cba62
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: openai mark used for nominative identification; rights remain with its
+    owner
+  fallback: providers
+- id: 12-invest-x_outputs
+  file: 12-invest-x-outputs.svg
+  sha256: 8dd1855430357c5ce6f76e7722b5f6b68a712ad98d2be5be6ba77616bfc69754
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: obsidian mark used for nominative identification; rights remain with
+    its owner
+  fallback: board
+- id: 12-invest-ui_projection
+  file: 12-invest-ui-projection.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: db
+- id: 12-invest-invest_db
+  file: 12-invest-invest-db.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: db
+- id: 12-invest-invest_ui_db
+  file: 12-invest-invest-ui-db.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: db
+- id: 12-invest-x_workspace_exports
+  file: 12-invest-x-workspace-exports.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v shared-workspace
+- id: 12-invest-x_telegram
+  file: 12-invest-x-telegram.svg
+  sha256: 29edf9cfe2d4c80eb0acd087312eaabba8f7b4c14a4651ccaab51c35b3bb608c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: telegram mark used for nominative identification; rights remain with
+    its owner
+  fallback: x telegram
+- id: 12-invest-x_stale
+  file: 12-invest-x-stale.svg
+  sha256: b3a1f13373a691cde24d3b79c39a9b37cb83d1fec10d9798d16a1e879af98955
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: netdata mark used for nominative identification; rights remain with its
+    owner
+  fallback: x oom
+- id: 12-invest-x_mf_sources
+  file: 12-invest-x-mf-sources.svg
+  sha256: 22d5958462fbda1a5c41457223848300a5effa3af533a44111800a6e79e9c798
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x apis
+- id: 12-invest-x_stock_sources
+  file: 12-invest-x-stock-sources.svg
+  sha256: 413189f576ee27dd4f599ab75d30410dd190fcc5a4feaf299965dda545b4d929
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x ats
+- id: 12-invest-x_claude_bridge
+  file: 12-invest-x-claude-bridge.svg
+  sha256: 7f3a400121b0ca7220ac7e9477303d4e6eef232634cc57ef8cea2982d421269e
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Anthropic and Claude marks belong to Anthropic PBC; nominative use only
+  fallback: Claude

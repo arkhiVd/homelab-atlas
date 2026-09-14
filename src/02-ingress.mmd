@@ -1,20 +1,76 @@
-flowchart LR
-  laptop["Trusted device"] --> overlay["Private overlay"]
-  overlay --> proxy["cloudops reverse proxy"]
-  proxy --> auth["Authentication check"]
-  auth --> homepage["homepage"]
-  auth --> homelab_ui["homelab-ui"]
-  auth --> uptime_kuma["uptime-kuma"]
-  auth --> librarian["librarian"]
-  internet["Public internet"] -.-> blocked["No direct application ingress"]
-  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
-  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
-  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
-  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
-  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
-  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class laptop,overlay,proxy,auth ingress
-  class homepage,homelab_ui,uptime_kuma,librarian app
-  class internet external
-  class blocked secure
+%% 02-ingress — how a request reaches anything on this box, and what stops it.
+%% Source of truth: src/02-ingress.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 28, "rankSpacing": 48, "diagramPadding": 34}}}%%
+flowchart TB
+    x_browser["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-browser.svg' width='64' height='64' alt=''/><br/>Browser / client</div>"]
+
+    subgraph door1["Application ingress — Authenticated overlay"]
+        x_overlay_access["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-overlay-access.svg' width='64' height='64' alt=''/><br/>authenticated overlay overlay.example.test<br/>device-authenticated</div>"]
+        x_serve["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-serve.svg' width='64' height='64' alt=''/><br/>overlay serve :443<br/>operator.overlay.example.test<br/>/ homepage · /atlas/ atlas · /health Grafana<br/>/invest dashboard · /health-connect webhook<br/>authenticated overlay only · funnel off</div>"]
+    end
+
+    subgraph door3["Direct protocol access"]
+        x_sshd["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-sshd.svg' width='64' height='64' alt=''/><br/>sshd :22</div>"]
+        x_slskd_p2p["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-slskd-p2p.svg' width='64' height='64' alt=''/><br/>slskd :50300<br/>Soulseek P2P</div>"]
+        x_rustdesk_p["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-rustdesk-p.svg' width='64' height='64' alt=''/><br/>rustdesk 21115-21119</div>"]
+    end
+
+    subgraph bound["operator — authenticated overlay-published and loopback services"]
+        homepage["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-homepage.svg' width='64' height='64' alt=''/><br/>homepage :3000<br/>dashboard</div>"]
+        cloudops["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-cloudops.svg' width='64' height='64' alt=''/><br/>cloudops — nginx :8090<br/>auth_request gate</div>"]
+        x_others["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-others.svg' width='64' height='64' alt=''/><br/>other published services<br/>jellyfin 8096 · immich 2283 · wger 8765 …</div>"]
+        x_atlas["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-atlas.svg' width='64' height='64' alt=''/><br/>Architecture atlas<br/>static files from<br/>homelab-atlas/out/site</div>"]
+        x_mcp["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-x-mcp.svg' width='64' height='64' alt=''/><br/>homelab-mcp :8830<br/>bearer token · overlay0 only</div>"]
+        grafana["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-grafana.svg' width='64' height='64' alt=''/><br/>grafana :3030 loopback<br/>Wearable health dashboards</div>"]
+    end
+
+    subgraph hostside["Host-side backends — not containers"]
+        cloudops_chat["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-cloudops-chat.svg' width='64' height='64' alt=''/><br/>cloudops-chat<br/>internal API for the CloudOps dashboard</div>"]
+        claude_bridge["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-claude-bridge.svg' width='64' height='64' alt=''/><br/>claude-bridge<br/>127.0.0.1:8787 · loopback only</div>"]
+        health_connect["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-health-connect.svg' width='64' height='64' alt=''/><br/>Health Connect receiver<br/>127.0.0.1:8788 · token-authenticated</div>"]
+        invest_dashboard["<div style='width:220px;min-height:150px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/02-ingress/02-ingress-invest-dashboard.svg' width='64' height='64' alt=''/><br/>invest dashboard<br/>127.0.0.1:8502 · loopback only</div>"]
+    end
+
+    x_browser --> x_overlay_access
+    x_browser -.->|"LAN / WAN"| x_sshd
+
+    x_overlay_access ==> x_serve
+    x_serve ==>|"/ proxy"| homepage
+    x_serve ==>|"/atlas/ static"| x_atlas
+    x_serve ==>|"/health proxy"| grafana
+    x_serve ==>|"/health-connect proxy"| health_connect
+    x_serve ==>|"/invest proxy"| invest_dashboard
+    x_overlay_access ==> cloudops
+    x_overlay_access ==> x_others
+    x_overlay_access ==> x_mcp
+
+    cloudops -->|"auth_request /auth-check<br/>401 → /login.html"| cloudops_chat
+    cloudops -->|"/api/ proxy · 600s · buffering off"| cloudops_chat
+    cloudops_chat -.->|"study chat"| claude_bridge
+
+    %% The ingress fanout stays direct; portrait layout and all relationships are unchanged.
+    linkStyle 3,4,5,6,7,8,9,10,11 interpolate linear
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_browser host
+    class x_overlay_access,x_serve,cloudops ingress
+    class x_sshd,x_slskd_p2p,x_rustdesk_p warn
+    class homepage,x_others,grafana media
+    class x_atlas data
+
+    %% Layout-only ordering within lanes.
+    x_sshd ~~~ x_slskd_p2p ~~~ x_rustdesk_p
+    homepage ~~~ x_atlas
+    x_atlas ~~~ grafana
+    grafana ~~~ health_connect
+    health_connect ~~~ invest_dashboard
+    cloudops ~~~ cloudops_chat

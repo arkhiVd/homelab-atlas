@@ -1,26 +1,173 @@
-flowchart TD
-  core["Core services"] --> homepage["homepage"]
-  core --> homelab_ui["homelab-ui"]
-  core --> uptime_kuma["uptime-kuma"]
-  core --> syncthing["syncthing"]
-  core --> miniflux["miniflux"]
-  core --> miniflux_db["miniflux-db"]
-  core --> librarian["librarian"]
-  remote["Remote support"] --> hbbs["hbbs"]
-  remote --> hbbr["hbbr"]
-  fitness["Fitness tracking"] --> wger_web["wger-web"]
-  fitness --> wger_worker["wger-celery-worker"]
-  fitness --> wger_celery_beat["wger-celery-beat"]
-  fitness --> wger_powersync["wger-powersync"]
-  fitness --> wger_db["wger-db"]
-  fitness --> wger_cache["wger-cache"]
-  fitness --> wger_nginx["wger-nginx"]
-  classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
-  classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
-  classDef app fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
-  classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
-  classDef automation fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
-  classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-  classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-  class core,remote,fitness host
-  class homepage,homelab_ui,uptime_kuma,syncthing,miniflux,miniflux_db,librarian,hbbs,hbbr,wger_web,wger_worker,wger_celery_beat,wger_powersync,wger_db,wger_cache,wger_nginx app
+%% 03-containers — every container on the box, grouped by what it is for.
+%% Source of truth: src/03-containers.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 36, "diagramPadding": 34}}}%%
+flowchart TB
+    subgraph entry["Entry and dashboards"]
+        homepage["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-homepage.svg' width='52' height='52' alt=''/><br/>homepage<br/>:3000 · the front page</div>"]
+        cloudops["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-cloudops.svg' width='52' height='52' alt=''/><br/>cloudops — nginx<br/>:8090 · auth-gated study site</div>"]
+        uptime_kuma["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-uptime-kuma.svg' width='52' height='52' alt=''/><br/>uptime-kuma<br/>:8091 · monitoring</div>"]
+        homelab_ui["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-homelab-ui.svg' width='52' height='52' alt=''/><br/>homelab-ui — nginx<br/>:8400 · shared hl.css + fonts, also /ui over HTTPS</div>"]
+        grafana["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-grafana.svg' width='52' height='52' alt=''/><br/>grafana<br/>127.0.0.1:3030 · health dashboards</div>"]
+    end
+
+    subgraph video["Video"]
+        direction LR
+        jellyseerr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-jellyseerr.svg' width='52' height='52' alt=''/><br/>jellyseerr<br/>:5055 · request front-door</div>"]
+        radarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-radarr.svg' width='52' height='52' alt=''/><br/>radarr :7878 · movies</div>"]
+        sonarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-sonarr.svg' width='52' height='52' alt=''/><br/>sonarr :8989 · TV</div>"]
+        prowlarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-prowlarr.svg' width='52' height='52' alt=''/><br/>prowlarr :9696 · indexers</div>"]
+        flaresolverr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-flaresolverr.svg' width='52' height='52' alt=''/><br/>flaresolverr<br/>internal :8191 · CF challenge solver</div>"]
+        bazarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-bazarr.svg' width='52' height='52' alt=''/><br/>bazarr :6767 · subtitles</div>"]
+        tdarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-tdarr.svg' width='52' height='52' alt=''/><br/>tdarr :8265-8266<br/>transcode · server-only node</div>"]
+        jellyfin["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-jellyfin.svg' width='52' height='52' alt=''/><br/>jellyfin :8096 · playback</div>"]
+    end
+
+    subgraph dl["Downloads"]
+        direction LR
+        gluetun["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-gluetun.svg' width='52' height='52' alt=''/><br/>gluetun :8085<br/>Cloudflare WARP · kill-switch</div>"]
+        qbittorrent["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-qbittorrent.svg' width='52' height='52' alt=''/><br/>qbittorrent<br/>no netns of its own</div>"]
+        unpackerr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-unpackerr.svg' width='52' height='52' alt=''/><br/>unpackerr · extracts</div>"]
+        decluttarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-decluttarr.svg' width='52' height='52' alt=''/><br/>decluttarr · cleans stalled</div>"]
+    end
+
+    subgraph music["Music"]
+        direction LR
+        lidarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-lidarr.svg' width='52' height='52' alt=''/><br/>lidarr :8686</div>"]
+        slskd["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-slskd.svg' width='52' height='52' alt=''/><br/>slskd :5030 · Soulseek</div>"]
+        soularr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-soularr.svg' width='52' height='52' alt=''/><br/>soularr · lidarr↔slskd bridge</div>"]
+        sonobarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-sonobarr.svg' width='52' height='52' alt=''/><br/>sonobarr :5000 · Last.fm discovery</div>"]
+        navidrome["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-navidrome.svg' width='52' height='52' alt=''/><br/>navidrome :4533 · playback</div>"]
+        musicportal["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-musicportal.svg' width='52' height='52' alt=''/><br/>musicportal :8100<br/>custom · JioSaavn</div>"]
+    end
+
+    subgraph del["Deletion"]
+        librarian["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-librarian.svg' width='52' height='52' alt=''/><br/>librarian :8300<br/>custom · the only delete path<br/>basic auth + Authenticated overlay</div>"]
+    end
+
+    subgraph books["Books"]
+        bookportal["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-bookportal.svg' width='52' height='52' alt=''/><br/>bookportal :8200<br/>custom · Libgen/Anna's</div>"]
+        gluetun_books["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-gluetun-books.svg' width='52' height='52' alt=''/><br/>gluetun-books<br/>Proton HTTP proxy :8888</div>"]
+        kavita["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-kavita.svg' width='52' height='52' alt=''/><br/>kavita :5001 · reader</div>"]
+    end
+
+    subgraph photos["Photos"]
+        immich_server["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-immich-server.svg' width='52' height='52' alt=''/><br/>immich-server :2283</div>"]
+        immich_machine_learning["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-immich-machine-learning.svg' width='52' height='52' alt=''/><br/>immich-machine-learning</div>"]
+        immich_db["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-immich-db.svg' width='52' height='52' alt=''/><br/>immich-db · pgvector</div>"]
+        immich_redis["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-immich-redis.svg' width='52' height='52' alt=''/><br/>immich-redis</div>"]
+    end
+
+    subgraph rss["Reading"]
+        miniflux["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-miniflux.svg' width='52' height='52' alt=''/><br/>miniflux :8080</div>"]
+        miniflux_db["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-miniflux-db.svg' width='52' height='52' alt=''/><br/>miniflux-db · postgres 16</div>"]
+    end
+
+    subgraph fitness["Fitness"]
+        direction LR
+        wger_nginx["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-wger-nginx.svg' width='52' height='52' alt=''/><br/>wger-nginx :8765</div>"]
+        wger_web["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-wger-web.svg' width='52' height='52' alt=''/><br/>wger-web</div>"]
+        wger_worker["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-wger-worker.svg' width='52' height='52' alt=''/><br/>wger-celery-worker</div>"]
+        wger_beat["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-wger-beat.svg' width='52' height='52' alt=''/><br/>wger-celery-beat</div>"]
+        wger_powersync["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-wger-powersync.svg' width='52' height='52' alt=''/><br/>wger-powersync</div>"]
+        wger_db["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-wger-db.svg' width='52' height='52' alt=''/><br/>wger-db</div>"]
+        wger_cache["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-wger-cache.svg' width='52' height='52' alt=''/><br/>wger-cache</div>"]
+    end
+
+    subgraph syncplat["Sync platform"]
+        syncthing["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-syncthing.svg' width='52' height='52' alt=''/><br/>syncthing · host net<br/>:8384 UI · :22000 sync</div>"]
+    end
+
+    subgraph opsplat["Container operations"]
+        watchtower["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-watchtower.svg' width='52' height='52' alt=''/><br/>watchtower<br/>alone on homelab_default</div>"]
+    end
+
+    subgraph remoteplat["Remote support"]
+        hbbs["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-hbbs.svg' width='52' height='52' alt=''/><br/>hbbs · rustdesk</div>"]
+        hbbr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/03-containers/03-containers-hbbr.svg' width='52' height='52' alt=''/><br/>hbbr · rustdesk</div>"]
+    end
+
+    jellyseerr --> radarr
+    jellyseerr --> sonarr
+    radarr --> prowlarr
+    sonarr --> prowlarr
+    prowlarr -.-> flaresolverr
+    radarr ==> qbittorrent
+    sonarr ==> qbittorrent
+    qbittorrent -.->|"netns"| gluetun
+    qbittorrent ==> unpackerr
+    decluttarr -.->|"prunes"| qbittorrent
+    unpackerr ==> jellyfin
+    bazarr --> jellyfin
+    tdarr --> jellyfin
+
+    sonobarr --> lidarr
+    lidarr ==> soularr
+    soularr <--> slskd
+    slskd ==> navidrome
+    musicportal ==> navidrome
+
+    librarian ---->|"deletes + unmonitors video"| video
+    librarian ---->|"deletes + retires artists"| lidarr
+    librarian -...->|"clears transfers"| slskd
+    librarian -...->|"deletes files"| kavita
+
+    bookportal -.->|"HTTP proxy"| gluetun_books
+    bookportal ==> kavita
+
+    immich_server --> immich_db
+    immich_server --> immich_redis
+    immich_server --> immich_machine_learning
+
+    miniflux --> miniflux_db
+
+    wger_nginx --> wger_web
+    wger_web --> wger_db
+    wger_web --> wger_cache
+    wger_worker --> wger_db
+    wger_worker --> wger_cache
+    wger_beat --> wger_worker
+    wger_powersync --> wger_web
+
+    syncthing -...->|"serves synced music"| navidrome
+    syncthing -...->|"serves synced media"| jellyfin
+    syncthing -...->|"serves synced site content"| cloudops
+    syncthing -...->|"serves synced workspace content"| homepage
+    watchtower -...->|"weekly image pulls"| homepage
+    uptime_kuma -.->|"probes"| homepage
+
+    %% Non-traffic layout constraints between existing cards only.
+    librarian ~~~ lidarr
+    librarian ~~~ kavita
+    miniflux ~~~ immich_server
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class homepage,cloudops,uptime_kuma,homelab_ui,grafana ingress
+    class jellyseerr,radarr,sonarr,prowlarr,flaresolverr,bazarr,tdarr,jellyfin media
+    class qbittorrent,unpackerr,decluttarr media
+    class gluetun vpn
+    class lidarr,slskd,soularr,sonobarr,navidrome,musicportal media
+    class librarian media
+    class bookportal,kavita media
+    class gluetun_books vpn
+    class immich_server,immich_machine_learning media
+    class immich_db,immich_redis,miniflux_db data
+    class miniflux media
+    class wger_nginx,wger_web,wger_worker,wger_beat,wger_powersync media
+    class wger_db,wger_cache data
+    class syncthing data
+    class watchtower,hbbs,hbbr host
+
+    %% Layout-only support column. These links do not represent traffic.
+    homepage ~~~ immich_server
+    immich_server ~~~ miniflux
+    miniflux ~~~ wger_nginx
+    wger_nginx ~~~ syncthing

@@ -1,30 +1,64 @@
 id: 05-music
-title: Music discovery, import, and playback
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
+title: "Music \u2014 two acquisition paths into one synced library"
+audience: Anyone wondering why a track landed in the library, or why qBittorrent is not involved.
+layer: B
+summary: 'Path A is Lidarr driving Soulseek through soularr; path B is the custom musicportal pulling from JioSaavn. Both write into ./data/syncthing/music, which Navidrome mounts read-only and Syncthing replicates to the laptop and mobile device.
+
+  '
+notes:
+- I use Sonobarr when I want recommendations based on Last.fm. It adds selected artists to Lidarr. Lidarr records what is wanted, Soularr polls that list, and slskd searches and queues the matching Soulseek downloads.
+- When a Soulseek download finishes, Soularr hands it back to Lidarr. Lidarr imports, names, and tags the files in the shared music folder. Syncthing then makes that library available on the laptop and phone.
+- Musicportal is the second path. It is a custom web service I use to search JioSaavn and write selected tracks directly into the same music folder. It exists because that workflow does not fit the Lidarr and Soulseek path.
+- Navidrome mounts the library read-only and gives me the playback dashboard. It cannot alter the source files. Librarian is the deliberate deletion path. I review its plan, type the confirmation, and let it remove files and retire the matching Lidarr entries.
+- Both acquisition paths end in one library. That keeps playback simple, but it also means a file change can synchronize to every peer. Cleanup goes through Librarian rather than an unrestricted file browser.
 nodes:
-- id: portal
+- id: x_user
+  kind: concept
+  label: Request
+  lifecycle: observed-live
+- id: sonobarr
   kind: container
-  name: musicportal
-  ports: []
+  name: sonobarr
+  lifecycle: observed-live
 - id: lidarr
   kind: container
   name: lidarr
-  ports: []
+  lifecycle: observed-live
+- id: soularr
+  kind: container
+  name: soularr
+  lifecycle: observed-live
 - id: slskd
   kind: container
   name: slskd
-  ports: []
-- id: soularrr
+  lifecycle: observed-live
+- id: musicportal
   kind: container
-  name: soularr
-  ports: []
+  name: musicportal
+  lifecycle: observed-live
 - id: navidrome
   kind: container
   name: navidrome
-  ports: []
-- id: inbox
+  lifecycle: observed-live
+- id: v_slskd_dl
+  kind: volume
+  lifecycle: observed-live
+- id: v_music
+  kind: volume
+  lifecycle: observed-live
+- id: x_lastfm
+  kind: external
+  label: Last.fm
+  lifecycle: external-unverified
+- id: x_soulseek
+  kind: external
+  label: Soulseek P2P network
+  lifecycle: external-unverified
+- id: x_saavn
+  kind: external
+  label: JioSaavn
+  lifecycle: external-unverified
+- id: librarian
   kind: concept
-- id: library
-  kind: concept
+  label: Mermaid node librarian
+  lifecycle: observed-live

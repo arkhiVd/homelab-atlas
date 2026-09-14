@@ -1,0 +1,157 @@
+diagram: 02-ingress
+assets:
+- id: 02-ingress-x_browser
+  file: 02-ingress-x-browser.svg
+  sha256: c45a7698dbf9a72a89c20f7c00d2863684a64ba660a42c5513c200d01a780647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: firefox mark used for nominative identification; rights remain with its
+    owner
+  fallback: x browser
+- id: 02-ingress-x_overlay_access
+  file: 02-ingress-x-overlay-access.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: overlay mark used for nominative identification; rights remain with its
+    owner
+  fallback: x authenticated overlay
+- id: 02-ingress-x_serve
+  file: 02-ingress-x-serve.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: overlay mark used for nominative identification; rights remain with its
+    owner
+  fallback: x serve
+- id: 02-ingress-x_sshd
+  file: 02-ingress-x-sshd.svg
+  sha256: 9cd43cf6b041c699a694cf90c4b552563e74de57dd57bf8f7e89dffe2f36ac80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x sshd
+- id: 02-ingress-x_slskd_p2p
+  file: 02-ingress-x-slskd-p2p.svg
+  sha256: 163133ab1baef9d6088d8a451bc7fd95ac03bdbb1d0ec2c3b089420cf3cd029a
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: slskd mark used for nominative identification; rights remain with its
+    owner
+  fallback: x slskd p2p
+- id: 02-ingress-x_rustdesk_p
+  file: 02-ingress-x-rustdesk-p.svg
+  sha256: f14e275f8b60adde7a026a54a44a4c5b79ff73ddbc21bcc7a338af04563029ce
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: rustdesk mark used for nominative identification; rights remain with
+    its owner
+  fallback: x rustdesk p
+- id: 02-ingress-homepage
+  file: 02-ingress-homepage.svg
+  sha256: 9cd43cf6b041c699a694cf90c4b552563e74de57dd57bf8f7e89dffe2f36ac80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: homepage
+- id: 02-ingress-cloudops
+  file: 02-ingress-cloudops.svg
+  sha256: 3860f0d399e48fcaa30f2b21d3cd5e0d693267140f1e28cb2d341981ab8d2f4c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: nginx mark used for nominative identification; rights remain with its
+    owner
+  fallback: cloudops
+- id: 02-ingress-x_others
+  file: 02-ingress-x-others.svg
+  sha256: 7de45e1ea203da32a040c257f47cd39a5711b3a200d27ec72dbccbc5efb1590b
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: docker mark used for nominative identification; rights remain with its
+    owner
+  fallback: x others
+- id: 02-ingress-x_atlas
+  file: 02-ingress-x-atlas.svg
+  sha256: ab7e219b66036aa5e065c300dd87ebf2d5e0f18801906055aee326a1fcddf880
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: draw-io mark used for nominative identification; rights remain with its
+    owner
+  fallback: x atlas
+- id: 02-ingress-x_mcp
+  file: 02-ingress-x-mcp.svg
+  sha256: 9cd43cf6b041c699a694cf90c4b552563e74de57dd57bf8f7e89dffe2f36ac80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x mcp
+- id: 02-ingress-grafana
+  file: 02-ingress-grafana.svg
+  sha256: 8f32897073ee93594ab2339482ef21ca3767044055da89e2baf9066d25592df7
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: grafana mark used for nominative identification; rights remain with its
+    owner
+  fallback: grafana
+- id: 02-ingress-cloudops_chat
+  file: 02-ingress-cloudops-chat.svg
+  sha256: 9cd43cf6b041c699a694cf90c4b552563e74de57dd57bf8f7e89dffe2f36ac80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: cloudops chat
+- id: 02-ingress-claude_bridge
+  file: 02-ingress-claude-bridge.svg
+  sha256: 9cd43cf6b041c699a694cf90c4b552563e74de57dd57bf8f7e89dffe2f36ac80
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: claude bridge
+- id: 02-ingress-health_connect
+  file: 02-ingress-health-connect.svg
+  sha256: 13e556c7ad822a8e3fca8b30a204fed67e56ffd55abd5e7afb0b029359b148c0
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: healthchecks mark used for nominative identification; rights remain with
+    its owner
+  fallback: health connect
+- id: 02-ingress-invest_dashboard
+  file: 02-ingress-invest-dashboard.svg
+  sha256: 8f32897073ee93594ab2339482ef21ca3767044055da89e2baf9066d25592df7
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: grafana mark used for nominative identification; rights remain with its
+    owner
+  fallback: invest dashboard

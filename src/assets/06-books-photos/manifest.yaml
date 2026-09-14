@@ -1,0 +1,140 @@
+diagram: 06-books-photos
+assets:
+- id: 06-books-photos-x_user_b
+  file: 06-books-photos-x-user-b.svg
+  sha256: c45a7698dbf9a72a89c20f7c00d2863684a64ba660a42c5513c200d01a780647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: firefox mark used for nominative identification; rights remain with its
+    owner
+  fallback: x user b
+- id: 06-books-photos-bookportal
+  file: 06-books-photos-bookportal.svg
+  sha256: 6b1d7132d3c664ffbcddf7de35ea7a6f6490122ad446773907e8a60b12fb2b9b
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: bookportal
+- id: 06-books-photos-gluetun_books
+  file: 06-books-photos-gluetun-books.svg
+  sha256: e0cdf1ba3b14532a796386e00ed695913864ebed1daaf36fab5aae4f1361a0ef
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: gluetun books
+- id: 06-books-photos-x_libgen
+  file: 06-books-photos-x-libgen.svg
+  sha256: 42230af1fae8e93f730cd4178e06463b9a7a7014004677c9fbca7a20394e65dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: x libgen
+- id: 06-books-photos-x_annas
+  file: 06-books-photos-x-annas.svg
+  sha256: b5025866bc7f43eda80d6c70b1e0ac47f259b57faff7e6359cd50edc4ac08050
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: x annas
+- id: 06-books-photos-v_books
+  file: 06-books-photos-v-books.svg
+  sha256: 349063003388f7bad7a1c10db4611d232dc929f5f3633f00ef303964b1771fe6
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v books
+- id: 06-books-photos-kavita
+  file: 06-books-photos-kavita.svg
+  sha256: f03ab7420b8b36ad6b43e88723f794d76c411f728fb020fbeee470f6e1e7696b
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: kavita mark used for nominative identification; rights remain with its
+    owner
+  fallback: kavita
+- id: 06-books-photos-x_user_p
+  file: 06-books-photos-x-user-p.svg
+  sha256: a5d4a43899e63ffc7e97246034f7f63cdfdc410aa803c5713d545290601c4d89
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: immich mark used for nominative identification; rights remain with its
+    owner
+  fallback: x user p
+- id: 06-books-photos-immich_server
+  file: 06-books-photos-immich-server.svg
+  sha256: 259848de71fc1c17511cb5d8ff5cb6a060ceb86e03b7979cb03b3ac0437f7bfd
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: immich server
+- id: 06-books-photos-immich_machine_learning
+  file: 06-books-photos-immich-machine-learning.svg
+  sha256: 6c3b2b326c1cc839c768bc24644dd13aea8fb833daaef45a3b7d9d091cad3f2a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: immich machine learning
+- id: 06-books-photos-immich_db
+  file: 06-books-photos-immich-db.svg
+  sha256: 98832a04407b147e54bf6b1424f0e88a64d2ec1aa6afb1e65bf1248001e20fb0
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: immich db
+- id: 06-books-photos-immich_redis
+  file: 06-books-photos-immich-redis.svg
+  sha256: c8aaae178ac316e7c3062fdcb7d0a4ac4b8ecb83c32dd4aa7bc8bed644f80085
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: immich redis
+- id: 06-books-photos-v_upload
+  file: 06-books-photos-v-upload.svg
+  sha256: 4fe1ada9a4d0575301351618a8eb5a20d35aa6943bc863cf3dc6f27745cadd1e
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v upload
+- id: 06-books-photos-v_model
+  file: 06-books-photos-v-model.svg
+  sha256: f7f87028ebec57ef388ce988dc69524c63688cb15abd4a1833a6cb48ded94647
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v model
+- id: 06-books-photos-v_immich_db
+  file: 06-books-photos-v-immich-db.svg
+  sha256: ed7f5153d6dc7274cac2249038896affa178d81f120a0bb28f38cd7fe7ce300c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v immich db

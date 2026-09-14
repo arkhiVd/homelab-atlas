@@ -1,0 +1,55 @@
+%% 14-runbooks-agent-incident — provider/config outage and MCP guard refusal.
+%% Source of truth: src/14-runbooks-agent-incident.mmd. Generated outputs are never hand-edited.
+sequenceDiagram
+    autonumber
+    %% atlas-participant J git
+    participant J as Jobhunt
+    %% atlas-participant I terminal
+    participant I as interactive client
+    %% atlas-participant H hermes
+    participant H as Hermes
+    %% atlas-participant L claude
+    participant L as Claude CLI (claude -p)
+    %% atlas-participant P openrouter
+    participant P as hosted provider
+    %% atlas-participant M mcp
+    participant M as homelab-mcp
+    %% atlas-participant V obsidian
+    participant V as guarded workspace
+    %% atlas-participant Y linux-mint
+    participant Y as User
+
+    alt Jobhunt provider request fails
+        J->>H: selected provider/model request
+        H-->>J: provider failure
+        Note over H,P: Inspect provider selection and credential/config status only.<br/>Never expose or copy credential values.
+        opt selected provider is not Hermes default
+            H->>H: retry Hermes working default provider
+        end
+        alt request resolves after selected route or default retry
+            H-->>J: provider result
+        else final Claude-family failure
+            J->>L: direct claude -p fallback
+            L-->>J: fallback result
+        else final non-Claude failure
+            J->>Y: report failed/retryable route
+            Y->>H: repair or reauthorize deliberately
+        end
+    else interactive client provider/config incident
+        I->>H: gateway provider request
+        H-->>I: failed/retryable route
+        I->>Y: report route and safe status
+        Y->>H: repair or reauthorize deliberately
+    end
+
+    I->>M: tool or resource request
+    alt path, conflict, or operation is refused
+        M-->>I: blocked/guard-refused
+        Note over M,V: No bypass, rename, overwrite, or sync-conflict resolution.
+        I->>Y: report refusal and safe path/context
+        Y->>V: resolve conflict or approve a compliant path by hand
+    else allowed request
+        M->>V: guarded read, append, or create
+        V-->>M: result
+        M-->>I: result plus audit record
+    end

@@ -1,0 +1,35 @@
+%% 14-runbooks-deploy — deploying a change to a homelab service (project-dev 9b).
+%% Source of truth: src/14-runbooks-deploy.mmd. Generated outputs are never hand-edited.
+sequenceDiagram
+    autonumber
+    %% atlas-participant A github-copilot
+    participant A as Agent
+    %% atlas-participant R git
+    participant R as Service repo
+    %% atlas-participant M mcp
+    participant M as homelab-mcp
+    %% atlas-participant S linux
+    participant S as systemd
+    %% atlas-participant Y linux-mint
+    participant Y as User
+
+    Note over A,Y: There is no CI and no staging here.<br/>The deploy gate IS the test.
+    A->>M: homelab_health (BEFORE — record it)
+    A->>R: branch, edit, ruff check + pytest
+    R-->>A: real output pasted, not summarised
+    A->>Y: state rollback path first
+    Note over Y: git revert + restart<br/>keep the previous venv or commit reachable
+    Y->>A: explicit instruction to deploy
+    Note over A,S: agents never restart a unit<br/>without that instruction in-session
+    A->>S: systemctl restart <unit>
+    S-->>A: systemctl status
+    A->>M: service_logs(unit) — check for errors
+    A->>M: one real tool call end to end
+    A->>M: homelab_health (AFTER — compare)
+    alt health moved or logs show errors
+        A->>S: git revert + restart
+        A->>Y: report failure with output
+    else clean
+        A->>Y: paste before/after evidence
+        Y->>R: human merge gate
+    end

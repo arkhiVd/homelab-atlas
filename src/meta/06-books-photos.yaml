@@ -1,42 +1,71 @@
 id: 06-books-photos
-title: Books and photo workflows
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
+title: "Books and photos \u2014 two small self-contained stacks"
+audience: Anyone touching bookportal's proxy path or the Immich four-container set.
+layer: B
+summary: 'Books: the custom bookportal fetches from Libgen directly and from Anna''s Archive through a dedicated ProtonVPN HTTP proxy, normalises filenames into ./data/books, and Kavita serves them. Photos: immich-server with its Postgres+pgvector database, Redis job queue, and a separate machine-learning container for CLIP search and face detection.
+
+  '
+notes:
+- For books, I open Bookportal in a browser and search from one page. Bookportal is a custom FastAPI service. It queries the configured sources, sends the source that needs a proxy through the dedicated ProtonVPN container, normalizes the downloaded filename, and saves the result in the book folder.
+- Kavita reads that folder and is the browser-based reader and library dashboard. Bookportal acquires and organizes files. Kavita catalogs and presents them. Keeping those jobs separate makes each service easier to replace or troubleshoot.
+- For photos, the Immich app on the phone uploads to Immich Server. The server stores original files in the upload area and metadata in PostgreSQL. Redis holds background jobs, and the machine-learning container produces search embeddings and face-detection results.
+- I use the Immich phone app and web dashboard to browse, search, and back up photos. A usable restore needs both the uploaded files and the database because the files alone do not contain albums, jobs, and application metadata.
+- The books and photos stacks share the host but not a workflow. They appear together because each is a small, self-contained service group with a clear user-facing app and its own durable storage.
 nodes:
+- id: x_user_b
+  kind: concept
+  label: Book search
+  lifecycle: observed-live
+- id: x_user_p
+  kind: concept
+  label: Immich mobile app
+  lifecycle: observed-live
 - id: bookportal
   kind: container
   name: bookportal
-  ports: []
-- id: book_vpn
+  lifecycle: observed-live
+- id: gluetun_books
+  lifecycle: observed-live
   kind: container
   name: gluetun-books
-  ports: []
+  note: Provides the internal ProtonVPN HTTP proxy used by bookportal. It was unhealthy in the 2026-08-02 capture and is healthy in the current observed state.
 - id: kavita
   kind: container
   name: kavita
-  ports: []
+  lifecycle: observed-live
 - id: immich_server
   kind: container
   name: immich-server
-  ports: []
+  lifecycle: observed-live
+- id: immich_machine_learning
+  kind: container
+  name: immich-machine-learning
+  lifecycle: observed-live
 - id: immich_db
   kind: container
   name: immich-db
-  ports: []
+  lifecycle: observed-live
 - id: immich_redis
   kind: container
   name: immich-redis
-  ports: []
-- id: immich_ml
-  kind: container
-  name: immich-machine-learning
-  ports: []
-- id: sources
-  kind: concept
-- id: books
-  kind: concept
-- id: phone
-  kind: concept
-- id: photos
-  kind: concept
+  lifecycle: observed-live
+- id: v_books
+  kind: volume
+  lifecycle: observed-live
+- id: v_upload
+  kind: volume
+  lifecycle: observed-live
+- id: v_model
+  kind: volume
+  lifecycle: observed-live
+- id: v_immich_db
+  kind: volume
+  lifecycle: observed-live
+- id: x_libgen
+  kind: external
+  label: Libgen
+  lifecycle: external-unverified
+- id: x_annas
+  kind: external
+  label: Anna's Archive
+  lifecycle: external-unverified

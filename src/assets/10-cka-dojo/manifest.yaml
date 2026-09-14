@@ -1,0 +1,103 @@
+diagram: 10-cka-dojo
+assets:
+- id: 10-cka-dojo-x_user
+  file: 10-cka-dojo-x-user.svg
+  sha256: c45a7698dbf9a72a89c20f7c00d2863684a64ba660a42c5513c200d01a780647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: firefox mark used for nominative identification; rights remain with its
+    owner
+  fallback: x user
+- id: 10-cka-dojo-dojo_cli
+  file: 10-cka-dojo-dojo-cli.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: dojo cli
+- id: 10-cka-dojo-terraform
+  file: 10-cka-dojo-terraform.svg
+  sha256: 81bb8443a3299c1bb00cf191953dbf0e42af6eb833873c7e54fc1c98dea82caf
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: terraform mark used for nominative identification; rights remain with
+    its owner
+  fallback: terraform
+- id: 10-cka-dojo-scenarios
+  file: 10-cka-dojo-scenarios.svg
+  sha256: c72c04462402ed4bd3d4d2170a4be4c5f59a5cf669eafe7d6aeeffb6980bf90c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: scenarios
+- id: 10-cka-dojo-dojo_db
+  file: 10-cka-dojo-dojo-db.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: dojo db
+- id: 10-cka-dojo-vpc
+  file: 10-cka-dojo-vpc.svg
+  sha256: d7e2172ecd09fe9a036ce0b3f9be68f87deaba60c9b5478a0eb826192e833916
+  source_url: local-authored
+  revision: projection-local
+  license: AWS Architecture Icons license
+  attribution: Local authored representative illustration
+  trademark: AWS marks remain the property of Amazon Web Services, Inc.
+  fallback: vpc
+- id: 10-cka-dojo-sg
+  file: 10-cka-dojo-sg.svg
+  sha256: 7685a604ab554fb5815bc8957804e041d3153b0fd73adfa497a22bcb36cf89ca
+  source_url: local-authored
+  revision: projection-local
+  license: AWS Architecture Icons license
+  attribution: Local authored representative illustration boundary
+  trademark: AWS marks remain the property of Amazon Web Services, Inc.
+  fallback: sg
+- id: 10-cka-dojo-iam
+  file: 10-cka-dojo-iam.svg
+  sha256: 9c9c272ccf2daded658065c3078344607735dc60248cc2e38b87dfb4f978b1e8
+  source_url: local-authored
+  revision: projection-local
+  license: AWS Architecture Icons license
+  attribution: Local authored representative illustration
+  trademark: AWS marks remain the property of Amazon Web Services, Inc.
+  fallback: iam
+- id: 10-cka-dojo-ec2
+  file: 10-cka-dojo-ec2.svg
+  sha256: 45e7138cffea8e588ed34307c8c0c8869d93e211c321cac22b6a3affe32483ea
+  source_url: local-authored
+  revision: projection-local
+  license: AWS Architecture Icons license
+  attribution: Local authored representative illustration
+  trademark: AWS marks remain the property of Amazon Web Services, Inc.
+  fallback: ec2
+- id: 10-cka-dojo-ami
+  file: 10-cka-dojo-ami.svg
+  sha256: 99fb0e5522112350a08773aab9fe66ccd83e4f81dfd4818bbbcbe616b394bb96
+  source_url: local-authored
+  revision: projection-local
+  license: AWS Architecture Icons license
+  attribution: Local authored representative illustration
+  trademark: AWS marks remain the property of Amazon Web Services, Inc.
+  fallback: ami
+- id: 10-cka-dojo-x_ssm
+  file: 10-cka-dojo-x-ssm.svg
+  sha256: 9c89cb580da2a11127fa2d0cf88bc138bae6df30468dd31bc24179714badbaa9
+  source_url: local-authored
+  revision: projection-local
+  license: AWS Architecture Icons license
+  attribution: Local authored representative illustration
+  trademark: AWS marks remain the property of Amazon Web Services, Inc.
+  fallback: x ssm

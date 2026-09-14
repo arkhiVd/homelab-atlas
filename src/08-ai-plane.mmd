@@ -1,0 +1,123 @@
+%% 08-ai-plane — agent workflow and trust boundaries on the host.
+%% Source of truth: src/08-ai-plane.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 30, "rankSpacing": 34, "diagramPadding": 16}}}%%
+flowchart TB
+    subgraph entry["People and triggers"]
+
+        x_browser["<img src='./assets/08-ai-plane/user.svg' width='72' height='72' alt=''/><br/><b>User</b><br/>CloudOps browser"]
+        x_telegram["<img src='./assets/08-ai-plane/telegram.svg' width='72' height='72' alt=''/><br/><b>Telegram</b><br/>gateway · Jobhunt bot"]
+        x_mcp_clients["<img src='./assets/08-ai-plane/mcp.svg' width='72' height='72' alt=''/><br/><b>MCP clients</b><br/>Claude Code · Desktop · Codex<br/>OpenCode · mobile device"]
+        x_timers["<img src='./assets/08-ai-plane/timer.svg' width='72' height='72' alt=''/><br/><b>systemd timers</b><br/>Jobhunt discovery"]
+    end
+
+    subgraph context["Local session context · no credentials"]
+
+        mise["<img src='./assets/08-ai-plane/package.svg' width='72' height='72' alt=''/><br/><b>mise</b><br/>tool installer"]
+        pi["<img src='./assets/08-ai-plane/pi.svg' width='72' height='72' alt=''/><br/><b>Pi</b><br/>client · session"]
+        herdr["<img src='./assets/08-ai-plane/herdr.svg' width='72' height='72' alt=''/><br/><b>Herdr CLI</b><br/>workflow state · reconciliation"]
+        instructions["<img src='./assets/08-ai-plane/instructions.svg' width='72' height='72' alt=''/><br/><b>Local instructions</b><br/>AGENTS.md · skills · guarded memory"]
+        workbench["<img src='./assets/08-ai-plane/github.svg' width='72' height='72' alt=''/><br/><b>agent-workbench</b><br/>public Git reference"]
+    end
+
+    %% Runtime cards stay ungrouped so edges terminate at cards, not a giant boundary.
+    cloudops["<img src='./assets/08-ai-plane/nginx.svg' width='72' height='72' alt=''/><br/><b>cloudops nginx</b><br/>:8090"]
+    cloudops_chat["<img src='./assets/08-ai-plane/agent.svg' width='72' height='72' alt=''/><br/><b>cloudops-chat.service</b><br/>internal API behind CloudOps"]
+    hermes_gateway["<img src='./assets/08-ai-plane/hermes.svg' width='72' height='72' alt=''/><br/><b>hermes-gateway.service</b><br/>Telegram gateway"]
+    hermes["<img src='./assets/08-ai-plane/hermes.svg' width='72' height='72' alt=''/><br/><b>Hermes CLI/core</b><br/>provider · model routing"]
+    jobhunt_discover["<img src='./assets/08-ai-plane/timer.svg' width='72' height='72' alt=''/><br/><b>jobhunt-discover.service</b><br/>08:00 UTC"]
+    jobhunt_bot["<img src='./assets/08-ai-plane/agent.svg' width='72' height='72' alt=''/><br/><b>jobhunt-bot.service</b><br/>human-gated bot"]
+    claude_bridge["<img src='./assets/08-ai-plane/claude.svg' width='72' height='72' alt=''/><br/><b>claude-bridge.service</b><br/>127.0.0.1:8787"]
+    homelab_mcp["<img src='./assets/08-ai-plane/mcp.svg' width='72' height='72' alt=''/><br/><b>homelab-mcp.service</b><br/>authenticated MCP gateway"]
+
+    subgraph providers["Provider boundary"]
+
+        codex_provider["<img src='./assets/08-ai-plane/codex.svg' width='72' height='72' alt=''/><br/><b>OpenAI Codex provider</b><br/>Pi direct route"]
+        hosted["<img src='./assets/08-ai-plane/cloud.svg' width='72' height='72' alt=''/><br/><b>Hosted providers</b><br/>selected endpoints"]
+        claude_cli["<img src='./assets/08-ai-plane/claude.svg' width='72' height='72' alt=''/><br/><b>Claude CLI</b><br/>subscription · claude -p"]
+        codex_cli["<img src='./assets/08-ai-plane/codex.svg' width='72' height='72' alt=''/><br/><b>Codex CLI</b>"]
+        credentials["<img src='./assets/08-ai-plane/credentials.svg' width='72' height='72' alt=''/><br/><b>Credential/config stores</b><br/>OAuth · provider credentials"]
+    end
+
+    subgraph guarded["Guarded MCP contracts and allow-listed state"]
+
+        subgraph workspace_contract["Workspace"]
+            t_workspace["<img src='./assets/08-ai-plane/obsidian.svg' width='72' height='72' alt=''/><br/><b>Workspace tools</b><br/>read · search · append · create"]
+            workspace["<img src='./assets/08-ai-plane/obsidian.svg' width='72' height='72' alt=''/><br/><b>shared-workspace</b><br/>append/create allow-lists"]
+        end
+        subgraph jobhunt_contract["Jobhunt"]
+            t_jobhunt["<img src='./assets/08-ai-plane/agent.svg' width='72' height='72' alt=''/><br/><b>Jobhunt tools</b>"]
+            jobhunt_db["<img src='./assets/08-ai-plane/sqlite.svg' width='72' height='72' alt=''/><br/><b>Jobhunt SQLite</b>"]
+        end
+        subgraph dojo_contract["Dojo"]
+            t_dojo["<img src='./assets/08-ai-plane/kubernetes.svg' width='72' height='72' alt=''/><br/><b>Dojo tools</b>"]
+            dojo_db["<img src='./assets/08-ai-plane/sqlite.svg' width='72' height='72' alt=''/><br/><b>Dojo SQLite</b>"]
+        end
+        subgraph ops_contract["Operations"]
+            t_ops["<img src='./assets/08-ai-plane/docker.svg' width='72' height='72' alt=''/><br/><b>Read-only ops tools</b>"]
+            ops["<img src='./assets/08-ai-plane/docker.svg' width='72' height='72' alt=''/><br/><b>Docker + journal reads</b><br/>fixed allow-list"]
+        end
+        subgraph resource_contract["Resources and audit"]
+            r_contract["<img src='./assets/08-ai-plane/github.svg' width='72' height='72' alt=''/><br/><b>Read-only resources</b><br/>AGENTS · conventions · memory"]
+            audit["<img src='./assets/08-ai-plane/database.svg' width='72' height='72' alt=''/><br/><b>Audit JSONL</b><br/>caller · tool · outcome"]
+        end
+    end
+
+    entry ~~~ homelab_mcp
+
+    mise -.->|"installs Pi"| pi
+    mise -.->|"installs Herdr"| herdr
+    workbench -.->|"human reference"| pi
+    pi -->|"loads"| instructions
+    pi -.->|"reports session/state"| herdr
+    pi ==>|"direct provider call"| codex_provider
+    pi -->|"tool calls"| homelab_mcp
+
+    x_browser ==>|"opens chat"| cloudops
+    cloudops ==>|"auth + API proxy"| cloudops_chat
+    x_telegram ==>|"gateway message"| hermes_gateway
+    x_telegram ==>|"bot message"| jobhunt_bot
+    hermes_gateway ==>|"dispatches"| hermes
+    x_timers ==>|"starts discovery"| jobhunt_discover
+    jobhunt_discover ==>|"queues review"| jobhunt_bot
+    x_mcp_clients ==>|"bearer over authenticated overlay"| homelab_mcp
+
+    cloudops_chat ==>|"Claude route"| claude_cli
+    cloudops_chat ==>|"Codex route"| codex_cli
+    cloudops_chat ==>|"selected provider"| hosted
+    cloudops_chat -.->|"catalog only"| hermes
+    hermes ==>|"selected hosted route"| hosted
+    credentials -.->|"authorizes"| hosted
+    hermes ==>|"claude-cli provider"| claude_bridge
+    claude_bridge ==>|"spawns"| claude_cli
+    jobhunt_bot ==>|"Hermes backend"| hermes
+    jobhunt_bot -.->|"Claude failure fallback"| claude_cli
+
+    homelab_mcp -->|"workspace contract"| t_workspace
+    homelab_mcp -->|"jobhunt contract"| t_jobhunt
+    homelab_mcp -->|"dojo contract"| t_dojo
+    homelab_mcp -->|"ops contract"| t_ops
+    homelab_mcp -->|"resource contract"| r_contract
+    t_workspace ==>|"guarded writes"| workspace
+    r_contract -->|"guarded reads"| workspace
+    t_jobhunt ==>|"bounded query"| jobhunt_db
+    t_dojo ==>|"bounded query"| dojo_db
+    t_ops ==>|"allow-listed read"| ops
+    homelab_mcp -.->|"every tool call"| audit
+
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:2px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:2px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:2px,color:#4a044e
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:2px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_telegram,x_browser,x_mcp_clients,x_timers,pi,instructions,herdr,mise host
+    class hermes_gateway,hermes,claude_bridge,cloudops_chat,homelab_mcp,jobhunt_bot,jobhunt_discover,t_workspace,t_jobhunt,t_dojo,t_ops,r_contract ai
+    class cloudops ingress
+    class workspace,jobhunt_db,dojo_db,audit data
+    class credentials secure
+    class codex_provider,hosted,workbench external
+    class claude_cli,codex_cli host
+    class ops warn

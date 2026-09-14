@@ -1,0 +1,124 @@
+diagram: 05-music
+assets:
+- id: 05-music-x_user
+  file: 05-music-x-user.svg
+  sha256: c45a7698dbf9a72a89c20f7c00d2863684a64ba660a42c5513c200d01a780647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: firefox mark used for nominative identification; rights remain with its
+    owner
+  fallback: x user
+- id: 05-music-sonobarr
+  file: 05-music-sonobarr.svg
+  sha256: a2c36648abb73ba625f2edef8e2420c38b1d7da65d39e0dac5fb5de085decac7
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: sonobarr
+- id: 05-music-x_lastfm
+  file: 05-music-x-lastfm.svg
+  sha256: f3ae3905cd577beca8f2418ff1926c5388d1486be376112c0cbc43e587289c10
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: x lastfm
+- id: 05-music-lidarr
+  file: 05-music-lidarr.svg
+  sha256: 2f55f69450a0ca03621e87550e81ec0f6798c4a578b54e4b988a9a7234a83647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: lidarr mark used for nominative identification; rights remain with its
+    owner
+  fallback: lidarr
+- id: 05-music-soularr
+  file: 05-music-soularr.svg
+  sha256: 0ed231460bcc4df67dd5f3a80d6cd7a3124a3f3b50f16716332a86ef3984d453
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: soularr
+- id: 05-music-slskd
+  file: 05-music-slskd.svg
+  sha256: 163133ab1baef9d6088d8a451bc7fd95ac03bdbb1d0ec2c3b089420cf3cd029a
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: slskd mark used for nominative identification; rights remain with its
+    owner
+  fallback: slskd
+- id: 05-music-x_soulseek
+  file: 05-music-x-soulseek.svg
+  sha256: 163133ab1baef9d6088d8a451bc7fd95ac03bdbb1d0ec2c3b089420cf3cd029a
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: slskd mark used for nominative identification; rights remain with its
+    owner
+  fallback: x soulseek
+- id: 05-music-v_slskd_dl
+  file: 05-music-v-slskd-dl.svg
+  sha256: be1d33e05ddb6339d514561f16f0c47aa2ee39d521412ff1bfcbaf01bb839536
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v slskd dl
+- id: 05-music-musicportal
+  file: 05-music-musicportal.svg
+  sha256: 38a46ce9924e23171e2ea88bfbabe059405dd4766e9a26a8a8dcfc06b8777c8c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: musicportal
+- id: 05-music-x_saavn
+  file: 05-music-x-saavn.svg
+  sha256: 6a2d469db55d6635e5c7d66cf56933896fb100f65c0459d6306fc0b230f3a45d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: x saavn
+- id: 05-music-v_music
+  file: 05-music-v-music.svg
+  sha256: 201bade3a8be3632a9f0a4f8e773edd36ff38422308451532fb25e6bf56a4c51
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: v music
+- id: 05-music-navidrome
+  file: 05-music-navidrome.svg
+  sha256: cd8911581c1173c0696dadaeb02f9bb2eb1ff3b6bdf5c64c49b90f7cb70274cf
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: navidrome mark used for nominative identification; rights remain with
+    its owner
+  fallback: navidrome
+- id: 05-music-librarian
+  file: 05-music-librarian.svg
+  sha256: bdb75b3c8e3dd51a05813fb137435fcae93a09e4797bb26bb51b6f8fdc3dce1c
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: librarian

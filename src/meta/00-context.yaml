@@ -1,22 +1,84 @@
 id: 00-context
-title: System context
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
+title: "System context \u2014 what operator is and what it depends on"
+audience: Anyone seeing this homelab for the first time, including an interviewer.
+layer: A
+summary: One screen, no container detail. Establishes current access, active compose projects, the agent plane, storage, and off-box dependencies. Every later diagram zooms into one box here.
+notes:
+- I use the laptop as the main control point. In a browser I open the home dashboard, this atlas, Grafana, the investment dashboard, and the other web apps through authenticated overlay access. The phone uses the same private access path for dashboards and also sends photos, wearable exports, and synchronized files.
+- The homelab host runs two kinds of work. Docker Compose runs the web applications and their databases. System services run jobs that need host files, timers, or tighter operating-system controls, including the agent gateway, investment pipeline, and health-data importers.
+- Syncthing connects the laptop, phone, and server. I use it to keep the Obsidian workspace, music, selected files, and incoming wearable exports available where they are needed. Application databases and generated files stay on the server unless a diagram explicitly shows them being synchronized.
+- External traffic has a specific purpose. WARP and ProtonVPN provide egress for selected download or lookup workflows. Model providers answer agent requests. Telegram carries bot conversations, digests, and failure alerts. AWS is used only when I start a CKA practice session.
+- This first diagram is the map for the rest of the site. Access and networking are expanded in 01 and 02. Applications are covered in 03 through 07. Agent, job-search, training, automation, investment, and health workflows follow after that.
 nodes:
-- id: operator
+- id: x_user
+  lifecycle: observed-live
   kind: concept
-- id: overlay
+  label: User
+  identity: user
+- id: workstation
+  lifecycle: observed-live
+  kind: device
+  name: workstation
+  label: workstation
+  identity: laptop
+- id: mobile_device
+  lifecycle: observed-live
+  kind: device
+  name: mobile device
+  label: mobile device
+  identity: mobile device
+- id: x_overlay_access
+  lifecycle: observed-live
   kind: concept
-- id: host
+  label: Authenticated overlay overlay.example.test
+  identity: overlay
+- id: x_lan
+  lifecycle: observed-live
   kind: concept
-- id: core
+  label: LAN / WAN direct exposure
+  identity: internet
+- id: x_stack_homelab
+  lifecycle: observed-live
   kind: concept
-- id: media
+  label: homelab compose project
+  identity: docker
+- id: x_stack_rustdesk
+  lifecycle: observed-live
   kind: concept
-- id: automation
+  label: rustdesk compose project
+  identity: rustdesk
+- id: x_agent_plane
+  lifecycle: observed-live
   kind: concept
-- id: local
+  label: agent plane
+  identity: agent
+- id: x_storage
+  lifecycle: observed-live
   kind: concept
-- id: external
-  kind: concept
+  label: storage
+  identity: storage
+- id: x_anthropic
+  lifecycle: external-unverified
+  kind: external
+  label: Claude via Pro subscription
+  identity: claude
+- id: x_telegram
+  lifecycle: external-unverified
+  kind: external
+  label: Telegram
+  identity: telegram
+- id: x_vpn_egress
+  lifecycle: external-unverified
+  kind: external
+  label: Cloudflare WARP + ProtonVPN
+  identity: vpn
+- id: x_content
+  lifecycle: external-unverified
+  kind: external
+  label: Indexers, Soulseek, Anna's Archive, ATS boards
+  identity: search
+- id: x_aws
+  lifecycle: external-unverified
+  kind: external
+  label: AWS example-region-1 (cka-dojo)
+  identity: aws

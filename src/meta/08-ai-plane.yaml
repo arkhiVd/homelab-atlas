@@ -1,0 +1,155 @@
+id: 08-ai-plane
+title: "Agent workflow \u2014 Pi, Hermes, providers, and homelab-mcp"
+audience: Anyone changing an agent path, credential/config routing, or a guarded MCP operation.
+layer: C
+summary: 'Pi calls its configured OpenAI Codex provider directly, while the Hermes gateway and Jobhunt use Hermes-selected provider routes. CloudOps Chat invokes its selected provider or local CLI itself and uses Hermes for catalog data. homelab-mcp remains authenticated overlay-only. Herdr is a local workflow CLI, while agent-workbench is public reference material, not a deployed service.
+
+  '
+notes:
+- I normally start AI coding work from Pi on the laptop. Pi reads the repository AGENTS.md, project documents, and installed skills before it edits code. For homelab projects the project-dev skill sets the change class, required checks, review gate, and the rule that an agent cannot restart a service without permission.
+- The unslop skill is the final writing pass. It removes stock AI wording and rewrites explanations in plain language without changing technical meaning. Other task-specific instructions can come from the repository or the synchronized Obsidian workspace.
+- Pi calls its configured Codex provider directly. Hermes is a separate router used by the Telegram gateway and Jobhunt. CloudOps Chat can call a hosted provider, Claude CLI, or Codex CLI. The credential stores authorize those calls, but credentials never enter the instruction files or diagrams.
+- Herdr coordinates work when several agents need bounded tasks. Pi reports session state to Herdr, and the coordinator assigns non-overlapping work. I still review the combined diff and control commits, deployment, and merge.
+- homelab-mcp is the controlled bridge from AI clients to homelab information. Its workspace tools search and read notes, append approved content, and create notes only in allowed folders. Jobhunt and Dojo tools return bounded database views. Operations tools expose selected health and log reads.
+- Every MCP tool call is logged with the caller, tool, and outcome. Writes are serialized. A guard refusal is a result to report, not something the agent should work around.
+- 'agent-workbench is the public explanation of this workflow. It documents the loop I use: understand the task, decide the boundary, write the contract, implement one reviewable slice, run real checks, review the diff, and record durable decisions.'
+nodes:
+- id: x_telegram
+  kind: external
+  label: Telegram
+  lifecycle: external-unverified
+  identity: telegram
+- id: x_browser
+  kind: concept
+  label: CloudOps browser
+  lifecycle: observed-live
+  identity: user
+- id: x_mcp_clients
+  kind: concept
+  label: configured MCP clients
+  lifecycle: observed-live
+  identity: agent
+- id: x_timers
+  kind: concept
+  label: systemd timers
+  lifecycle: observed-live
+- id: pi
+  kind: concept
+  label: Pi client/session
+  lifecycle: observed-live
+  identity: pi
+- id: instructions
+  kind: concept
+  label: local instructions, skills, and guarded memory
+  lifecycle: observed-live
+- id: herdr
+  kind: concept
+  label: Herdr local CLI/state
+  lifecycle: observed-live
+  identity: herdr
+- id: mise
+  kind: concept
+  label: mise tool manager for Herdr and Pi
+  lifecycle: observed-live
+- id: workbench
+  kind: external
+  label: agent-workbench public Git/docs
+  lifecycle: external-unverified
+- id: hermes_gateway
+  kind: unit
+  name: hermes-gateway.service
+  scope: user
+  lifecycle: observed-live
+- id: hermes
+  kind: concept
+  label: Hermes CLI/core
+  lifecycle: observed-live
+  identity: hermes
+- id: claude_bridge
+  kind: unit
+  name: claude-bridge.service
+  scope: user
+  lifecycle: observed-live
+- id: cloudops_chat
+  kind: unit
+  name: cloudops-chat.service
+  scope: user
+  lifecycle: observed-live
+- id: jobhunt_bot
+  kind: unit
+  name: jobhunt-bot.service
+  lifecycle: observed-live
+- id: jobhunt_discover
+  kind: unit
+  name: jobhunt-discover.service
+  lifecycle: observed-live
+- id: homelab_mcp
+  kind: unit
+  name: homelab-mcp.service
+  lifecycle: observed-live
+- id: cloudops
+  kind: container
+  name: cloudops
+  lifecycle: observed-live
+- id: codex_provider
+  kind: external
+  label: OpenAI Codex provider
+  lifecycle: external-unverified
+- id: hosted
+  kind: external
+  label: selected hosted provider endpoints
+  lifecycle: external-unverified
+- id: credentials
+  kind: concept
+  label: credential and configuration stores
+  lifecycle: observed-live
+  class: secure
+  note: Credential source and routing metadata are guarded configuration. The atlas records no values.
+- id: claude_cli
+  kind: concept
+  label: Claude subscription CLI
+  lifecycle: observed-live
+  identity: claude
+- id: codex_cli
+  kind: concept
+  label: Codex CLI
+  lifecycle: observed-live
+  identity: codex
+- id: t_workspace
+  kind: concept
+  label: workspace tools
+  lifecycle: observed-live
+- id: t_jobhunt
+  kind: concept
+  label: Jobhunt tools
+  lifecycle: observed-live
+- id: t_dojo
+  kind: concept
+  label: Dojo tools
+  lifecycle: observed-live
+- id: t_ops
+  kind: concept
+  label: read-only ops tools
+  lifecycle: observed-live
+- id: r_contract
+  kind: concept
+  label: read-only workspace resources
+  lifecycle: observed-live
+- id: workspace
+  kind: volume
+  lifecycle: observed-live
+- id: jobhunt_db
+  kind: volume
+  lifecycle: observed-live
+- id: dojo_db
+  kind: volume
+  lifecycle: observed-live
+- id: ops
+  kind: concept
+  label: allow-listed docker and journal reads
+  lifecycle: observed-live
+  class: warn
+  note: The ops group has the broadest MCP privilege. It uses fixed read-only commands and an allow-listed journal scope.
+- id: audit
+  kind: volume
+  lifecycle: observed-live

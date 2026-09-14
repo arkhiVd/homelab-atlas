@@ -1,0 +1,236 @@
+diagram: 07-storage
+assets:
+- id: 07-storage-workstation
+  file: 07-storage-workstation.svg
+  sha256: 927ab6734db67cf88731e69ac48faf689942024eed544e9d9e23f94e0720a23f
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: No third-party mark
+  fallback: workstation
+- id: 07-storage-mobile_device
+  file: 07-storage-phone.svg
+  sha256: 580fbc30f44a396d80c9eabb8e27666a1cef14aa7879cb7d2a4f7baa89a7f2f0
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Product names used for nominative identification; rights remain with their owners
+  fallback: mobile device
+- id: 07-storage-syncthing
+  file: 07-storage-syncthing.svg
+  sha256: 65d1430f7522bea0507259929f0033d7c62539d14757d7c6f5b62574eb4da2d3
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: syncthing mark used for nominative identification; rights remain with its owner
+  fallback: syncthing
+- id: 07-storage-v_shared-workspace
+  file: 07-storage-v-shared-workspace.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v shared-workspace
+- id: 07-storage-v_music
+  file: 07-storage-v-music.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v music
+- id: 07-storage-v_media
+  file: 07-storage-v-media.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v media
+- id: 07-storage-v_cloudops
+  file: 07-storage-v-cloudops.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v cloudops
+- id: 07-storage-v_resume
+  file: 07-storage-v-resume.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v resume
+- id: 07-storage-v_gadgetbridge_raw
+  file: 07-storage-v-gadgetbridge-raw.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v gadgetbridge raw
+- id: 07-storage-v_mediaroot
+  file: 07-storage-v-mediaroot.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v mediaroot
+- id: 07-storage-v_books
+  file: 07-storage-v-books.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v books
+- id: 07-storage-v_immich
+  file: 07-storage-v-immich.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v immich
+- id: 07-storage-v_configs
+  file: 07-storage-v-configs.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v configs
+- id: 07-storage-v_health
+  file: 07-storage-v-health.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v health
+- id: 07-storage-navidrome
+  file: 07-storage-navidrome.svg
+  sha256: cd8911581c1173c0696dadaeb02f9bb2eb1ff3b6bdf5c64c49b90f7cb70274cf
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: navidrome mark used for nominative identification; rights remain with its owner
+  fallback: navidrome
+- id: 07-storage-jellyfin
+  file: 07-storage-jellyfin.svg
+  sha256: 7f53cf083dbb3119ec8c5acbd8049c5033227617e461540f70591ac109124306
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: jellyfin mark used for nominative identification; rights remain with its owner
+  fallback: jellyfin
+- id: 07-storage-cloudops
+  file: 07-storage-cloudops.svg
+  sha256: 3860f0d399e48fcaa30f2b21d3cd5e0d693267140f1e28cb2d341981ab8d2f4c
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: nginx mark used for nominative identification; rights remain with its owner
+  fallback: cloudops
+- id: 07-storage-lidarr
+  file: 07-storage-lidarr.svg
+  sha256: 2f55f69450a0ca03621e87550e81ec0f6798c4a578b54e4b988a9a7234a83647
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: lidarr mark used for nominative identification; rights remain with its owner
+  fallback: lidarr
+- id: 07-storage-musicportal
+  file: 07-storage-musicportal.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: musicportal
+- id: 07-storage-slskd
+  file: 07-storage-slskd.svg
+  sha256: 163133ab1baef9d6088d8a451bc7fd95ac03bdbb1d0ec2c3b089420cf3cd029a
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: slskd mark used for nominative identification; rights remain with its owner
+  fallback: slskd
+- id: 07-storage-kavita
+  file: 07-storage-kavita.svg
+  sha256: f03ab7420b8b36ad6b43e88723f794d76c411f728fb020fbeee470f6e1e7696b
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: kavita mark used for nominative identification; rights remain with its owner
+  fallback: kavita
+- id: 07-storage-immich_server
+  file: 07-storage-immich-server.svg
+  sha256: a5d4a43899e63ffc7e97246034f7f63cdfdc410aa803c5713d545290601c4d89
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: immich mark used for nominative identification; rights remain with its owner
+  fallback: immich server
+- id: 07-storage-x_agents
+  file: 07-storage-x-agents.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: x agents
+- id: 07-storage-health_promoter
+  file: 07-storage-health-promoter.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health promoter
+- id: 07-storage-health_receiver
+  file: 07-storage-health-receiver.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health receiver
+- id: 07-storage-grafana
+  file: 07-storage-grafana.svg
+  sha256: 8f32897073ee93594ab2339482ef21ca3767044055da89e2baf9066d25592df7
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: grafana mark used for nominative identification; rights remain with its owner
+  fallback: grafana

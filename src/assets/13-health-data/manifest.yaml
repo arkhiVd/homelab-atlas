@@ -1,0 +1,191 @@
+diagram: 13-health-data
+assets:
+- id: 13-health-data-x_miband
+  file: 13-health-data-x-miband.svg
+  sha256: 9138a3586d90bbcfaa3f55298a6f8720500cc18f3ed4b3d1fe9f7ff41eb07698
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health promote path
+- id: 13-health-data-x_gadgetbridge
+  file: 13-health-data-x-gadgetbridge.svg
+  sha256: 580fbc30f44a396d80c9eabb8e27666a1cef14aa7879cb7d2a4f7baa89a7f2f0
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Product names used for nominative identification; rights remain with their owners
+  fallback: mobile device
+- id: 13-health-data-x_health_connect
+  file: 13-health-data-x-health-connect.svg
+  sha256: 1970c905674dd518e218ce6e8d80db3a4032e7f2af94ea4b3c739a8d25387b63
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health connect
+- id: 13-health-data-syncthing
+  file: 13-health-data-syncthing.svg
+  sha256: 65d1430f7522bea0507259929f0033d7c62539d14757d7c6f5b62574eb4da2d3
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: syncthing mark used for nominative identification; rights remain with its owner
+  fallback: syncthing
+- id: 13-health-data-gb_source
+  file: 13-health-data-gb-source.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: db
+- id: 13-health-data-promote_path
+  file: 13-health-data-promote-path.svg
+  sha256: 9138a3586d90bbcfaa3f55298a6f8720500cc18f3ed4b3d1fe9f7ff41eb07698
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health promote path
+- id: 13-health-data-promote_timer
+  file: 13-health-data-promote-timer.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t health promote
+- id: 13-health-data-promote_service
+  file: 13-health-data-promote-service.svg
+  sha256: 1970c905674dd518e218ce6e8d80db3a4032e7f2af94ea4b3c739a8d25387b63
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s health promote
+- id: 13-health-data-gb_current
+  file: 13-health-data-gb-current.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: db
+- id: 13-health-data-gb_archive
+  file: 13-health-data-gb-archive.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v shared-workspace
+- id: 13-health-data-promotion_state
+  file: 13-health-data-promotion-state.svg
+  sha256: db4cbaf10f684252dd4b94523e8c734a5fc8cadd675d8f5d21cd0520a1a278e9
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon owner
+  fallback: settings
+- id: 13-health-data-x_overlay_access
+  file: 13-health-data-x-overlay-access.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: overlay mark used for nominative identification; rights remain with its owner
+  fallback: overlayd
+- id: 13-health-data-hc_receiver
+  file: 13-health-data-hc-receiver.svg
+  sha256: 1970c905674dd518e218ce6e8d80db3a4032e7f2af94ea4b3c739a8d25387b63
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: health connect
+- id: 13-health-data-hc_source
+  file: 13-health-data-hc-source.svg
+  sha256: 8fb2bfa899a3ec396dbd0b91aec6dc346e3ed7ee67e08d37c7f1b2eb0c823dcc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Locked credentials
+- id: 13-health-data-hc_snapshot
+  file: 13-health-data-hc-snapshot.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: db
+- id: 13-health-data-hc_backup_timer
+  file: 13-health-data-hc-backup-timer.svg
+  sha256: 7dd8c6490e6570aae6e69cbbd7779b892864aee5fa5f06c74f9b988c271ac8dc
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: t health backup
+- id: 13-health-data-hc_backup_service
+  file: 13-health-data-hc-backup-service.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: s health backup
+- id: 13-health-data-hc_backups
+  file: 13-health-data-hc-backups.svg
+  sha256: b655a77c793a326f172f070bfb808785f05cb1b467510bbc0a72818b4c92558a
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: v shared-workspace
+- id: 13-health-data-source_policy
+  file: 13-health-data-source-policy.svg
+  sha256: 44d601fe76f060a0bd415f3e005702392e821306d60b5ef390ba9acc54a07716
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: prefilter
+- id: 13-health-data-grafana
+  file: 13-health-data-grafana.svg
+  sha256: 8f32897073ee93594ab2339482ef21ca3767044055da89e2baf9066d25592df7
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: grafana mark used for nominative identification; rights remain with its owner
+  fallback: grafana
+- id: 13-health-data-x_health_ui
+  file: 13-health-data-x-health-ui.svg
+  sha256: 8f32897073ee93594ab2339482ef21ca3767044055da89e2baf9066d25592df7
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: grafana mark used for nominative identification; rights remain with its owner
+  fallback: grafana

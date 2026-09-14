@@ -1,0 +1,24 @@
+{
+  "captured_at": "2025-01-01T00:00:00Z",
+  "host": "public-demo",
+  "source_commit": "fixture",
+  "dirty": false,
+  "gate": "pass",
+  "findings": 0,
+  "freshness_hours": 876000,
+  "evidence_sources": [
+    "committed demonstration fixture"
+  ],
+  "stats": [
+    [
+      "1",
+      "components",
+      "ok"
+    ],
+    [
+      "0",
+      "gate findings",
+      "ok"
+    ]
+  ]
+}

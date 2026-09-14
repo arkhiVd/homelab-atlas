@@ -3,9 +3,10 @@
 ## Architecture
 
 - `src/*.mmd` contains hand-authored Mermaid diagrams.
-- `src/meta/*.yaml` contains machine-checkable node identifiers.
-- `fixtures/demo/inventory.json` is the only bundled inventory.
-- `atlas/core.py` owns command and path safety boundaries.
+- `src/meta/*.yaml` contains machine-checkable node sidecars.
+- `src/assets/*/manifest.yaml` records local, checksum-verified SVG assets.
+- `fixtures/demo/evidence.json` is the deterministic dashboard evidence fixture.
+- `bin/render-artifact` generates the static dashboard below `out/`.
 - `out/` is generated. Never hand-edit it.
 
 ## Commands
@@ -13,19 +14,18 @@
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -e '.[dev]'
-PATH="$PWD/.venv/bin:$PATH" bin/validate
+PATH="$PWD/.venv/bin:$PATH bin/validate
 ```
 
 ## Boundaries
 
-- Use synthetic infrastructure only. Never commit real hostnames, private addresses, account names, mount paths, inventories, observations, logs, vault content, or secrets.
-- Never use `shell=True` or pass a command through a shell.
-- Live discovery additions must pass through `validate_command` and remain read-only.
-- Keep the public CLI fixture-first. It must not inspect the local machine by default.
+- Keep publication content free of personal identifiers, non-public addresses, account data, credentials, local machine paths, logs, and live host observations.
+- The public renderer must use committed fixtures. It must not inspect the local machine, Docker, systemd, listeners, or network state.
+- Never use `shell=True` or pass commands through a shell.
 - Render only below this repository's `out/` directory.
-- Add negative tests for destructive commands, injection strings, and path traversal.
+- Treat SVG assets as inert local files: verify checksums and reject scripts, event handlers, external URLs, and oversized files.
 - Do not create a repository, push, tag, publish, or release without the owner's explicit approval.
 
 ## Validation
 
-The full gate is `PATH="$PWD/.venv/bin:$PATH" bin/validate`. Diagram changes also require a browser check of `out/atlas.html` and an updated synthetic screenshot.
+The full gate is `PATH="$PWD/.venv/bin:$PATH" bin/validate`. Diagram changes also require browser checks of `out/site/index.html` at desktop and mobile widths.

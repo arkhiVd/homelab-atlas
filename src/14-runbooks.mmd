@@ -1,0 +1,33 @@
+%% 14-runbooks — cold boot order. The other runbooks live in 14-runbooks-*.mmd.
+%% Source of truth: src/14-runbooks.mmd. Generated outputs are never hand-edited.
+sequenceDiagram
+    autonumber
+    %% atlas-participant P hp
+    participant P as Power on
+    %% atlas-participant D docker
+    participant D as docker.service
+    %% atlas-participant T overlay
+    participant T as overlayd
+    %% atlas-participant H linux
+    participant H as homelab.service
+    %% atlas-participant C docker
+    participant C as compose workloads
+    %% atlas-participant M linux-mint
+    participant M as operator user manager
+    %% atlas-participant U terminal
+    participant U as user units
+
+    P->>D: system boot starts service
+    P->>T: system boot starts service
+    T-->>T: bring up authenticated overlay
+    Note over H: system oneshot, After docker + overlayd
+    D->>H: ready
+    T->>H: ready
+    H->>C: docker compose up -d --remove-orphans
+    Note over C: application access waits for the authenticated overlay
+    C-->>H: homelab + rustdesk up
+    Note over M,U: operator lingering is enabled and user units are enabled
+    P->>M: user manager starts with lingering
+    M->>U: default.target starts hermes-gateway,<br/>claude-bridge, cloudops-chat
+    Note over U: not children of homelab.service<br/>verify user manager state separately
+    H-->>P: active (exited), healthy oneshot

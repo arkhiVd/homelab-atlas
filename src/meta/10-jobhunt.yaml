@@ -1,6 +1,0 @@
-id: 10-jobhunt
-title: Scheduled job discovery workflow
-audience: Homelab operators and reviewers
-summary: Synthetic topology that demonstrates the architecture pattern without publishing
-  host-specific addresses, paths, or account data.
-nodes: []

@@ -1,0 +1,82 @@
+%% 04-media — how a movie or episode actually arrives and reaches playback.
+%% Source of truth: src/04-media.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 34, "rankSpacing": 46, "diagramPadding": 20}}}%%
+flowchart LR
+    x_user["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-x-user.svg' width='52' height='52' alt=''/><br/>Request</div>"]
+    jellyseerr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-jellyseerr.svg' width='52' height='52' alt=''/><br/>jellyseerr :5055<br/>request front-door</div>"]
+
+    subgraph manage["Management"]
+        radarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-radarr.svg' width='52' height='52' alt=''/><br/>radarr :7878<br/>movies</div>"]
+        sonarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-sonarr.svg' width='52' height='52' alt=''/><br/>sonarr :8989<br/>TV</div>"]
+    end
+
+    subgraph find["Finding it"]
+        prowlarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-prowlarr.svg' width='52' height='52' alt=''/><br/>prowlarr :9696<br/>indexer aggregator</div>"]
+        flaresolverr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-flaresolverr.svg' width='52' height='52' alt=''/><br/>flaresolverr :8191<br/>Cloudflare challenges</div>"]
+        x_indexers["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-x-indexers.svg' width='52' height='52' alt=''/><br/>Knaben · YTS<br/>ISP blocks force these</div>"]
+    end
+
+    subgraph fetch["Fetching it — all traffic leaves via VPN"]
+        gluetun["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-gluetun.svg' width='52' height='52' alt=''/><br/>gluetun :8085<br/>Cloudflare WARP · kill-switch</div>"]
+    end
+
+    subgraph pipeline["Download and extraction"]
+        qbittorrent["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-qbittorrent.svg' width='52' height='52' alt=''/><br/>qbittorrent<br/>network_mode: service:gluetun</div>"]
+        v_downloads["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-v-downloads.svg' width='52' height='52' alt=''/><br/>downloads</div>"]
+        unpackerr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-unpackerr.svg' width='52' height='52' alt=''/><br/>unpackerr<br/>extracts archives</div>"]
+        decluttarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-decluttarr.svg' width='52' height='52' alt=''/><br/>decluttarr<br/>prunes stalled/orphaned</div>"]
+    end
+
+    subgraph library["Libraries and serving"]
+        v_syncmedia["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-v-syncmedia.svg' width='52' height='52' alt=''/><br/>data/syncthing/Media<br/>second library, synced from laptop</div>"]
+        jellyfin["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-jellyfin.svg' width='52' height='52' alt=''/><br/>jellyfin :8096</div>"]
+        v_movies["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-v-movies.svg' width='52' height='52' alt=''/><br/>movies</div>"]
+        bazarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-bazarr.svg' width='52' height='52' alt=''/><br/>bazarr :6767<br/>subtitles</div>"]
+        v_tv["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-v-tv.svg' width='52' height='52' alt=''/><br/>tv</div>"]
+        tdarr["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/04-media/04-media-tdarr.svg' width='52' height='52' alt=''/><br/>tdarr :8265<br/>transcode · server-only</div>"]
+    end
+
+    x_user ==> jellyseerr
+    jellyseerr ==> radarr
+    jellyseerr ==> sonarr
+    radarr ==> prowlarr
+    sonarr ==> prowlarr
+    prowlarr -.->|"solves challenges via"| flaresolverr
+    prowlarr ==> x_indexers
+
+    radarr ==>|"send .torrent"| qbittorrent
+    sonarr ==> qbittorrent
+    qbittorrent ==>|"shares netns —<br/>no VPN, no traffic"| gluetun
+    gluetun ==>|"WireGuard 162.159.192.1:2408"| x_indexers
+
+    qbittorrent ==> v_downloads
+    v_downloads ==> unpackerr
+    decluttarr -.->|"removes stalled"| qbittorrent
+    unpackerr ==>|"radarr/sonarr import"| v_movies
+    unpackerr ==> v_tv
+
+    v_movies ==> jellyfin
+    v_tv ==> jellyfin
+    v_syncmedia ==> jellyfin
+    v_movies --> bazarr
+    v_tv --> bazarr
+    bazarr -.->|"subtitle files"| v_movies
+    v_movies --> tdarr
+    v_tv --> tdarr
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_user host
+    class jellyseerr,radarr,sonarr,prowlarr,flaresolverr media
+    class qbittorrent,unpackerr,decluttarr,bazarr,tdarr,jellyfin media
+    class gluetun vpn
+    class v_downloads,v_movies,v_tv,v_syncmedia data
+    class x_indexers external

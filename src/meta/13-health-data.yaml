@@ -1,0 +1,96 @@
+id: 13-health-data
+title: "Health data \u2014 validated wearable ingress and read-only dashboards"
+audience: Anyone checking wearable-data ingress, snapshot freshness, backups, or Grafana inputs.
+layer: C
+summary: Wearable exports are validated, promoted atomically, retained, and served to Grafana through read-only data paths.
+notes:
+- The phone collects wearable records through Gadgetbridge and Health Connect. Gadgetbridge is the main source for steps and heart rate. Its database export moves to the server through a send-only phone folder and a receive-only server folder.
+- A path unit notices a new Gadgetbridge export, and a timer provides a fallback check. The promoter waits for the file to stop changing, checks its schema and SQLite integrity, records the source hash, and atomically publishes a current snapshot. A bad or incomplete export never replaces the last good copy.
+- Health Connect uses a second route. The phone exporter sends authenticated requests through the overlay to the receiver. The receiver deduplicates logical records, keeps each unique raw payload in the source database, checks the generated snapshot, and replaces it atomically.
+- A daily timer makes a transaction-consistent backup of the Health Connect source database. This protects the write-side record independently from the read-only snapshot used by dashboards.
+- Grafana reads both verified snapshots without write access. The source policy prefers Gadgetbridge where the two feeds overlap and uses Health Connect only for supplementary records. I open /health from the laptop or phone to view the dashboards.
+nodes:
+- id: x_miband
+  kind: external
+  label: Wearable device
+  lifecycle: external-unverified
+- id: x_gadgetbridge
+  kind: external
+  label: Wearable client
+  lifecycle: external-unverified
+- id: x_health_connect
+  kind: external
+  label: Health Connect exporter
+  lifecycle: external-unverified
+- id: syncthing
+  kind: container
+  name: syncthing
+  lifecycle: observed-live
+- id: gb_source
+  kind: volume
+  lifecycle: observed-live
+- id: promote_path
+  kind: path
+  name: gadgetbridge-health-promote.path
+  label: Canonical Gadgetbridge export watcher
+  lifecycle: observed-live
+- id: promote_timer
+  kind: timer
+  name: gadgetbridge-health-promote.timer
+  persistent: true
+  randomized_delay_usec: 1min
+  lifecycle: observed-live
+- id: promote_service
+  kind: unit
+  name: gadgetbridge-health-promote.service
+  lifecycle: observed-live
+- id: gb_current
+  kind: volume
+  lifecycle: observed-live
+- id: gb_archive
+  kind: volume
+  lifecycle: observed-live
+- id: promotion_state
+  kind: volume
+  lifecycle: observed-live
+- id: x_overlay_access
+  kind: concept
+  label: Authenticated overlay Serve /health-connect
+  lifecycle: observed-live
+- id: hc_receiver
+  kind: unit
+  name: gadgetbridge-health-connect.service
+  lifecycle: observed-live
+- id: hc_source
+  kind: volume
+  lifecycle: observed-live
+- id: hc_snapshot
+  kind: volume
+  lifecycle: observed-live
+- id: hc_backup_timer
+  kind: timer
+  name: gadgetbridge-health-connect-backup.timer
+  on_calendar:
+  - '*-*-* 00:00:00'
+  persistent: true
+  randomized_delay_usec: 30min
+  lifecycle: observed-live
+- id: hc_backup_service
+  kind: unit
+  name: gadgetbridge-health-connect-backup.service
+  lifecycle: observed-live
+- id: hc_backups
+  kind: volume
+  lifecycle: observed-live
+- id: source_policy
+  kind: concept
+  label: Conservative dashboard source policy
+  lifecycle: observed-live
+- id: grafana
+  kind: container
+  name: grafana
+  lifecycle: observed-live
+- id: x_health_ui
+  kind: concept
+  label: Authenticated overlay Serve /health
+  lifecycle: observed-live

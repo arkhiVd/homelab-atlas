@@ -1,0 +1,89 @@
+id: 12-invest
+title: "Invest \u2014 Authenticated overlay dashboard and nightly research pipeline"
+audience: Anyone checking investment-data freshness, the dashboard path, or the nightly pipeline.
+layer: C
+summary: 'The dashboard reads a privacy-safe DuckDB projection. A system timer runs the authoritative 17-stage research pipeline; bounded model stages run only after deterministic filtering.
+
+  '
+notes:
+- "I open the investment dashboard from the laptop through the authenticated /invest route. The gateway forwards the request to Streamlit. Streamlit reads a separate DuckDB projection, so browsing charts and tables cannot modify the pipeline\u2019s working database."
+- The nightly timer starts one locked pipeline run. The first stages refresh mutual-fund data, calculate metrics, write exports to the synchronized workspace, and prepare alerts. Later stages collect prices and filings, update fundamentals, apply deterministic screens, and build the watchlist.
+- Only the survivors reach bounded model research and headline sentiment. Those calls add context to a filtered set instead of asking a model to inspect every record. The final stages update tracking, produce the Telegram digest, and rank the current candidates.
+- The last stage creates a temporary read-only UI database, checks it, and atomically replaces the previous projection. If an optional feed fails, the pipeline keeps the last usable data and marks freshness or missing sections. The dashboard therefore shows a stable result rather than a half-written run.
+- I use Telegram for change alerts and the compact digest. I use the Streamlit dashboard when I want to inspect the underlying metrics and rankings. The system is research-only and has no broker order path.
+nodes:
+- id: x_overlay_access
+  kind: concept
+  label: Authenticated overlay Serve /invest
+  lifecycle: observed-live
+- id: invest_dashboard
+  kind: unit
+  name: invest-dashboard.service
+  lifecycle: observed-live
+- id: x_streamlit
+  kind: concept
+  label: Streamlit dashboard
+  lifecycle: observed-live
+- id: invest_mf_timer
+  kind: timer
+  name: invest-mf.timer
+  on_calendar:
+  - '*-*-* 21:30:00 UTC'
+  persistent: true
+  randomized_delay_usec: 5min
+  lifecycle: observed-live
+- id: invest_mf_service
+  kind: unit
+  name: invest-mf.service
+  lifecycle: observed-live
+- id: x_mf_refresh
+  kind: concept
+  label: MF refresh and export stages
+  lifecycle: observed-live
+- id: x_market_data
+  kind: concept
+  label: Market data and deterministic screening stages
+  lifecycle: observed-live
+- id: x_bounded_models
+  kind: concept
+  label: Bounded research and sentiment model stages
+  lifecycle: observed-live
+- id: x_outputs
+  kind: concept
+  label: Tracking digest and ranking stages
+  lifecycle: observed-live
+- id: ui_projection
+  kind: concept
+  label: Verified atomic UI projection
+  lifecycle: observed-live
+- id: invest_db
+  kind: volume
+  lifecycle: observed-live
+- id: invest_ui_db
+  kind: volume
+  lifecycle: observed-live
+- id: x_workspace_exports
+  kind: volume
+  lifecycle: observed-live
+- id: x_telegram
+  kind: external
+  label: Telegram
+  lifecycle: external-unverified
+- id: x_stale
+  kind: concept
+  label: Last-good and stale-data state
+  lifecycle: observed-live
+  class: warn
+  note: The XBRL and fundamentals chips are intentionally fail-open in run-nightly.sh; warnings retain retryable work and the projection exposes freshness or gaps.
+- id: x_mf_sources
+  kind: external
+  label: TigZig MFAPI and NSE
+  lifecycle: external-unverified
+- id: x_stock_sources
+  kind: external
+  label: NSE filings bhavcopy and market data
+  lifecycle: external-unverified
+- id: x_claude_bridge
+  kind: concept
+  label: claude-bridge bounded model path
+  lifecycle: observed-live

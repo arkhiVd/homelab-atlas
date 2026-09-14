@@ -1,0 +1,125 @@
+diagram: 00-context
+assets:
+- id: overlay
+  file: overlay.svg
+  sha256: cfa3645dcf2f595b9219cf8b0a67beced7fb0f025425859820ba044d1041ad98
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Authenticated overlay is a trademark of Authenticated overlay Inc.; nominative
+    use only
+  fallback: Authenticated overlay
+- id: docker
+  file: docker.svg
+  sha256: 7de45e1ea203da32a040c257f47cd39a5711b3a200d27ec72dbccbc5efb1590b
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Docker and the Docker logo are trademarks of Docker, Inc.; nominative
+    use only
+  fallback: Docker Compose
+- id: rustdesk
+  file: rustdesk.svg
+  sha256: f14e275f8b60adde7a026a54a44a4c5b79ff73ddbc21bcc7a338af04563029ce
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: RustDesk and its mark belong to their respective owner; nominative use
+    only
+  fallback: RustDesk
+- id: aws
+  file: aws.svg
+  sha256: 3ab3e2114a4e7fca84f2da92f8ab982d9d6d304d049db0dafbd9c3f2b0e44801
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Amazon Web Services and AWS marks belong to Amazon.com, Inc. or its affiliates;
+    nominative use only
+  fallback: AWS
+- id: claude
+  file: claude.svg
+  sha256: 7f3a400121b0ca7220ac7e9477303d4e6eef232634cc57ef8cea2982d421269e
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Anthropic and Claude marks belong to Anthropic PBC; nominative use only
+  fallback: Claude
+- id: telegram
+  file: telegram.svg
+  sha256: 949491b66d35834896660ec8d461a15e87119cd6738344d771006652331f4628
+  source_url: local-authored
+  revision: projection-local
+  license: CC-BY-4.0
+  attribution: Local authored representative illustration
+  trademark: Telegram is a trademark of Telegram Messenger Inc.; nominative use only
+  fallback: Telegram
+- id: user
+  file: user.svg
+  sha256: a17e5e6993bcce3e092dd7dbeaff63ca699fa088562de281c97f9949169aaee6
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Person
+- id: mobile device
+  file: phone.svg
+  sha256: 580fbc30f44a396d80c9eabb8e27666a1cef14aa7879cb7d2a4f7baa89a7f2f0
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration and GrapheneOS text treatment
+  trademark: Generic semantic icon; representative mobile device only; Pixel and GrapheneOS
+    marks are not depicted
+  fallback: Phone
+- id: internet
+  file: internet.svg
+  sha256: 22d5958462fbda1a5c41457223848300a5effa3af533a44111800a6e79e9c798
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: LAN and WAN
+- id: agent
+  file: agent.svg
+  sha256: 3d3d9766312f12d91c892916fa3195f0ba3fef5d6527aec11c7dd88b4c21268d
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Agent plane
+- id: storage
+  file: storage.svg
+  sha256: a6a876841deb9bb13cc51520adfe68b06cc47e82df5756ea7a0acf72af37c218
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon
+  fallback: Storage
+- id: vpn
+  file: vpn.svg
+  sha256: 6dda189f1e5912c720ff1c6d6c63f8e53393098cce48b7e7ab8817bdee750d86
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon; Cloudflare and Proton marks are not depicted
+  fallback: VPN egress
+- id: search
+  file: search.svg
+  sha256: 3d3ce41f882e1f25a80b0a264f39252e24bc4d067d790f393ce1f4a08b35afe2
+  source_url: local-authored
+  revision: projection-local
+  license: MIT
+  attribution: Local authored representative illustration
+  trademark: Generic semantic icon; named content providers are identified by adjacent
+    text only
+  fallback: External content sources

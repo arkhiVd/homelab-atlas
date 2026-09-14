@@ -1,0 +1,83 @@
+%% 09-jobhunt — nightly discovery, bounded model scoring, and user-facing outputs.
+%% Source of truth: src/09-jobhunt.mmd. Generated outputs are never hand-edited.
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 18, "rankSpacing": 26, "diagramPadding": 34}}}%%
+flowchart LR
+    subgraph sources["Current sources"]
+        x_ats["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-x-ats.svg' width='52' height='52' alt=''/><br/>ATS boards<br/>Greenhouse · Lever · Ashby</div>"]
+        x_apis["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-x-apis.svg' width='52' height='52' alt=''/><br/>Job APIs<br/>Remotive · Jobicy · Arbeitnow<br/>Remote OK · Adzuna</div>"]
+        x_local["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-x-local.svg' width='52' height='52' alt=''/><br/>Regional sources<br/>Regional board A · Regional board B</div>"]
+        x_serpapi["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-x-serpapi.svg' width='52' height='52' alt=''/><br/>SerpAPI pilot<br/>enabled · recent failures/timeouts</div>"]
+        x_disabled["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-x-disabled.svg' width='52' height='52' alt=''/><br/>configured inactive<br/>Jooble · JSearch</div>"]
+    end
+
+    jobhunt_timer["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-jobhunt-timer.svg' width='52' height='52' alt=''/><br/>jobhunt-discover.timer<br/>daily window · persistent</div>"]
+    jobhunt_discover["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-jobhunt-discover.svg' width='52' height='52' alt=''/><br/>jobhunt-discover.service<br/>jobhunt.nightly</div>"]
+    resume["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-resume.svg' width='52' height='52' alt=''/><br/>canonical resume<br/>Syncthing resume folder</div>"]
+
+    subgraph pipeline["Discovery and scoring"]
+        leads["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-leads.svg' width='52' height='52' alt=''/><br/>fetch · normalize<br/>insert · deduplicate</div>"]
+        prefilter["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-prefilter.svg' width='52' height='52' alt=''/><br/>deterministic filter<br/>PASS · REVIEW · HARD_REJECT</div>"]
+        score["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-score.svg' width='52' height='52' alt=''/><br/>bounded model scoring<br/>fast tier · failed calls remain retryable</div>"]
+        db["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-db.svg' width='52' height='52' alt=''/><br/>jobhunt.db<br/>canonical jobs and status</div>"]
+        funnel["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-funnel.svg' width='52' height='52' alt=''/><br/>funnel.jsonl<br/>aggregate run diagnostics</div>"]
+    end
+
+    hermes["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-hermes.svg' width='52' height='52' alt=''/><br/>Hermes CLI<br/>selected provider + model</div>"]
+    settings["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-settings.svg' width='52' height='52' alt=''/><br/>settings.json<br/>main and scoring selections</div>"]
+    claude_fallback["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-claude-fallback.svg' width='52' height='52' alt=''/><br/>direct claude -p<br/>Claude-family emergency fallback</div>"]
+    providers["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-providers.svg' width='52' height='52' alt=''/><br/>configured model providers</div>"]
+
+    subgraph outputs["Outputs and actions"]
+        digest["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-digest.svg' width='52' height='52' alt=''/><br/>Telegram digest and cards</div>"]
+        jobhunt_bot["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-jobhunt-bot.svg' width='52' height='52' alt=''/><br/>jobhunt-bot.service<br/>show · tailor · prep · model</div>"]
+        board["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-board.svg' width='52' height='52' alt=''/><br/>workspace kanban<br/>Tracker/jobhunt-board.md</div>"]
+        prep["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-prep.svg' width='52' height='52' alt=''/><br/>tailored material<br/>Tracker/jobhunt-prep/</div>"]
+    end
+    x_telegram["<div style='width:170px;min-height:118px;text-align:center;white-space:normal;overflow-wrap:anywhere'><img src='./assets/09-jobhunt/09-jobhunt-x-telegram.svg' width='52' height='52' alt=''/><br/>Telegram</div>"]
+
+    jobhunt_timer ==> jobhunt_discover
+    jobhunt_discover ==> leads
+    x_ats ==> leads
+    x_apis ==> leads
+    x_local ==> leads
+    x_serpapi -.->|"degraded source state"| leads
+    x_disabled -.->|"off"| leads
+    leads ==> db
+    leads ==> prefilter
+    prefilter ==>|"PASS and REVIEW only"| score
+    score ==> db
+    jobhunt_discover ==> funnel
+
+    resume ==> score
+    settings ==> hermes
+    score <==>|"hermes -z · fast model"| hermes
+    hermes ==> providers
+    hermes -.->|"Claude-family failure only"| claude_fallback
+
+    db ==> digest
+    db ==> board
+    digest ==> x_telegram
+    x_telegram <==> jobhunt_bot
+    jobhunt_bot ==>|"tailored resume and prep"| prep
+    jobhunt_bot <==>|"main model"| hermes
+    jobhunt_bot --> db
+
+    %% Keep prep beyond Hermes so the bot's two outgoing lanes do not intersect.
+    hermes ~~~ prep
+
+    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:1.5px,color:#1a202c
+    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#1e1b4b
+    classDef media fill:#ffedd5,stroke:#ea580c,stroke-width:1.5px,color:#431407
+    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:1.5px,color:#042f2e
+    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:1.5px,color:#4a044e
+    classDef vpn fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:1.5px,color:#0f172a
+    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+
+    class x_ats,x_apis,x_local,providers,x_telegram external
+    class x_serpapi,x_disabled,claude_fallback warn
+    class jobhunt_timer,jobhunt_discover,jobhunt_bot ai
+    class leads,prefilter,digest media
+    class score,hermes ai
+    class db,funnel,resume,settings,board,prep data
