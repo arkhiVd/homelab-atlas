@@ -123,7 +123,7 @@ def test_standalone_uses_local_assets_and_recovers_from_loading_failures():
 
 def test_generated_inline_scripts_parse_with_node():
     page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
-    scripts = re.findall(r"<script(?:[^>]*)>(.*?)</script\s*>", page, re.DOTALL | re.IGNORECASE)
+    scripts = re.findall(r"<script(?:[^>]*)>(.*?)</script[^>]*>", page, re.DOTALL | re.IGNORECASE)
     assert scripts
     for script in scripts:
         with TemporaryDirectory() as directory:
