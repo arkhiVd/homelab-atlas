@@ -132,10 +132,11 @@ def test_generated_inline_scripts_parse_with_node():
             assert subprocess.run(["node", "--check", path], capture_output=True).returncode == 0
 
 
-def test_brand_squircles_are_limited_to_runbook_participants():
+def test_brand_squircles_cover_main_diagrams_and_runbook_participants():
     page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
-    assert "function decorateBrandIcons()" not in page
-    assert "atlas-icon-squircle" not in page
+    assert "function decorateBrandIcons()" in page
+    assert ".atlas-sheet:not(.atlas-sequence-sheet) img[src]" in page
+    assert "atlas-icon-squircle" in page
     assert "atlas-brand-squircle" in page
     assert "svg.appendChild(back)" in page
 

@@ -67,7 +67,7 @@ assets:
   fallback: score
 - id: 12-invest-x_bounded_models
   file: 12-invest-x-bounded-models.svg
-  sha256: 8a6030406f34ee761c3d60dd95cc49af8c3ca1c9f45b61a3d8648d60c91cba62
+  sha256: d710c4424318f666f2aa63e9a9baeeae28cfa4c636dda8449b12cd6adf09a4aa
   source_url: local-authored
   revision: projection-local
   license: CC-BY-4.0
