@@ -2,7 +2,9 @@ import hashlib
 import importlib.machinery
 import importlib.util
 import json
+import re
 import shutil
+import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -91,12 +93,9 @@ def test_fixture_is_committed_and_has_required_shape():
     assert {"captured_at", "host", "source_commit", "stats"} <= evidence.keys()
 
 
-def test_page_is_an_architecture_guide_with_fixture_backed_catalog_content():
+def test_page_is_a_diagrams_first_architecture_guide():
     html = renderer.build(renderer.load(), renderer.load_fixture_evidence())
     assert "A self-hosted environment organized around" in html
-    assert "Evidence snapshot" in html
-    assert "Service catalog" in html
-    assert "fixture evidence" in html
     assert "https://github.com/arkhiVd/agent-workbench" in html
     assert "https://github.com/arkhiVd/invest-pipeline" in html
     assert "https://github.com/arkhiVd/librarian" in html
@@ -116,10 +115,29 @@ def test_standalone_uses_local_assets_and_recovers_from_loading_failures():
     assert "atlas-theme" not in page
     assert "linux-mint" not in page
     assert "atlas-participant M debian" in page
-    assert "image.setAttribute('href',assets[id])" in page
+    assert "im.setAttribute('href',a[id])" in page
     assert "Instrument Sans" in page
     assert "Space Grotesk" not in page
     assert "space-grotesk" not in page
+
+
+def test_generated_inline_scripts_parse_with_node():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    scripts = re.findall(r"<script(?:[^>]*)>(.*?)</script>", page, re.DOTALL)
+    assert scripts
+    for script in scripts:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "generated.js"
+            path.write_text(script)
+            assert subprocess.run(["node", "--check", path], capture_output=True).returncode == 0
+
+
+def test_brand_squircles_are_limited_to_runbook_participants():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert "function decorateBrandIcons()" not in page
+    assert "atlas-icon-squircle" not in page
+    assert "atlas-brand-squircle" in page
+    assert "svg.appendChild(back)" in page
 
 
 def test_participant_decorations_only_reference_manifest_backed_assets():
@@ -130,21 +148,65 @@ def test_participant_decorations_only_reference_manifest_backed_assets():
     assert "image.onerror=resolve" in page
 
 
-def test_dashboard_catalog_stats_filters_and_service_interactions_are_preserved():
+def test_mermaid_theme_overrides_only_defaults_and_sequence_surfaces():
+    docs = renderer.load()
+    html = renderer.build(docs, renderer.load_fixture_evidence())
+    assert ".cluster rect{fill:#182735!important" in html
+    assert ".node.default rect" in html
+    assert ".default>rect{fill:#182735!important" in html
+    assert ".atlas-sequence-theme .actor{fill:#182735!important" in html
+    assert ".atlas-sequence-theme .note{fill:#182735!important" in html
+    assert (
+        ".atlas-sequence-theme .messageLine0,#atlas-root .atlas-sequence-theme .messageLine1,#atlas-root .atlas-sequence-theme .actor-line,#atlas-root .atlas-sequence-theme .loopLine{stroke:#e2e8f0!important;stroke-width:2.5px!important"
+        in html
+    )
+    assert (
+        ".atlas-sequence-theme marker path{fill:#e2e8f0!important;stroke:#e2e8f0!important" in html
+    )
+    assert ".atlas-sequence-theme .sectionTitle" in html
+    assert ".sectionTitle tspan" in html
+    assert ".sectionTitle" in html and "fill:#edf2f7!important" in html
+    assert (
+        "content.className='atlas-diagram-theme'+(sheet.classList.contains('atlas-sequence-sheet')?' atlas-sequence-theme':'')"
+        in html
+    )
+    expected = sum(source.count("sequenceDiagram") for doc in docs for _, source in doc["bodies"])
+    assert expected == 6
+    assert (
+        len(
+            re.findall(
+                r'class="atlas-sheet atlas-diagram-theme atlas-sequence-sheet atlas-sequence-theme"',
+                html,
+            )
+        )
+        == expected
+    )
+    assert "classDef host fill:#1e293b" in (ROOT / "src" / "00-context.mmd").read_text()
+
+
+def test_modal_fit_resets_scroll_offsets_without_scroll_extent_centering():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert (
+        "s.style.marginLeft='0';s.style.marginTop='0';content.scrollLeft=0;content.scrollTop=0"
+        in page
+    )
+    assert "content.scrollHeight<=content.clientHeight" not in page
+    assert "targetH=Math.max(h,120)" in page
+    assert "if(isTop)y-=targetH-originalH" in page
+    assert "icon=64" in page
+
+
+def test_dashboard_is_diagrams_first_without_public_fixture_or_catalog_diagnostics():
     html = renderer.build(renderer.load(), renderer.load_fixture_evidence())
     for marker in (
-        'aria-label="Evidence snapshot"',
-        'aria-label="Evidence statistics"',
-        'id="atlas-catalog"',
-        'data-filter="lifecycle"',
-        'data-filter="capability"',
-        'class="atlas-service"',
-        "data-inspect=",
-        'id="atlas-inspector"',
-        "function apply()",
-        "data-layer",
-        "data-zoom-action",
+        "Evidence snapshot",
+        "Evidence statistics",
+        "atlas-catalog",
+        "atlas-inspector",
+        "atlas-service",
     ):
+        assert marker not in html
+    for marker in ("atlas-viewport", "data-zoom-action", 'id="atlas-zoom"'):
         assert marker in html
 
 
@@ -203,7 +265,7 @@ def test_generated_css_has_valid_hyphenated_properties_and_balanced_media_rule()
     for malformed in ("grid -", "margin -", "font -", "border -", "template -", "{{{{"):
         assert malformed not in html
     assert "grid-column:1/-1" in html
-    assert "@media(max-width:680px){#atlas-root .atlas-service" in html
+    assert "@media(max-width:680px){#atlas-root{" in html
 
 
 def test_automation_user_manager_uses_debian_artwork_with_accurate_manifest():
