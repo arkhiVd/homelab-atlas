@@ -4,9 +4,10 @@
 flowchart TB
     subgraph entry["People and triggers"]
 
+        x_mcp_clients["<img src='./assets/08-ai-plane/mcp.svg' width='72' height='72' alt=''/><br/><b>MCP clients</b><br/>Claude Code · Desktop · Codex<br/>OpenCode · mobile device"]
+
         x_browser["<img src='./assets/08-ai-plane/user.svg' width='72' height='72' alt=''/><br/><b>User</b><br/>CloudOps browser"]
         x_telegram["<img src='./assets/08-ai-plane/telegram.svg' width='72' height='72' alt=''/><br/><b>Telegram</b><br/>gateway · Jobhunt bot"]
-        x_mcp_clients["<img src='./assets/08-ai-plane/mcp.svg' width='72' height='72' alt=''/><br/><b>MCP clients</b><br/>Claude Code · Desktop · Codex<br/>OpenCode · mobile device"]
         x_timers["<img src='./assets/08-ai-plane/timer.svg' width='72' height='72' alt=''/><br/><b>systemd timers</b><br/>Jobhunt discovery"]
     end
 
@@ -62,7 +63,6 @@ flowchart TB
         end
     end
 
-    entry ~~~ homelab_mcp
 
     mise -.->|"installs Pi"| pi
     mise -.->|"installs Herdr"| herdr
@@ -105,13 +105,13 @@ flowchart TB
     homelab_mcp -.->|"every tool call"| audit
 
 
-    classDef host fill:#e8eaf0,stroke:#4a5568,stroke-width:2px,color:#1a202c
-    classDef ingress fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b
-    classDef data fill:#ccfbf1,stroke:#0d9488,stroke-width:2px,color:#042f2e
-    classDef ai fill:#fae8ff,stroke:#a21caf,stroke-width:2px,color:#4a044e
-    classDef secure fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#450a0a
-    classDef external fill:#f1f5f9,stroke:#64748b,stroke-width:2px,color:#0f172a
-    classDef warn fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#422006
+    classDef host fill:#1e293b,stroke:#94a3b8,stroke-width:1.5px,color:#f8fafc
+    classDef ingress fill:#172554,stroke:#60a5fa,stroke-width:1.5px,color:#eff6ff
+    classDef data fill:#134e4a,stroke:#5eead4,stroke-width:1.5px,color:#f0fdfa
+    classDef ai fill:#4a044e,stroke:#f0abfc,stroke-width:1.5px,color:#fdf4ff
+    classDef secure fill:#450a0a,stroke:#fca5a5,stroke-width:2px,color:#fff1f2
+    classDef external fill:#1e293b,stroke:#94a3b8,stroke-width:1.5px,color:#f8fafc
+    classDef warn fill:#422006,stroke:#facc15,stroke-width:2px,color:#fefce8
 
     class x_telegram,x_browser,x_mcp_clients,x_timers,pi,instructions,herdr,mise host
     class hermes_gateway,hermes,claude_bridge,cloudops_chat,homelab_mcp,jobhunt_bot,jobhunt_discover,t_workspace,t_jobhunt,t_dojo,t_ops,r_contract ai

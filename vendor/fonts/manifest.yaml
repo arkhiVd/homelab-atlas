@@ -1,0 +1,17 @@
+fonts:
+- file: instrument-sans-var.woff2
+  family: Instrument Sans
+  sha256: 2ee17598a98d8a59e4df8152d015bec9ab8e4d5672cc0ab42bef806b568e3971
+  source_url: https://github.com/Instrument/instrument-sans
+  revision: portfolio-infra local artifact
+  license: OFL-1.1
+  license_file: OFL.txt
+  attribution: Instrument Sans contributors
+- file: jetbrains-mono-latin.woff2
+  family: JetBrains Mono
+  sha256: 83c005d49d8a6a50474c73a5a36ac0468076e9c4a29da7bdb14995d80560a5be
+  source_url: local-vendored
+  revision: existing local artifact
+  license: OFL-1.1
+  license_file: OFL.txt
+  attribution: JetBrains Mono contributors

@@ -2,7 +2,9 @@ import hashlib
 import importlib.machinery
 import importlib.util
 import json
+import re
 import shutil
+import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -44,7 +46,11 @@ def test_fixture_render_is_deterministic_and_stays_under_out():
             assert (out / "site" / "index.html").read_bytes() == first
         assert (out / "atlas.html").is_file()
         assert any((out / "site" / "assets").rglob("*.svg"))
-        assert (out / "site" / "fonts" / "space-grotesk-latin.woff2").is_file()
+        font = out / "site" / "fonts" / "instrument-sans-var.woff2"
+        assert font.is_file()
+        assert hashlib.sha256(font.read_bytes()).hexdigest() == (
+            "2ee17598a98d8a59e4df8152d015bec9ab8e4d5672cc0ab42bef806b568e3971"
+        )
     finally:
         shutil.rmtree(out, ignore_errors=True)
 
@@ -87,14 +93,190 @@ def test_fixture_is_committed_and_has_required_shape():
     assert {"captured_at", "host", "source_commit", "stats"} <= evidence.keys()
 
 
-def test_page_is_an_architecture_guide_without_snapshot_or_catalog_cards():
+def test_page_is_a_diagrams_first_architecture_guide():
     html = renderer.build(renderer.load(), renderer.load_fixture_evidence())
     assert "A self-hosted environment organized around" in html
-    assert "Evidence snapshot" not in html
-    assert "Service catalog" not in html
-    assert "observed live" not in html
     assert "https://github.com/arkhiVd/agent-workbench" in html
     assert "https://github.com/arkhiVd/invest-pipeline" in html
     assert "https://github.com/arkhiVd/librarian" in html
     assert '<section class="atlas-notes" aria-label="Notes">' in html
     assert "<summary>Notes</summary>" not in html
+
+
+def test_standalone_uses_local_assets_and_recovers_from_loading_failures():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert 'src="./mermaid.min.js"' in page
+    assert "loading homelab atlas…" in page
+    assert "Retry" in page
+    assert "Show text" in page
+    assert "45000" in page
+    assert "<noscript>" in page
+    assert "localStorage" not in page
+    assert "atlas-theme" not in page
+    assert "linux-mint" not in page
+    assert "atlas-participant M debian" in page
+    assert "im.setAttribute('href',a[id])" in page
+    assert "Instrument Sans" in page
+    assert "Space Grotesk" not in page
+    assert "space-grotesk" not in page
+
+
+def test_generated_inline_scripts_parse_with_node():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    scripts = re.findall(r"<script(?:[^>]*)>(.*?)</script[^>]*>", page, re.DOTALL | re.IGNORECASE)
+    assert scripts
+    for script in scripts:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "generated.js"
+            path.write_text(script)
+            assert subprocess.run(["node", "--check", path], capture_output=True).returncode == 0
+
+
+def test_brand_squircles_are_limited_to_runbook_participants():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert "function decorateBrandIcons()" not in page
+    assert "atlas-icon-squircle" not in page
+    assert "atlas-brand-squircle" in page
+    assert "svg.appendChild(back)" in page
+
+
+def test_participant_decorations_only_reference_manifest_backed_assets():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert '"T":"overlay"' not in page
+    assert "14-runbooks-overlay.svg" not in page
+    assert "&quot;M&quot;:&quot;./assets/14-runbooks/14-runbooks-debian.svg&quot;" in page
+    assert "image.onerror=resolve" in page
+
+
+def test_mermaid_theme_overrides_only_defaults_and_sequence_surfaces():
+    docs = renderer.load()
+    html = renderer.build(docs, renderer.load_fixture_evidence())
+    assert ".cluster rect{fill:#182735!important" in html
+    assert ".node.default rect" in html
+    assert ".default>rect{fill:#182735!important" in html
+    assert ".atlas-sequence-theme .actor{fill:#182735!important" in html
+    assert ".atlas-sequence-theme .note{fill:#182735!important" in html
+    assert (
+        ".atlas-sequence-theme .messageLine0,#atlas-root .atlas-sequence-theme .messageLine1,#atlas-root .atlas-sequence-theme .actor-line,#atlas-root .atlas-sequence-theme .loopLine{stroke:#e2e8f0!important;stroke-width:2.5px!important"
+        in html
+    )
+    assert (
+        ".atlas-sequence-theme marker path{fill:#e2e8f0!important;stroke:#e2e8f0!important" in html
+    )
+    assert ".atlas-sequence-theme .sectionTitle" in html
+    assert ".sectionTitle tspan" in html
+    assert ".sectionTitle" in html and "fill:#edf2f7!important" in html
+    assert (
+        "content.className='atlas-diagram-theme'+(sheet.classList.contains('atlas-sequence-sheet')?' atlas-sequence-theme':'')"
+        in html
+    )
+    expected = sum(source.count("sequenceDiagram") for doc in docs for _, source in doc["bodies"])
+    assert expected == 6
+    assert (
+        len(
+            re.findall(
+                r'class="atlas-sheet atlas-diagram-theme atlas-sequence-sheet atlas-sequence-theme"',
+                html,
+            )
+        )
+        == expected
+    )
+    assert "classDef host fill:#1e293b" in (ROOT / "src" / "00-context.mmd").read_text()
+
+
+def test_modal_fit_resets_scroll_offsets_without_scroll_extent_centering():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert (
+        "s.style.marginLeft='0';s.style.marginTop='0';content.scrollLeft=0;content.scrollTop=0"
+        in page
+    )
+    assert "content.scrollHeight<=content.clientHeight" not in page
+    assert "targetH=Math.max(h,120)" in page
+    assert "if(isTop)y-=targetH-originalH" in page
+    assert "icon=64" in page
+
+
+def test_dashboard_is_diagrams_first_without_public_fixture_or_catalog_diagnostics():
+    html = renderer.build(renderer.load(), renderer.load_fixture_evidence())
+    for marker in (
+        "Evidence snapshot",
+        "Evidence statistics",
+        "atlas-catalog",
+        "atlas-inspector",
+        "atlas-service",
+    ):
+        assert marker not in html
+    for marker in ("atlas-viewport", "data-zoom-action", 'id="atlas-zoom"'):
+        assert marker in html
+
+
+def test_loading_retry_rearms_timeout_and_show_text_replaces_diagrams():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert (
+        "function arm(generation){clearTimeout(timer);timer=setTimeout(function(){fail(generation)},45000)}"
+        in page
+    )
+    assert "var generation=++attempt;settled=false;arm(generation)" in page
+    assert "function showText()" in page
+    assert "sheet.replaceChildren(pre)" in page
+    assert "data-atlas-source=" in page
+
+
+def test_loading_attempt_token_ignores_stale_retry_callbacks_and_timeouts():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert "timer,settled=false,attempt=0" in page
+    assert "function current(generation){return generation===attempt}" in page
+    assert "if(!current(generation))return" in page
+    assert "if(!current(generation)||settled)return" in page
+    assert "reveal(generation)" in page
+    assert "fail(generation)" in page
+
+
+def test_loading_waits_for_mermaid_decoration_assets_not_lazy_screenshots():
+    page = renderer.standalone(renderer.build(renderer.load(), renderer.load_fixture_evidence()))
+    assert "function decorationAssets()" in page
+    assert "querySelectorAll('.atlas-sheet svg image[href]')" in page
+    assert "document.images" not in page
+    assert "var image=new Image()" in page
+    assert 'loading="lazy"' in renderer.build(
+        [
+            {
+                "id": "demo",
+                "screenshots": [
+                    {"src": "./screenshots/demo.svg", "alt": "demo", "caption": "demo"}
+                ],
+                "bodies": [],
+                "notes": [],
+                "anchor": "atlas-diagram-demo",
+                "layer": "A",
+                "stack_key": "foundations",
+                "stack": "Foundations",
+                "title": "demo",
+                "summary": "demo",
+                "services": [],
+            }
+        ],
+        renderer.load_fixture_evidence(),
+    )
+
+
+def test_generated_css_has_valid_hyphenated_properties_and_balanced_media_rule():
+    html = renderer.build(renderer.load(), renderer.load_fixture_evidence())
+    for malformed in ("grid -", "margin -", "font -", "border -", "template -", "{{{{"):
+        assert malformed not in html
+    assert "grid-column:1/-1" in html
+    assert "@media(max-width:680px){#atlas-root{" in html
+
+
+def test_automation_user_manager_uses_debian_artwork_with_accurate_manifest():
+    asset = ROOT / "src" / "assets" / "11-automation" / "11-automation-x-user-manager.svg"
+    manifest = renderer.yaml.safe_load(
+        (ROOT / "src" / "assets" / "11-automation" / "manifest.yaml").read_text()
+    )
+    entry = next(
+        item for item in manifest["assets"] if item["id"] == "11-automation-x_user_manager"
+    )
+    assert entry["sha256"] == hashlib.sha256(asset.read_bytes()).hexdigest()
+    assert entry["fallback"] == "Debian user manager"
+    assert "#a80030" in asset.read_text()
+    assert "#69b53f" not in asset.read_text()
