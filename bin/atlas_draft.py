@@ -11,15 +11,16 @@ from __future__ import annotations
 import html
 import re
 
-EDGE_RE = re.compile(
-    r'^\s*([A-Za-z_]\w*)\s*(=+>|-\.+->|-{2,}>)\s*(?:\|"?(.*?)"?\|)?\s*([A-Za-z_]\w*)\s*$'
-)
-NODE_RE = re.compile(r'^\s*([A-Za-z_]\w*)\s*\["(.*)"\]\s*$')
-SUBGRAPH_RE = re.compile(r'^\s*subgraph\s+([A-Za-z_]\w*)\s*\["(.*)"\]\s*$')
-CLASS_RE = re.compile(r"^\s*class\s+([\w,]+)\s+(\w+)\s*$")
+ID = r"[A-Za-z_](?:\w|-(?![-.>]))*"
+EDGE_START_RE = re.compile(rf"^\s*({ID})")
+EDGE_HOP_RE = re.compile(rf'\s*(<?)(=+>|-\.+->|-{{2,}}>)\s*(?:\|"?(.*?)"?\|)?\s*({ID})')
+NODE_RE = re.compile(rf'^\s*({ID})\s*\["(.*)"\]\s*$')
+SUBGRAPH_RE = re.compile(r'^\s*subgraph\s+([^\["]+?)\s*(?:\["(.*)"\])?\s*$')
+CLASS_RE = re.compile(r"^\s*class\s+([\w,-]+)\s+(\w+)\s*$")
 HEADER_RE = re.compile(r"^\s*flowchart\s+(LR|RL|TD|TB|BT)\s*$")
-INVISIBLE_RE = re.compile(r"^\s*[A-Za-z_]\w*(?:\s*~~~\s*[A-Za-z_]\w*)+\s*$")
-ARROWISH = re.compile(r"==>|-->|-\.->|~~~")
+DIRECTION_RE = re.compile(r"^\s*direction\s+(LR|RL|TD|TB|BT)\s*$")
+INVISIBLE_RE = re.compile(rf"^\s*{ID}(?:\s*~~~\s*{ID})+\s*$")
+ARROWISH = re.compile(r"=+>|-{2,}>|-\.+->|~~~")
 TAG_RE = re.compile(r"</?(?:div|span|b|i|em|strong|small|code|sub|sup|u|img)\b[^<>]*>", re.I)
 
 # Rough advance widths (px) used to fit text: node name, node sub-line, edge label, zone title.
@@ -49,6 +50,24 @@ def label_lines(raw: str) -> tuple[list[str], str | None]:
     return [line for line in lines if line], icon.group(1) if icon else None
 
 
+def parse_edges(line: str) -> list[dict] | None:
+    """One edge statement, possibly a chain `a --> b ==>|x| c`, as a list of edges."""
+    start = EDGE_START_RE.match(line)
+    if not start:
+        return None
+    pos, a, edges = start.end(), start.group(1), []
+    while pos < len(line):
+        hop = EDGE_HOP_RE.match(line, pos)
+        if not hop:
+            return None
+        back, op, label, b = hop.groups()
+        kind = "p" if op.startswith("=") else "c" if "." in op else "d"
+        lines, _ = label_lines(label or "")
+        edges.append({"a": a, "b": b, "kind": kind, "label": lines, "both": bool(back)})
+        pos, a = hop.end(), b
+    return edges or None
+
+
 def parse_flowchart(text: str) -> dict:
     """Parse the repo's flowchart subset. Unknown edge syntax fails instead of being dropped.
 
@@ -69,10 +88,10 @@ def parse_flowchart(text: str) -> dict:
             continue
         if stripped.startswith(("classDef ", "style ", "linkStyle ")):
             continue
-        if INVISIBLE_RE.match(stripped):
+        if INVISIBLE_RE.match(stripped) or DIRECTION_RE.match(stripped):
             continue
         if match := SUBGRAPH_RE.match(stripped):
-            title, _ = label_lines(match.group(2))
+            title, _ = label_lines(match.group(2) if match.group(2) is not None else match.group(1))
             group = {
                 "id": match.group(1),
                 "title": " ".join(title),
@@ -101,11 +120,8 @@ def parse_flowchart(text: str) -> dict:
             for group in stack:
                 group["members"].append(match.group(1))
             continue
-        if match := EDGE_RE.match(stripped):
-            a, op, label, b = match.groups()
-            kind = "p" if op.startswith("=") else "c" if "." in op else "d"
-            lines, _ = label_lines(label or "")
-            edges.append({"a": a, "b": b, "kind": kind, "label": lines})
+        if ARROWISH.search(stripped) and (chain := parse_edges(stripped)):
+            edges.extend(chain)
             continue
         if ARROWISH.search(stripped):
             raise DraftError(f"line {lineno}: unsupported edge syntax: {stripped!r}")
@@ -114,10 +130,11 @@ def parse_flowchart(text: str) -> dict:
         raise DraftError("empty source: no flowchart header")
     if stack:
         raise DraftError(f"subgraph {stack[-1]['id']!r} is never closed")
+    group_ids = {g["id"] for g in groups}
     for edge in edges:
         for end in (edge["a"], edge["b"]):
-            if end not in nodes:
-                raise DraftError(f"edge endpoint {end!r} has no node declaration")
+            if end not in nodes and end not in group_ids:
+                raise DraftError(f"edge endpoint {end!r} has no node or subgraph declaration")
     for node_id, node in nodes.items():
         node["cls"] = classes.get(node_id, "")
     return {"direction": header, "nodes": nodes, "groups": groups, "edges": edges}
@@ -217,7 +234,28 @@ class Sheet:
         unknown_zones = sorted(bottom - {g["id"] for g in flow["groups"]})
         if unknown_zones:
             raise DraftError(f"layout.zone_titles_below names unknown groups: {unknown_zones}")
-        self.zones = [self._zone(g, g["id"] in bottom) for g in flow["groups"] if g["members"]]
+        # Children first, so a parent frame encloses its nested frames and their titles.
+        built: dict[str, dict] = {}
+        for g in reversed(flow["groups"]):
+            if g["members"]:
+                kids = [
+                    built[c["id"]]
+                    for c in flow["groups"]
+                    if c["parent"] == g["id"] and c["id"] in built
+                ]
+                built[g["id"]] = self._zone(g, g["id"] in bottom, kids)
+        self.zones = [built[g["id"]] for g in flow["groups"] if g["id"] in built]
+        # Edge endpoints are nodes or, as in Mermaid, whole subgraphs (drawn to the zone frame).
+        self.ends = dict(self.nodes)
+        zones = {z["id"]: z for z in self.zones}
+        for e in self.edges:
+            for end in (e["a"], e["b"]):
+                if end in self.nodes or end in self.ends:
+                    continue
+                if end not in zones:
+                    raise DraftError(f"edge endpoint {end!r} is an empty subgraph")
+                cols = [self.nodes[m]["col"] for m in zones[end]["members"]]
+                self.ends[end] = dict(zones[end], col=min(cols), colmax=max(cols))
         self.routed = False
 
     def _box(self, node: dict, col: float, row: float) -> dict:
@@ -231,6 +269,7 @@ class Sheet:
         return {
             "id": node["id"],
             "col": col,
+            "colmax": col,
             "x": x,
             "y": self.py + row * self.rh - h / 2,
             "w": w,
@@ -262,8 +301,10 @@ class Sheet:
             )
         return out
 
-    def _zone(self, group: dict, below: bool) -> dict:
-        boxes = [self.nodes[m] for m in group["members"]]
+    def _zone(self, group: dict, below: bool, kids: list[dict] | None = None) -> dict:
+        boxes = [self.nodes[m] for m in group["members"]] + [
+            {"x": k["x"] - 2, "y": k["y"] - 2, "w": k["w"] + 4, "h": k["h"] + 4} for k in kids or []
+        ]
         x0 = min(b["x"] for b in boxes) - 14
         x1 = max(b["x"] + b["w"] for b in boxes) + 14
         title = wrap(group["title"], max(8, int((x1 - x0 - 16) / ZONE_PX)))
@@ -343,13 +384,16 @@ class Sheet:
             return used[key]
 
         for ed in self.edges:
-            a, b, hint = self.nodes[ed["a"]], self.nodes[ed["b"]], ed["hint"]
+            a, b, hint = self.ends[ed["a"]], self.ends[ed["b"]], ed["hint"]
             explicit = hint.get("via") or (hint.get("source_port") or ("r",))[0] in "tb"
-            if a["col"] == b["col"] or explicit:
+            if explicit:
                 continue
-            fwd = b["col"] > a["col"]
-            ga = a["col"] if fwd else self.prev_col(a["col"])
-            gb = self.prev_col(b["col"]) if fwd else b["col"]
+            if b["col"] > a["colmax"]:
+                fwd, ga, gb = True, a["colmax"], self.prev_col(b["col"])
+            elif b["colmax"] < a["col"]:
+                fwd, ga, gb = False, self.prev_col(a["col"]), b["colmax"]
+            else:
+                continue
             ed["_g"] = (ga, gb, fwd)
             outs.setdefault((ed["a"], ga), []).append(ed)
             ins.setdefault((ed["b"], gb), []).append(ed)
@@ -360,7 +404,7 @@ class Sheet:
         self.routed = True
 
     def _route_one(self, ed, outs, ins, lane):
-        a, b, hint = self.nodes[ed["a"]], self.nodes[ed["b"]], ed["hint"]
+        a, b, hint = self.ends[ed["a"]], self.ends[ed["b"]], ed["hint"]
         sp_hint, tp_hint = hint.get("source_port"), hint.get("target_port")
         if hint.get("via") or (sp_hint and sp_hint[0] in "tb"):
             sp = self.port(a, *(sp_hint or ("r", 0)))
@@ -390,7 +434,9 @@ class Sheet:
             key = ("t", ed["b"]) if fan_in else ("s", ed["a"]) if fan_out else own
             x1 = x2 = self.gutter(ga) + lane(ga, key)
         else:
-            x1 = self.gutter(ga) + lane(ga, ("s", ed["a"]) if fan_out else own)
+            # Edges converging on one target merge into its trunk already in the first gutter.
+            first = ("s", ed["a"]) if fan_out else ("t", ed["b"]) if fan_in else own
+            x1 = self.gutter(ga) + lane(ga, first)
             x2 = self.gutter(gb) + lane(gb, ("t", ed["b"]) if fan_in else own)
         if abs(x1 - x2) < 1:
             return [(sx, ay), (x1, ay), (x1, by), (tx, by)]
@@ -420,6 +466,7 @@ class Sheet:
             shared[ed["index"]] = [
                 s for s in _segments(ed) if any(_collinear(s, t) for t in others)
             ]
+        placed: list[dict] = []
         for ed in self.edges:
             ed["label_box"] = None
             if not ed["label"]:
@@ -429,19 +476,64 @@ class Sheet:
             horiz = [s for s in segs if abs(s[0][1] - s[1][1]) < 0.5]
             at = ed["hint"].get("label_at")
             if at == "first" and horiz:
-                seg = horiz[0]
+                order = [horiz[0]]
             elif at == "last" and horiz:
-                seg = horiz[-1]
+                order = [horiz[-1]]
             else:
-                own = [s for s in horiz if s not in shared[ed["index"]]] or horiz
-                # Longest free horizontal run; ties go to the run nearest the target.
-                seg = max(reversed(own or segs), key=_length)
-            room = max(_length(seg) - 10, 60) if seg in horiz else 150
-            lines = [p for line in ed["label"] for p in wrap(line, max(6, int(room / LABEL_PX)))]
-            w = max(len(line) for line in lines) * LABEL_PX + 10
-            h = 14 * len(lines) + 2
-            cx, cy = (seg[0][0] + seg[1][0]) / 2, (seg[0][1] + seg[1][1]) / 2
-            ed["label_box"] = {"x": cx - w / 2, "y": cy - h / 2, "w": w, "h": h, "lines": lines}
+                free = [s for s in horiz if s not in shared[ed["index"]]]
+                # Longest free horizontal run first (ties go to the run nearest the target),
+                # then the edge's own vertical runs, and a shared trunk only as a last resort:
+                # a label there would read as belonging to every edge on it.
+                own = [s for s in segs if s not in shared[ed["index"]]]
+                order = sorted(reversed(free), key=_length, reverse=True)
+                order += sorted((s for s in own if s not in horiz), key=_length, reverse=True)
+                order += sorted((s for s in segs if s not in own), key=_length, reverse=True)
+            first = None
+            for seg in order:
+                room = max(_length(seg) - 10, 60) if seg in horiz else 150
+                limit = max(6, int(room / LABEL_PX))
+                lines = [p for line in ed["label"] for p in wrap(line, limit)]
+                w = max(len(line) for line in lines) * LABEL_PX + 10
+                h = 14 * len(lines) + 2
+                box, clear = self._slide_label(ed, seg, w, h, lines, placed)
+                first = first or box
+                if clear:
+                    break
+            ed["label_box"] = box if clear else first
+            placed.append(ed["label_box"])
+
+    def _slide_label(self, ed, seg, w, h, lines, placed):
+        """Centre the label on its run, sliding along it until it clears foreign lines, boxes,
+        and earlier labels. Falls back to the centre, where the geometry gate reports it."""
+        (x0, y0), (x1, y1) = seg
+        horizontal = abs(y0 - y1) < 0.5
+        span = abs(x1 - x0) if horizontal else abs(y1 - y0)
+        room = max(0.0, (span - (w if horizontal else h)) / 2 - 4)
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        own = _segments(ed)
+        foreign = [
+            t
+            for f in self.edges
+            if f is not ed
+            for t in _segments(f)
+            if not any(_collinear(t, o) for o in own)
+        ]
+        offsets = [0.0]
+        step = 6.0
+        while step <= room:
+            offsets += [step, -step]
+            step += 6.0
+        for off in offsets:
+            px, py = (cx + off, cy) if horizontal else (cx, cy + off)
+            box = {"x": px - w / 2, "y": py - h / 2, "w": w, "h": h, "lines": lines}
+            if any(_box_hits_segment(box, t) for t in foreign):
+                continue
+            if any(_boxes_overlap(box, n) for n in self.nodes.values()):
+                continue
+            if any(_boxes_overlap(box, other) for other in placed):
+                continue
+            return box, True
+        return {"x": cx - w / 2, "y": cy - h / 2, "w": w, "h": h, "lines": lines}, False
 
     def plan(self) -> Sheet:
         self.route()
@@ -483,7 +575,13 @@ class Sheet:
             out.append(
                 f'<path class="ad-edge ad-{ed["kind"]}" data-edge="{esc(ed["a"])}&gt;'
                 f'{esc(ed["b"])}" data-edge-index="{ed["index"]}" data-kind="{ed["kind"]}" '
-                f'd="{path_d(ed["pts"])}" marker-end="url(#{mid}-{ed["kind"]})"/>'
+                f'd="{path_d(ed["pts"])}" marker-end="url(#{mid}-{ed["kind"]})"'
+                + (
+                    f' marker-start="url(#{mid}-{ed["kind"]})" data-dir="both"'
+                    if ed["both"]
+                    else ""
+                )
+                + "/>"
             )
         for z in self.zones:
             for t in self.title_boxes(z):

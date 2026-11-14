@@ -32,7 +32,9 @@ def words(text):
 
 
 def test_proof_diagram_is_drafted():
-    assert "02-ingress" in [param.id for param in laid_out()]
+    assert {"00-context", "02-ingress", "03-containers", "08-ai-plane"} <= {
+        p.id for p in laid_out()
+    }
 
 
 @pytest.mark.parametrize(("doc", "source", "stores"), laid_out())
