@@ -104,3 +104,33 @@ nodes:
 - id: prep
   kind: volume
   lifecycle: observed-live
+layout:
+  grid: {column: 320, node_width: 200, row: 150}
+  column_shift: {1: 140}
+  key: [score, db, hermes]
+  nodes:
+    jobhunt_timer: [0, 0]
+    x_ats: [0, 1.4]
+    x_apis: [0, 2.4]
+    x_local: [0, 3.4]
+    x_serpapi: [0, 4.4]
+    x_disabled: [0, 5.4]
+    jobhunt_discover: [1, 0]
+    leads: [2, 2.6]
+    funnel: [3, 1.5]
+    prefilter: [3, 2.6]
+    db: [4, 4]
+    score: [4, 2.6]
+    resume: [4, 0.2]
+    settings: [5, 1.4]
+    hermes: [5, 2.6]
+    x_telegram: [5, 4.2]
+    providers: [7, 2.6]
+    claude_fallback: [7, 3.6]
+    digest: [4, 5.4]
+    jobhunt_bot: [6, 5.4]
+    board: [5, 6.4]
+    prep: [6, 6.4]
+  edges:
+    - {from: jobhunt_bot, to: hermes, target_port: [r, 26]}
+    - {from: jobhunt_bot, to: db, source_port: [l, -26]}

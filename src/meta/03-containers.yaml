@@ -192,3 +192,59 @@ nodes:
   kind: concept
   label: Mermaid node watchtower
   lifecycle: observed-live
+layout:
+  grid: {column: 320, node_width: 200, row: 150}
+  column_shift: {4: 60}
+  key: [homepage, syncthing, jellyfin, navidrome]
+  nodes:
+    grafana: [2, -1.6]
+    homelab_ui: [3, -1.6]
+    homepage: [4, -1.6]
+    uptime_kuma: [5, -1.6]
+    cloudops: [6, -1.6]
+    watchtower: [1, -1.6]
+    syncthing: [4, 0.6]
+    jellyseerr: [0, 0.5]
+    radarr: [1, 0]
+    sonarr: [1, 1]
+    prowlarr: [2, 0.5]
+    flaresolverr: [3, 0.5]
+    bazarr: [2, 1.6]
+    tdarr: [2, 2.5]
+    jellyfin: [3, 2]
+    decluttarr: [1, 4.8]
+    qbittorrent: [2, 3.8]
+    unpackerr: [3, 3.8]
+    gluetun: [2, 4.8]
+    librarian: [4, 3.6]
+    sonobarr: [5, 0]
+    lidarr: [6, 0]
+    soularr: [7, 0]
+    slskd: [7, 1.2]
+    musicportal: [5, 2.2]
+    navidrome: [6, 2.2]
+    kavita: [6, 3.6]
+    bookportal: [6, 4.7]
+    gluetun_books: [7, 4.7]
+    immich_server: [0, 6.4]
+    immich_machine_learning: [1, 5.8]
+    immich_redis: [1, 6.6]
+    immich_db: [1, 7.4]
+    miniflux: [2, 6]
+    miniflux_db: [3, 6]
+    hbbs: [2, 7.4]
+    hbbr: [3, 7.4]
+    wger_nginx: [4, 6]
+    wger_powersync: [4, 7]
+    wger_beat: [4, 8]
+    wger_web: [5, 6]
+    wger_worker: [5, 7.4]
+    wger_db: [6, 6]
+    wger_cache: [6, 7.4]
+  edges:
+    - {from: librarian, to: lidarr, source_port: [r, -30]}
+    - {from: librarian, to: kavita, source_port: [r, 22], target_port: [l, 22]}
+    - {from: wger_web, to: wger_cache, source_port: [r, 14], target_port: [l, -14]}
+    - {from: wger_worker, to: wger_db, source_port: [r, -28], target_port: [l, 28]}
+    - {from: librarian, to: slskd, target_port: [l, -22]}
+    - {from: syncthing, to: jellyfin, label_at: first}

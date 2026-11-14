@@ -153,3 +153,43 @@ nodes:
 - id: audit
   kind: volume
   lifecycle: observed-live
+layout:
+  grid: {column: 310, node_width: 200, row: 150}
+  column_shift: {3: 60}
+  key: [pi, homelab_mcp, hermes]
+  nodes:
+    x_browser: [0, 0]
+    x_telegram: [0, 1.6]
+    x_timers: [0, 3.3]
+    x_mcp_clients: [0, 9]
+    cloudops: [1, 0]
+    hermes_gateway: [1, 1.1]
+    jobhunt_bot: [1, 2.2]
+    jobhunt_discover: [1, 3.3]
+    cloudops_chat: [2, 0]
+    hermes: [2, 1.6]
+    claude_bridge: [3, 2]
+    codex_cli: [4, 0]
+    hosted: [4, 1]
+    claude_cli: [4, 2]
+    codex_provider: [4, 3]
+    credentials: [5, 1]
+    workbench: [1, 4.8]
+    mise: [1, 6]
+    pi: [2, 5.4]
+    instructions: [3, 4.8]
+    herdr: [3, 6]
+    homelab_mcp: [2, 9]
+    t_workspace: [3, 11]
+    workspace: [4, 11]
+    t_jobhunt: [3, 7.4]
+    jobhunt_db: [4, 7.4]
+    t_dojo: [3, 8.6]
+    dojo_db: [4, 8.6]
+    t_ops: [3, 9.8]
+    ops: [4, 9.8]
+    r_contract: [3, 12.2]
+    audit: [4, 12.2]
+  edges:
+    - {from: homelab_mcp, to: audit, source_port: [b, 0], target_port: [b, 0], via: [[null, 1985], [1428, 1985]]}
+    - {from: r_contract, to: workspace, target_port: [l, 26]}

@@ -52,3 +52,19 @@ nodes:
   kind: external
   label: AWS SSM Session Manager
   lifecycle: external-unverified
+layout:
+  grid: {column: 320, node_width: 200, row: 150}
+  column_shift: {3: 80}
+  key: [dojo_cli, ec2]
+  nodes:
+    x_user: [0, 1]
+    dojo_cli: [1, 1]
+    terraform: [2, 0]
+    scenarios: [2, 1]
+    dojo_db: [2, 2]
+    vpc: [3, -0.5]
+    sg: [3, 0.5]
+    iam: [3, 1.5]
+    ec2: [4, 0.5]
+    ami: [5, 0.5]
+    x_ssm: [4, 2.8]

@@ -80,3 +80,28 @@ nodes:
   kind: external
   label: Torrent indexers (Knaben, YTS)
   lifecycle: external-unverified
+layout:
+  grid: {column: 330, node_width: 200, row: 150}
+  column_shift: {6: 60}
+  key: [qbittorrent, gluetun, jellyfin]
+  nodes:
+    x_user: [0, 1.5]
+    jellyseerr: [1, 1.5]
+    radarr: [2, 1]
+    sonarr: [2, 2]
+    prowlarr: [3, 0.5]
+    flaresolverr: [4, -0.4]
+    x_indexers: [5, 0.5]
+    gluetun: [4, 1.9]
+    qbittorrent: [3, 3.1]
+    decluttarr: [3, 4.3]
+    v_downloads: [4, 3.1]
+    unpackerr: [5, 3.1]
+    v_movies: [6, 2.6]
+    v_tv: [6, 3.6]
+    bazarr: [7, 1.7]
+    tdarr: [7, 4.5]
+    v_syncmedia: [8, 1.9]
+    jellyfin: [8, 3.1]
+  edges:
+    - {from: bazarr, to: v_movies, source_port: [b, -40], target_port: [r, -22]}
