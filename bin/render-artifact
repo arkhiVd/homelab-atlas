@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import html
+import importlib.util
 import json
 import re
 import sys
@@ -19,8 +20,13 @@ import yaml
 REPO = Path(__file__).resolve().parent.parent
 SRC, META, OUT = REPO / "src", REPO / "src" / "meta", REPO / "out"
 FONT_DIR = REPO / "vendor" / "fonts"
-FONT_FILES = ("jetbrains-mono-latin.woff2", "space-grotesk-latin.woff2")
+FONT_FILES = ("roboto-latin.woff2", "roboto-mono-latin.woff2")
 ASSETS_ROOT = SRC / "assets"
+_DRAFT_SPEC = importlib.util.spec_from_file_location(
+    "atlas_draft", Path(__file__).resolve().parent / "atlas_draft.py"
+)
+atlas_draft = importlib.util.module_from_spec(_DRAFT_SPEC)
+_DRAFT_SPEC.loader.exec_module(atlas_draft)
 IDENTITY_FALLBACKS = {"user": "👤", "agent": "🤖", "phone": "📱", "device": "🖥️"}
 
 LAYERS = {"A": "Layer A", "B": "Layer B", "C": "Layer C"}
@@ -97,6 +103,41 @@ def load_identity_assets() -> dict[str, dict]:
                 "source_path": file,
             }
     return loaded
+
+
+def verified_asset_urls() -> set[str]:
+    """Page URLs of every manifest-listed SVG, after checksum and inertness validation."""
+    load_identity_assets()
+    urls = set()
+    for manifest_path in sorted(ASSETS_ROOT.glob("*/manifest.yaml")):
+        manifest = yaml.safe_load(manifest_path.read_text()) or {}
+        for asset in manifest["assets"]:
+            relative = (manifest_path.parent / asset["file"]).relative_to(ASSETS_ROOT)
+            urls.add(f"./assets/{relative.as_posix()}")
+    return urls
+
+
+def diagram_kind(text: str) -> str:
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("%%"):
+            return "sequence" if stripped.startswith("sequenceDiagram") else "flowchart"
+    return "flowchart"
+
+
+def drafted_body(doc: dict, path: Path, text: str, icons: set[str]) -> tuple[str, int, int]:
+    """Draft one laid-out flowchart; geometry findings refuse the render."""
+    stores = {str(n["id"]) for n in doc.get("nodes") or [] if n.get("kind") == "volume"}
+    layout = doc["layout"]
+    try:
+        sheet = atlas_draft.plan(text, layout, stores, icons)
+        findings = atlas_draft.geometry_findings(sheet)
+    except atlas_draft.DraftError as error:
+        raise ValueError(f"{path.name}: {error}") from error
+    if findings:
+        raise ValueError(f"{path.name}: drafted geometry is not clean: {'; '.join(findings)}")
+    svg = atlas_draft.draft(text, layout, str(doc["id"]), str(doc.get("title", "")), stores, icons)
+    return svg, len(sheet.nodes), len(sheet.edges)
 
 
 def identity_html(node: dict, identities: dict[str, dict]) -> str:
@@ -198,7 +239,7 @@ def service_record(node: dict, doc: dict, ordinal: int) -> dict | None:
     }
 
 
-def normalize(doc: dict, path: Path) -> dict:
+def normalize(doc: dict, path: Path, icons: set[str] | None = None) -> dict:
     nodes = doc.get("nodes") or []
     if any(node.get("lifecycle") not in LIFECYCLES for node in nodes):
         raise ValueError(f"{path.name}: dashboard catalog requires valid node lifecycle values")
@@ -214,7 +255,30 @@ def normalize(doc: dict, path: Path) -> dict:
     missing = [str(source.relative_to(REPO)) for source, _ in pairs if not source.exists()]
     if missing:
         raise FileNotFoundError(f"{path.name}: missing Mermaid source: {', '.join(missing)}")
+    if doc.get("layout") and len(pairs) != 1:
+        raise ValueError(f"{path.name}: layout needs exactly one diagram source")
     stack_key, stack = stack_for(diagram_id)
+    bodies, drafted_nodes, drafted_edges = [], 0, 0
+    for source, topic in pairs:
+        text = source.read_text().rstrip()
+        kind = diagram_kind(text)
+        svg = None
+        if doc.get("layout"):
+            if kind != "flowchart":
+                raise ValueError(f"{path.name}: layout applies only to flowcharts")
+            svg, drafted_nodes, drafted_edges = drafted_body(
+                doc, source, text, verified_asset_urls() if icons is None else icons
+            )
+        bodies.append(
+            {
+                "topic": topic,
+                "text": text,
+                "file": f"src/{source.name}",
+                "rev": short_rev(text),
+                "engine": "drafted" if svg else kind,
+                "svg": svg,
+            }
+        )
     record = {
         "id": diagram_id,
         "anchor": f"atlas-diagram-{slug(diagram_id)}",
@@ -236,7 +300,9 @@ def normalize(doc: dict, path: Path) -> dict:
         "repository": doc.get("repository"),
         "owner": doc.get("owner"),
         "source": f"src/meta/{path.name}",
-        "bodies": [(topic, source.read_text().rstrip()) for source, topic in pairs],
+        "bodies": bodies,
+        "drafted_nodes": drafted_nodes,
+        "drafted_edges": drafted_edges,
         "nodes": nodes,
         "lifecycle": sorted({node["lifecycle"] for node in nodes}),
         "capabilities": sorted({tag for node in nodes for tag in capabilities(node)}),
@@ -250,8 +316,9 @@ def normalize(doc: dict, path: Path) -> dict:
 
 
 def load() -> list[dict]:
+    icons = verified_asset_urls()
     return [
-        normalize(yaml.safe_load(path.read_text()) or {}, path)
+        normalize(yaml.safe_load(path.read_text()) or {}, path, icons)
         for path in sorted(META.glob("*.yaml"))
     ]
 
@@ -435,122 +502,457 @@ RESOURCE_LINKS = {
 }
 
 
+OVERVIEW = (
+    "A self-hosted environment organized around authenticated remote access, containerized "
+    "applications, synchronized storage, automation, observability, and agent-assisted "
+    "workflows. Follow the diagrams from system context to individual application pipelines to "
+    "see which clients open each dashboard, which services exchange data, and where durable "
+    "state is kept."
+)
+
+
+def short_rev(text: str) -> str:
+    return hashlib.sha256(text.encode()).hexdigest()[:7]
+
+
+def stat_panel(value: object, label: str, state: str, hint: str) -> str:
+    return (
+        f'<section class="atlas-panel atlas-stat atlas-span-4" data-state="{esc(state)}">'
+        f'<h3 class="atlas-panel-title">{esc(label)}</h3><p class="atlas-stat-value">'
+        f'{esc(value)}</p><p class="atlas-stat-hint">{esc(hint)}</p></section>'
+    )
+
+
+def alert_item(state: str, title: str, detail: str) -> str:
+    word = {"ok": "OK", "drift": "Drift", "crit": "Failing"}[state]
+    return (
+        f'<li class="atlas-alert" data-state="{esc(state)}"><span class="atlas-alert-state">'
+        f'{word}</span><span class="atlas-alert-title">{esc(title)}</span>'
+        f'<span class="atlas-alert-detail">{esc(detail)}</span></li>'
+    )
+
+
+def drawing_panel(doc: dict, body: dict, diagram_name: str) -> str:
+    topic, source_file = body["topic"], body["file"]
+    title = topic or "Diagram"
+    label = f"{diagram_name}{': ' + topic if topic else ''}"
+    if body["svg"]:
+        drawing = body["svg"]
+    else:
+        participants = re.findall(
+            r"^\s*%% atlas-participant (\w+) ([a-z0-9-]+)\s*$", body["text"], re.MULTILINE
+        )
+        assets = esc(json.dumps(dict(participants), separators=(",", ":"))) if participants else ""
+        drawing = (
+            f'<pre class="mermaid" data-atlas-participants="{assets}">{esc(body["text"])}</pre>'
+        )
+    return (
+        f'<section class="atlas-panel atlas-span-24 atlas-drawing" data-engine="{body["engine"]}">'
+        f'<header class="atlas-panel-head"><h3 class="atlas-panel-title">{esc(title)}</h3>'
+        f'<code class="atlas-panel-file">{esc(source_file)}</code><span class="atlas-panel-tools">'
+        f'<button type="button" class="atlas-tool atlas-actual" aria-pressed="false">Actual size'
+        f'</button><button type="button" class="atlas-tool atlas-zoom" aria-label="Zoom {esc(label)}">'
+        f'Zoom</button></span></header><div class="atlas-sheet">{drawing}</div></section>'
+    )
+
+
+def source_panel(doc: dict, evidence: dict) -> str:
+    engines = {body["engine"] for body in doc["bodies"]}
+    if engines == {"drafted"}:
+        state, word = "ok", "drafted"
+        check = f"geometry clean · {doc['drafted_nodes']} nodes · {doc['drafted_edges']} edges"
+    elif "flowchart" in engines:
+        state, word, check = "drift", "auto layout", "Mermaid layout, no geometry gate"
+    else:
+        state, word, check = "info", "sequence", "Mermaid sequence renderer"
+    files = "".join(f"<code>{esc(body['file'])}</code>" for body in doc["bodies"])
+    revision = " · ".join(body["rev"] for body in doc["bodies"])
+    snapshot = f"{evidence['captured_at'][:10]} · {evidence['host']}"
+    rows = (
+        ("File", f'<span class="atlas-files">{files}<code>{esc(doc["source"])}</code></span>'),
+        ("State", f'<span class="atlas-badge" data-state="{state}">{esc(word)}</span>'),
+        ("Check", esc(check)),
+        ("Revision", f"<code>{esc(revision)}</code> <span>{esc(evidence['source_commit'])}</span>"),
+        ("Snapshot", f"<code>{esc(snapshot)}</code>"),
+    )
+    items = "".join(f"<dt>{label}</dt><dd>{value}</dd>" for label, value in rows)
+    return (
+        '<section class="atlas-panel atlas-span-8 atlas-source"><header class="atlas-panel-head">'
+        f'<h3 class="atlas-panel-title">Source</h3></header><dl>{items}</dl></section>'
+    )
+
+
+def notes_panel(doc: dict) -> str:
+    note_items = "".join(f"<li>{esc(note)}</li>" for note in doc["notes"])
+    note_images = "".join(
+        f'<figure><img src="{esc(item["src"])}" alt="{esc(item["alt"])}" loading="lazy">'
+        f"<figcaption>{esc(item['caption'])}</figcaption></figure>"
+        for item in doc.get("screenshots", [])
+    )
+    links = RESOURCE_LINKS.get(doc["id"], [])
+    resources = (
+        ""
+        if not links
+        else '<p class="atlas-resources"><strong>Sources:</strong> '
+        + " · ".join(f'<a href="{esc(url)}">{esc(label)}</a>' for label, url in links)
+        + "</p>"
+    )
+    body = f"<ul>{note_items}</ul>" if note_items else ""
+    return (
+        '<section class="atlas-panel atlas-span-16 atlas-notes" aria-label="Notes">'
+        '<header class="atlas-panel-head"><h3 class="atlas-panel-title">Notes</h3></header>'
+        f"<p>{esc(doc['summary'])}</p>{body}{note_images}{resources}</section>"
+    )
+
+
 def build(docs: list[dict], evidence: dict, now: datetime | None = None) -> str:
     stale = is_stale(evidence, now)
-    identities = load_identity_assets()
-    services = [service for doc in docs for service in doc["services"]]
     meta = json.dumps(
         {key: value for key, value in evidence.items() if key not in {"stats", "reused"}},
         separators=(",", ":"),
     )
-    stat_html = "".join(
-        f'<div class="atlas-stat atlas-{esc(state)}"><b>{esc(value)}</b><span>{esc(label)}</span></div>'
-        for value, label, state in evidence["stats"]
+    bodies = [body for doc in docs for body in doc["bodies"]]
+    flowcharts = [body for body in bodies if body["engine"] != "sequence"]
+    drafted = [body for body in bodies if body["engine"] == "drafted"]
+    pending = len(flowcharts) - len(drafted)
+    components = sum(len(doc["nodes"]) for doc in docs)
+    fixture_stats = "".join(
+        stat_panel(value, label, "ok" if state == "ok" else "drift", "fixture evidence")
+        for value, label, state in evidence["stats"][:2]
     )
-    controls = "".join(
-        f'<label><input type="checkbox" data-filter="lifecycle" value="{state}">{esc(state.replace("-", " "))}</label>'
-        for state in LIFECYCLES
+    stats = (
+        stat_panel(len(docs), "Diagram rows", "ok", f"{len(bodies)} source files")
+        + stat_panel(components, "Sidecar nodes", "ok", "machine-checkable records")
+        + stat_panel(
+            f"{len(drafted)}/{len(flowcharts)}",
+            "Drafted flowcharts",
+            "ok" if not pending else "drift",
+            "hand-placed, gutter-routed",
+        )
+        + stat_panel(
+            evidence["gate"],
+            "Fixture gate",
+            "ok" if evidence["gate"] == "pass" and not stale else "drift",
+            "stale fixture" if stale else "committed fixture",
+        )
+        + fixture_stats
     )
-    tags = sorted({tag for service in services for tag in service["capabilities"]})
-    capabilities_html = "".join(
-        f'<label><input type="checkbox" data-filter="capability" value="{tag}">{esc(tag)}</label>'
-        for tag in tags
-    )
-    layer_buttons = "".join(
-        f'<button type="button" class="atlas-layer" data-layer="{key}" aria-pressed="false">{esc(value)}</button>'
-        for key, value in LAYERS.items()
-    )
-    stack_options = "".join(f'<option value="{key}">{esc(value)}</option>' for key, value in STACKS)
-    rail = "".join(
-        f'<li><a href="#{esc(doc["anchor"])}" data-target="{esc(doc["anchor"])}">{esc(doc["id"])} {esc(doc["title"].split(" — ")[0])}</a></li>'
+    alerts = [
+        alert_item(
+            "ok" if evidence["gate"] == "pass" else "crit",
+            "Fixture gate",
+            f"{evidence['gate']} · {evidence['findings']} findings · {evidence['host']}",
+        )
+    ]
+    alerts += [
+        alert_item("ok", f"Geometry · {doc['id']}", "no edge through a box, no label on a box")
+        for doc in docs
+        if any(body["engine"] == "drafted" for body in doc["bodies"])
+    ]
+    if pending:
+        alerts.append(
+            alert_item(
+                "drift",
+                "Auto-layout flowcharts",
+                f"{pending} flowchart{'s' if pending != 1 else ''} still use Mermaid layout",
+            )
+        )
+    if stale:
+        alerts.append(alert_item("drift", "Fixture freshness", "snapshot older than its window"))
+    jumps = "".join(
+        f'<a class="atlas-jump" href="#{esc(doc["anchor"])}" data-target="{esc(doc["anchor"])}">'
+        f"{esc(doc['id'].split('-', 1)[0])} {esc(doc['title'].split(' — ')[0])}</a>"
         for doc in docs
     )
-    cards = []
+    rows = []
     for doc in docs:
         heading, _, sub = doc["title"].partition(" — ")
         diagram_name = f"{heading}{': ' + sub if sub else ''}"
-
-        def participant_assets(body: str) -> str:
-            pairs = re.findall(
-                r"^\s*%% atlas-participant (\w+) ([a-z0-9-]+)\s*$", body, re.MULTILINE
-            )
-            return esc(json.dumps(dict(pairs), separators=(",", ":"))) if pairs else ""
-
-        bodies = "".join(
-            f'{f"<h3>{esc(topic)}</h3>" if topic else ""}<div class="atlas-sheet"><button class="atlas-zoom" type="button" aria-label="Zoom {esc(diagram_name)}{": " + esc(topic) if topic else ""}">zoom</button><pre class="mermaid" data-atlas-participants="{participant_assets(body)}">{esc(body)}</pre></div>'
-            for topic, body in doc["bodies"]
+        panels = "".join(drawing_panel(doc, body, diagram_name) for body in doc["bodies"])
+        rows.append(
+            f'<section class="atlas-row atlas-diagram" id="{esc(doc["anchor"])}" '
+            f'data-layer="{esc(doc["layer"])}" data-stack="{esc(doc["stack_key"])}">'
+            f'<h2 class="atlas-row-head"><button type="button" class="atlas-row-toggle" '
+            f'aria-expanded="true"><span class="atlas-row-id">{esc(doc["id"])}</span> '
+            f'<span class="atlas-row-title">{esc(heading)}</span><span class="atlas-row-sub">'
+            f"{esc(sub)}</span><span class=\"atlas-row-meta\">{esc(doc['stack'])} · "
+            f"{len(doc['bodies']) + 2} panels</span></button></h2>"
+            f'<div class="atlas-panels">{panels}{notes_panel(doc)}{source_panel(doc, evidence)}'
+            "</div></section>"
         )
-        note_items = "".join(f"<li>{esc(note)}</li>" for note in doc["notes"])
-        screenshots = doc.get("screenshots", [])
-        note_images = "".join(
-            f'<figure><img src="{esc(item["src"])}" alt="{esc(item["alt"])}" loading="lazy"><figcaption>{esc(item["caption"])}</figcaption></figure>'
-            for item in screenshots
-        )
-        notes = (
-            f'<section class="atlas-notes" aria-label="Notes"><h3>Notes</h3><ul>{note_items}</ul>{note_images}</section>'
-            if doc["notes"] or screenshots
-            else ""
-        )
-        links = RESOURCE_LINKS.get(doc["id"], [])
-        resources = (
-            ""
-            if not links
-            else '<p class="atlas-resources"><strong>Sources:</strong> '
-            + " · ".join(f'<a href="{esc(url)}">{esc(label)}</a>' for label, url in links)
-            + "</p>"
-        )
-        cards.append(
-            f'<section class="atlas-diagram" id="{esc(doc["anchor"])}" data-layer="{esc(doc["layer"])}" data-stack="{esc(doc["stack_key"])}"><p>{esc(doc["id"])} · {esc(doc["stack"])}</p><h2>{esc(heading)}</h2><p>{esc(sub)}</p><p>{esc(doc["summary"])}</p>{resources}{bodies}{notes}</section>'
-        )
-    overview = "A self-hosted environment organized around authenticated remote access, containerized applications, synchronized storage, automation, observability, and agent-assisted workflows. Follow the diagrams from system context to individual application pipelines to see which clients open each dashboard, which services exchange data, and where durable state is kept."
+    snapshot = f"{evidence['captured_at'][:10]} · {evidence['host']}"
     return (
-        f"""<title>Public Architecture Atlas</title><style>
-#atlas-root{{--atlas-ink:#12141c;--atlas-soft:#4d5561;--atlas-ground:#fbfbfd;--atlas-panel:#fff;--atlas-line:#ccd0df;--atlas-accent:#4f46e5;--atlas-sheet:#f7f8fb;--atlas-warn:#986206;font:16px/1.55 'Space Grotesk',system-ui,sans-serif;color:var(--atlas-ink);background:var(--atlas-ground);max-width:96rem;margin:auto;padding:1.25rem}}#atlas-root .atlas-skip{{position:fixed;left:1rem;top:1rem;z-index:50;transform:translateY(-200%);padding:.5rem .75rem;background:var(--atlas-panel);color:var(--atlas-accent);border:1px solid var(--atlas-accent)}}#atlas-root .atlas-skip:focus{{transform:none}}#atlas-root[data-theme="dark"]{{--atlas-ink:#e9f6ee;--atlas-soft:#b6c7be;--atlas-ground:#05080a;--atlas-panel:#0a1311;--atlas-line:#34413d;--atlas-accent:#a5b4fc;--atlas-sheet:#dfe3ec;--atlas-warn:#ffb02e}}@media(prefers-color-scheme:dark){{#atlas-root:not([data-theme]){{--atlas-ink:#e9f6ee;--atlas-soft:#b6c7be;--atlas-ground:#05080a;--atlas-panel:#0a1311;--atlas-line:#34413d;--atlas-accent:#a5b4fc;--atlas-sheet:#dfe3ec;--atlas-warn:#ffb02e}}}}#atlas-root *,#atlas-root *::before,#atlas-root *::after{{box-sizing:border-box}}#atlas-root button,#atlas-root input,#atlas-root select{{font:inherit}}#atlas-root button{{cursor:pointer}}#atlas-root .atlas-grid{{display:grid;grid-template-columns:15rem minmax(0,1fr);gap:1.5rem}}#atlas-root .atlas-head,#atlas-root .atlas-snapshot,#atlas-root .atlas-stats,#atlas-root .atlas-toolbar,#atlas-root .atlas-footer{{grid-column:1/-1}}#atlas-root .atlas-head,#atlas-root .atlas-snapshot,#atlas-root .atlas-toolbar,#atlas-root .atlas-service,#atlas-root .atlas-diagram{{border:1px solid var(--atlas-line);background:var(--atlas-panel);padding:1rem}}#atlas-root h1,#atlas-root h2,#atlas-root h3{{line-height:1.15}}#atlas-root .atlas-meta,#atlas-root dt{{font:12px 'JetBrains Mono',ui-monospace,monospace;color:var(--atlas-soft);text-transform:uppercase}}#atlas-root .atlas-stale{{border-color:var(--atlas-warn)}}#atlas-root .atlas-stats{{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:1px;background:var(--atlas-line)}}#atlas-root .atlas-stat{{background:var(--atlas-panel);padding:.75rem}}#atlas-root .atlas-stat b,#atlas-root .atlas-stat span{{display:block}}#atlas-root .atlas-toolbar{{display:grid;gap:.6rem}}#atlas-root .atlas-toolbar fieldset{{border:0;margin:0;padding:0;display:flex;gap:.5rem;flex-wrap:wrap}}#atlas-root .atlas-toolbar input[type=search],#atlas-root button,#atlas-root select{{border:1px solid var(--atlas-line);border-radius:3px;padding:.35rem;background:var(--atlas-panel);color:var(--atlas-ink)}}#atlas-root .atlas-layer[aria-pressed="true"]{{border-color:var(--atlas-accent);color:var(--atlas-accent)}}#atlas-root .atlas-rail{{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}}#atlas-root .atlas-rail ul{{list-style:none;margin:0;padding:0}}#atlas-root .atlas-rail a{{display:block;padding:.35rem;color:var(--atlas-soft);text-decoration:none}}#atlas-root .atlas-rail a[hidden]{{display:none}}#atlas-root .atlas-content{{display:grid;gap:1rem;min-width:0}}#atlas-root .atlas-services{{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:1rem}}#atlas-root .atlas-service[hidden],#atlas-root .atlas-diagram[hidden]{{display:none}}#atlas-root .atlas-service h3{{margin-top:0}}#atlas-root dl{{display:grid;grid-template-columns:7rem 1fr;gap:.35rem;margin:1rem 0}}#atlas-root dd{{margin:0;overflow-wrap:anywhere}}#atlas-root .atlas-badge{{display:inline-block;border:1px solid var(--atlas-line);border-radius:2px;padding:.1rem .3rem;font:11px 'JetBrains Mono',ui-monospace,monospace}}#atlas-root .atlas-evidence{{display:grid;gap:.2rem;font:12px 'JetBrains Mono',ui-monospace,monospace;color:var(--atlas-soft)}}#atlas-root .atlas-diagram{{scroll-margin-top:1rem}}#atlas-root .atlas-sheet{{position:relative;overflow:auto;background:var(--atlas-sheet);padding:1.75rem .75rem .75rem;margin-top:1rem;cursor:zoom-in;touch-action:manipulation}}#atlas-root .atlas-sheet svg{{max-width:100%;height:auto}}#atlas-root .atlas-zoom{{position:absolute;right:.5rem;top:.4rem}}#atlas-root .atlas-notes{{margin-top:1rem}}#atlas-root .atlas-dialog{{border:1px solid var(--atlas-line);background:var(--atlas-panel);color:var(--atlas-ink);max-width:min(48rem,calc(100% - 2rem))}}#atlas-root #atlas-zoom{{width:calc(100vw - 2rem);max-width:none;height:calc(100vh - 2rem)}}#atlas-root #atlas-zoom-content{{--atlas-zoom-scale:1.75;overflow:auto;height:calc(100% - 3rem);cursor:grab;touch-action:none;overscroll-behavior:contain;user-select:none;background:var(--atlas-sheet)}}#atlas-root #atlas-zoom-content.atlas-dragging{{cursor:grabbing}}#atlas-root #atlas-zoom-content svg .flowchart-link{{stroke:#303744!important;stroke-width:2px!important}}#atlas-root #atlas-zoom-content svg marker path{{fill:#303744!important;stroke:#303744!important}}#atlas-root #atlas-zoom-content svg .edgeLabel{{color:#111827!important;background:#f7f8fb!important}}#atlas-root #atlas-zoom-content svg .edgeLabel rect{{fill:#f7f8fb!important;opacity:.96!important}}#atlas-root #atlas-zoom-content svg{{display:block;max-width:none!important;width:calc(var(--atlas-zoom-scale) * 100%)!important;min-width:calc(var(--atlas-zoom-scale) * 100%);height:auto!important}}#atlas-root .atlas-zoom-bar{{display:flex;gap:.4rem;align-items:center;margin-bottom:.5rem}}#atlas-root .atlas-pan{{display:flex;gap:.4rem;margin-left:auto}}#atlas-root :focus-visible{{outline:2px solid var(--atlas-accent);outline-offset:2px}}@media(prefers-reduced-motion:reduce){{#atlas-root *{{animation:none!important;transition:none!important;scroll-behavior:auto!important}}}}@media(max-width:60rem){{#atlas-root .atlas-grid{{grid-template-columns:1fr}}#atlas-root .atlas-rail{{position:static;max-height:none}}#atlas-root .atlas-rail ul{{display:flex;flex-wrap:wrap}}}}
-/* Restore the established atlas layout and shared homelab indigo system. */
-#atlas-root{{--atlas-faint:#6f8479;--atlas-accent-soft:hsl(240 60% 68%/.12);max-width:96rem;padding:0 2rem;background:var(--atlas-ground)}}
-#atlas-root .atlas-grid{{grid-template-columns:16rem minmax(0,1fr);gap:0 3rem}}
-#atlas-root .atlas-head{{grid-column:1/-1;padding:4.5rem 0 2rem;border:0;border-bottom:1px solid var(--atlas-line);background:transparent}}
-#atlas-root .atlas-head h1{{font:600 clamp(1.9rem,4vw,3rem)/1.1 'JetBrains Mono',ui-monospace,monospace;letter-spacing:-.035em;margin:.7rem 0}}
-#atlas-root .atlas-head .atlas-meta{{max-width:78ch;margin:.5rem 0;text-transform:none;letter-spacing:0}}
-#atlas-root .atlas-snapshot{{grid-column:1/-1;border:0;border-left:2px solid var(--atlas-line);background:transparent;padding:.25rem 1rem;margin:1.5rem 0 0}}
-#atlas-root .atlas-snapshot p{{display:inline;margin:0 1rem 0 0;color:var(--atlas-soft);font-size:.82rem}}
-/* Wrap HTML icon cards before Mermaid measures foreignObject geometry. */
-#atlas-root .nodeLabel div{{white-space:normal!important;overflow-wrap:anywhere;line-height:1.4}}#atlas-root svg.atlas-sequence-decorated{{display:block;width:100%!important;max-width:100%!important;height:auto}}#atlas-root .atlas-sequence-icon{{pointer-events:none}}
-#atlas-root .atlas-stats{{grid-column:1/-1;margin:1.5rem 0 0;border:1px solid var(--atlas-line);border-radius:3px;overflow:hidden}}
-#atlas-root .atlas-stat{{padding:.8rem 1rem}}#atlas-root .atlas-stat b{{font:600 1.35rem 'JetBrains Mono',monospace}}#atlas-root .atlas-stat span{{font-size:.68rem;color:var(--atlas-faint)}}
-#atlas-root .atlas-rail{{grid-column:1;padding:2.5rem 0}}#atlas-root .atlas-rail a{{border-left:2px solid transparent;padding:.32rem .55rem;font-size:.84rem}}#atlas-root .atlas-rail a:hover,#atlas-root .atlas-rail a:focus{{background:var(--atlas-accent-soft);color:var(--atlas-accent);border-left-color:var(--atlas-accent)}}
-#atlas-root .atlas-content{{grid-column:2;padding:2.5rem 0 6rem;gap:3.5rem}}
-#atlas-root #atlas-diagrams>h2{{font:600 1rem 'JetBrains Mono',monospace;color:var(--atlas-soft);margin:0 0 2rem}}
-#atlas-root .atlas-diagram{{border:0;background:transparent;padding:0;margin:0 0 4rem}}#atlas-root .atlas-diagram>p:first-child{{font:12px 'JetBrains Mono',monospace;color:var(--atlas-accent);margin:0;text-transform:none}}#atlas-root .atlas-diagram>h2{{font:600 1.45rem 'JetBrains Mono',monospace;letter-spacing:-.03em;margin:.35rem 0}}#atlas-root .atlas-diagram>p{{max-width:72ch;color:var(--atlas-soft)}}
-#atlas-root .atlas-sheet{{border:1px solid var(--atlas-line);border-radius:4px;padding:2.25rem 1.5rem 1.5rem;margin-top:1.5rem}}#atlas-root .atlas-sheet svg{{overflow:visible}}
-#atlas-root .atlas-evidence{{border-left:2px solid var(--atlas-line);padding-left:1rem;text-transform:none}}
-#atlas-root #atlas-catalog{{grid-column:2;border-top:1px solid var(--atlas-line);padding:1.5rem 0 4rem}}#atlas-root #atlas-catalog>summary,#atlas-root .atlas-filters>summary{{cursor:pointer;font:600 1rem 'JetBrains Mono',monospace;color:var(--atlas-ink)}}#atlas-root #atlas-catalog>p{{color:var(--atlas-soft);max-width:72ch}}
-#atlas-root .atlas-toolbar{{border:0;background:transparent;padding:0;margin:1.25rem 0}}#atlas-root .atlas-filters{{border:1px solid var(--atlas-line);border-radius:4px;padding:.75rem 1rem}}#atlas-root .atlas-filters[open]>summary{{margin-bottom:1rem}}#atlas-root .atlas-toolbar fieldset{{margin:.65rem 0}}#atlas-root .atlas-toolbar label{{font-size:.82rem;color:var(--atlas-soft)}}
-#atlas-root .atlas-services{{display:block;border-top:1px solid var(--atlas-line)}}#atlas-root .atlas-service{{display:grid;grid-template-columns:minmax(10rem,1fr) 2fr auto;align-items:center;gap:1rem;border:0;border-bottom:1px solid var(--atlas-line);background:transparent;padding:.8rem 0}}#atlas-root .atlas-service h3{{font:600 .9rem 'JetBrains Mono',monospace;margin:0}}#atlas-root .atlas-service>p{{margin:0;font-size:.76rem}}#atlas-root .atlas-service dl{{display:none}}#atlas-root .atlas-service button{{padding:.25rem .55rem;font-size:.76rem}}
-#atlas-root .atlas-dialog{{border-radius:6px;padding:1rem}}#atlas-root #atlas-theme{{position:fixed;right:1.25rem;bottom:1.25rem;z-index:20}}
-#atlas-root .cluster rect{{rx:8px;ry:8px}}
-#atlas-root .cluster-label text,#atlas-root .cluster-label span{{font-weight:700}}
-#atlas-root .atlas-notes figure{{margin:1rem 0}}#atlas-root .atlas-notes img{{display:block;max-width:100%;height:auto;border:1px solid var(--atlas-line);border-radius:4px}}#atlas-root .atlas-notes figcaption{{color:var(--atlas-soft);font-size:.85rem;margin-top:.4rem}}
-@media(max-width:60rem){{#atlas-root{{padding:0 1.25rem}}#atlas-root .atlas-grid{{grid-template-columns:1fr}}#atlas-root .atlas-content,#atlas-root .atlas-rail,#atlas-root #atlas-catalog{{grid-column:1}}#atlas-root .atlas-head{{padding-top:3rem}}#atlas-root .atlas-rail{{overflow-x:auto;padding:1.25rem 0;border-bottom:1px solid var(--atlas-line)}}#atlas-root .atlas-rail ul{{display:flex;flex-wrap:nowrap;gap:.25rem;width:max-content}}#atlas-root .atlas-rail a{{white-space:nowrap;border-left:0;border-bottom:2px solid transparent}}#atlas-root .atlas-rail a:hover,#atlas-root .atlas-rail a:focus{{border-left:0;border-bottom-color:var(--atlas-accent)}}#atlas-root .atlas-content{{padding-top:2rem}}#atlas-root .atlas-service{{grid-template-columns:1fr auto}}#atlas-root .atlas-service>p{{grid-column:1/-1}}}}
-</style><div id="atlas-root"><a class="atlas-skip atlas-skip-diagrams" href="#atlas-diagrams">Skip to diagrams</a><div class="atlas-grid"><header class="atlas-head"><p class="atlas-meta">architecture guide</p><h1>Homelab Atlas</h1><p>{esc(overview)}</p></header><nav class="atlas-rail" aria-label="Diagrams"><ul>{rail}</ul></nav><main class="atlas-content"><section id="atlas-diagrams" tabindex="-1"><h2>Architecture and workflows</h2>{"".join(cards)}</section></main><footer class="atlas-footer">Architecture diagrams, operating workflows, and upstream project references.</footer></div><dialog id="atlas-zoom" class="atlas-dialog" aria-label="Diagram zoom"><div class="atlas-zoom-bar"><button type="button" data-close="atlas-zoom">close</button><button type="button" data-zoom-action="out" aria-label="Zoom out">−</button><button type="button" data-zoom-action="reset">100%</button><button type="button" data-zoom-action="fit">fit</button><button type="button" data-zoom-action="in" aria-label="Zoom in">+</button><span class="atlas-pan"><button type="button" data-pan-action="left" aria-label="Pan left">←</button><button type="button" data-pan-action="right" aria-label="Pan right">→</button></span></div><div id="atlas-zoom-content"></div></dialog></div>"""
-        + DASHBOARD_SCRIPT
+        f"<title>Homelab Atlas</title><style>{DASHBOARD_CSS}</style>"
+        f'<div id="atlas-root" data-snapshot="{esc(meta)}">'
+        '<a class="atlas-skip atlas-skip-diagrams" href="#atlas-diagrams">Skip to diagrams</a>'
+        '<header class="atlas-top"><div class="atlas-bar">'
+        '<nav class="atlas-crumbs" aria-label="Breadcrumb"><ol><li>Home</li><li>Dashboards</li>'
+        '<li>Homelab</li><li aria-current="page"><h1>Atlas</h1></li></ol></nav>'
+        '<label class="atlas-find"><span class="atlas-visually-hidden">Find diagrams</span>'
+        '<input id="atlas-find" type="search" placeholder="Find diagrams, nodes, notes" '
+        'autocomplete="off" aria-keyshortcuts="/"><kbd aria-hidden="true">/</kbd></label>'
+        f'<span class="atlas-chip" title="Committed demonstration fixture">Snapshot '
+        f"<code>{esc(snapshot)}</code></span>"
+        '<button id="atlas-theme" class="atlas-tool" type="button" aria-label="Toggle dark theme" '
+        'aria-pressed="false">Theme</button></div>'
+        f'<nav class="atlas-jumps" aria-label="Diagram rows"><a class="atlas-jump" '
+        f'href="#atlas-overview" data-target="atlas-overview">Overview</a>{jumps}</nav></header>'
+        '<main class="atlas-main"><section class="atlas-row" id="atlas-overview">'
+        '<h2 class="atlas-row-head"><span class="atlas-row-title">Overview</span>'
+        '<span class="atlas-row-meta">fixture evidence, no live host data</span></h2>'
+        f'<div class="atlas-panels">{stats}'
+        '<section class="atlas-panel atlas-span-14 atlas-about"><header class="atlas-panel-head">'
+        '<h3 class="atlas-panel-title">About this atlas</h3></header>'
+        f"<p>{esc(OVERVIEW)}</p><p>Architecture diagrams, operating workflows, and upstream "
+        "project references.</p></section>"
+        '<section class="atlas-panel atlas-span-10 atlas-alerts"><header class="atlas-panel-head">'
+        '<h3 class="atlas-panel-title">Findings and drift</h3></header>'
+        f'<ul>{"".join(alerts)}</ul></section></div></section>'
+        '<div id="atlas-diagrams" tabindex="-1"><p class="atlas-find-status" aria-live="polite">'
+        f'</p>{"".join(rows)}</div></main>'
+        '<dialog id="atlas-zoom" class="atlas-dialog" aria-label="Diagram zoom">'
+        '<div class="atlas-zoom-bar"><button type="button" class="atlas-tool" '
+        'data-close="atlas-zoom">Close</button><button type="button" class="atlas-tool" '
+        'data-zoom-action="out" aria-label="Zoom out">−</button><button type="button" '
+        'class="atlas-tool" data-zoom-action="reset">100%</button><button type="button" '
+        'class="atlas-tool" data-zoom-action="in" aria-label="Zoom in">+</button>'
+        '<span class="atlas-pan"><button type="button" class="atlas-tool" data-pan-action="left" '
+        'aria-label="Pan left">←</button><button type="button" class="atlas-tool" '
+        'data-pan-action="right" aria-label="Pan right">→</button></span></div>'
+        '<div id="atlas-zoom-content"></div></dialog></div>' + DASHBOARD_SCRIPT
     )
 
 
+PLANES = {
+    # class: (light fill, light stroke, light text, dark fill, dark stroke, dark text)
+    "host": ("#e8eaf0", "#4a5568", "#1a202c", "#23262d", "#9aa5b8", "#e6e8ec"),
+    "ingress": ("#e0e7ff", "#4f46e5", "#1e1b4b", "#1e2040", "#818cf8", "#e0e7ff"),
+    "media": ("#ffedd5", "#ea580c", "#431407", "#34230f", "#fb923c", "#ffedd5"),
+    "data": ("#ccfbf1", "#0d9488", "#042f2e", "#0f2f2c", "#2dd4bf", "#ccfbf1"),
+    "ai": ("#fae8ff", "#a21caf", "#4a044e", "#2f1634", "#e879f9", "#fae8ff"),
+    "vpn": ("#dbeafe", "#2563eb", "#172554", "#13263f", "#60a5fa", "#dbeafe"),
+    "secure": ("#fee2e2", "#dc2626", "#450a0a", "#3a1517", "#f87171", "#fee2e2"),
+    "external": ("#f1f5f9", "#94a3b8", "#0f172a", "#1f232a", "#8b95a3", "#e2e8f0"),
+    "warn": ("#fef9c3", "#ca8a04", "#422006", "#332b0c", "#facc15", "#fef9c3"),
+    "none": ("#ffffff", "#8b939e", "#1f2328", "#1f2228", "#6e7681", "#d8d9da"),
+}
+
+
+def plane_css() -> str:
+    light = "".join(
+        f"#atlas-root .cls-{name}{{--pf:{v[0]};--ps:{v[1]};--pt:{v[2]}}}"
+        for name, v in PLANES.items()
+    )
+    dark = "".join(
+        f"#atlas-root[data-theme=dark] .cls-{name}{{--pf:{v[3]};--ps:{v[4]};--pt:{v[5]}}}"
+        for name, v in PLANES.items()
+    )
+    return light + dark
+
+
+THEME_LIGHT = (
+    "--page:#f4f5f5;--panel:#ffffff;--panel-head:#ffffff;--line:#dcdee1;--line-strong:#c7cad0;"
+    "--text:#24292e;--muted:#5d646d;--faint:#8a9099;--primary:#3d71d9;--primary-soft:#e6eefc;"
+    "--ok:#1a7f4b;--ok-soft:#e3f4ea;--drift:#b85c00;--drift-soft:#fdf0e1;--crit:#c4163c;"
+    "--info:#5d646d;--info-soft:#eef0f2;--ad-line:#6e7681;--ad-primary:#3d71d9;"
+    "--ad-zone:#b9bec6;--ad-zone-fill:rgba(36,41,46,.025);--chip:#ffffff;color-scheme:light"
+)
+THEME_DARK = (
+    "--page:#111217;--panel:#181b1f;--panel-head:#181b1f;--line:#2a2d33;--line-strong:#3a3e45;"
+    "--text:#d8d9da;--muted:#a0a3ab;--faint:#7b7f88;--primary:#6e9fff;--primary-soft:#1d2a45;"
+    "--ok:#73bf69;--ok-soft:#18301a;--drift:#ff9830;--drift-soft:#3a2710;--crit:#f2495c;"
+    "--info:#a0a3ab;--info-soft:#22252b;--ad-line:#8e939c;--ad-primary:#6e9fff;"
+    "--ad-zone:#3f444c;--ad-zone-fill:rgba(204,204,220,.025);--chip:#f4f5f5;color-scheme:dark"
+)
+
+DASHBOARD_CSS = (
+    f"""
+#atlas-root{{{THEME_LIGHT};font:14px/1.5 Roboto,'Segoe UI',system-ui,sans-serif;color:var(--text);background:var(--page);min-height:100vh}}
+#atlas-root[data-theme=dark]{{{THEME_DARK}}}
+@media (prefers-color-scheme:dark){{#atlas-root:not([data-theme]){{{THEME_DARK}}}}}
+#atlas-root *,#atlas-root *::before,#atlas-root *::after{{box-sizing:border-box}}
+#atlas-root button,#atlas-root input{{font:inherit;color:inherit}}
+#atlas-root code,#atlas-root kbd{{font:12px/1.4 'Roboto Mono',ui-monospace,monospace}}
+#atlas-root a{{color:var(--primary)}}
+#atlas-root :focus-visible{{outline:2px solid var(--primary);outline-offset:1px}}
+#atlas-root .atlas-visually-hidden{{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
+#atlas-root .atlas-skip{{position:fixed;left:8px;top:8px;z-index:60;transform:translateY(-200%);padding:6px 10px;background:var(--panel);border:1px solid var(--primary);border-radius:2px}}
+#atlas-root .atlas-skip:focus{{transform:none}}
+#atlas-root .atlas-top{{position:sticky;top:0;z-index:30;background:var(--panel-head);border-bottom:1px solid var(--line)}}
+#atlas-root .atlas-bar{{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:48px}}
+#atlas-root .atlas-crumbs ol{{display:flex;flex-wrap:wrap;align-items:center;gap:6px;list-style:none;margin:0;padding:0;color:var(--muted);font-size:13px}}
+#atlas-root .atlas-crumbs li+li::before{{content:'›';margin-right:6px;color:var(--faint)}}
+#atlas-root .atlas-crumbs h1{{display:inline;margin:0;font-size:16px;font-weight:500;color:var(--text)}}
+#atlas-root .atlas-find{{position:relative;margin-left:auto;flex:0 1 22rem;min-width:0}}
+#atlas-root .atlas-find input{{width:100%;height:32px;padding:0 30px 0 10px;background:var(--page);border:1px solid var(--line-strong);border-radius:2px}}
+#atlas-root .atlas-find kbd{{position:absolute;right:6px;top:6px;padding:0 5px;border:1px solid var(--line-strong);border-radius:2px;color:var(--muted);font-size:11px}}
+#atlas-root .atlas-chip{{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--line-strong);border-radius:2px;color:var(--muted);font-size:12px;white-space:nowrap}}
+#atlas-root .atlas-chip code{{color:var(--text)}}
+#atlas-root .atlas-tool{{height:28px;padding:0 10px;background:var(--panel);border:1px solid var(--line-strong);border-radius:2px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}}
+#atlas-root .atlas-tool:hover{{border-color:var(--primary);color:var(--primary)}}
+#atlas-root .atlas-tool[aria-pressed=true]{{background:var(--primary-soft);border-color:var(--primary);color:var(--primary)}}
+#atlas-root #atlas-theme{{height:32px}}
+#atlas-root .atlas-jumps{{display:flex;gap:4px;padding:0 16px 8px;overflow-x:auto;scrollbar-width:thin}}
+#atlas-root .atlas-jump{{flex:none;padding:3px 10px;border:1px solid var(--line);border-radius:2px;color:var(--muted);font-size:12px;text-decoration:none;white-space:nowrap}}
+#atlas-root .atlas-jump:hover{{color:var(--text);border-color:var(--line-strong)}}
+#atlas-root .atlas-jump[aria-current=true]{{background:var(--primary-soft);border-color:var(--primary);color:var(--primary)}}
+#atlas-root .atlas-jump[hidden]{{display:none}}
+#atlas-root .atlas-main{{padding:8px 16px 48px}}
+#atlas-root .atlas-row{{scroll-margin-top:96px;margin-top:8px}}
+#atlas-root .atlas-row[hidden]{{display:none}}
+#atlas-root .atlas-row-head{{display:flex;align-items:baseline;gap:8px;margin:0;padding:8px 0;font-size:15px;font-weight:500}}
+#atlas-root .atlas-row-toggle{{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;width:100%;padding:0;background:none;border:0;text-align:left;cursor:pointer}}
+#atlas-root .atlas-row-toggle::before{{content:'▾';color:var(--muted);width:1em}}
+#atlas-root .atlas-row-toggle[aria-expanded=false]::before{{content:'▸'}}
+#atlas-root .atlas-row-id{{font:12px 'Roboto Mono',ui-monospace,monospace;color:var(--muted)}}
+#atlas-root .atlas-row-sub{{color:var(--muted);font-weight:400}}
+#atlas-root .atlas-row-meta{{margin-left:auto;color:var(--faint);font-size:12px;font-weight:400}}
+#atlas-root .atlas-panels{{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:8px}}
+#atlas-root .atlas-panels[hidden]{{display:none}}
+#atlas-root .atlas-panel{{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:0 12px 12px}}
+#atlas-root .atlas-span-4{{grid-column:span 4}}#atlas-root .atlas-span-8{{grid-column:span 8}}#atlas-root .atlas-span-10{{grid-column:span 10}}#atlas-root .atlas-span-14{{grid-column:span 14}}#atlas-root .atlas-span-16{{grid-column:span 16}}#atlas-root .atlas-span-24{{grid-column:span 24}}
+#atlas-root .atlas-panel-head{{display:flex;align-items:center;gap:8px;min-height:36px;margin:0 -12px 8px;padding:4px 12px;border-bottom:1px solid var(--line)}}
+#atlas-root .atlas-panel-title{{margin:0;font-size:14px;font-weight:500}}
+#atlas-root .atlas-panel-file{{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}}
+#atlas-root .atlas-panel-tools{{display:flex;gap:4px;margin-left:auto}}
+#atlas-root .atlas-stat{{padding-top:8px}}
+#atlas-root .atlas-stat .atlas-panel-title{{color:var(--muted);font-size:13px}}
+#atlas-root .atlas-stat-value{{margin:4px 0 0;font-size:30px;font-weight:500;line-height:1.15;font-variant-numeric:tabular-nums}}
+#atlas-root .atlas-stat-hint{{margin:2px 0 0;color:var(--faint);font-size:12px}}
+#atlas-root [data-state=ok] .atlas-stat-value{{color:var(--ok)}}#atlas-root [data-state=drift] .atlas-stat-value{{color:var(--drift)}}
+#atlas-root .atlas-stat::after{{content:'';display:block;height:3px;margin:10px -12px -12px;background:var(--ok)}}
+#atlas-root .atlas-stat[data-state=drift]::after{{background:var(--drift)}}
+#atlas-root .atlas-about p{{margin:0 0 8px;max-width:80ch;color:var(--muted)}}
+#atlas-root .atlas-alerts ul{{list-style:none;margin:0;padding:0}}
+#atlas-root .atlas-alert{{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:0 10px;padding:6px 8px;border-left:3px solid var(--ok);background:var(--ok-soft);margin-bottom:4px;border-radius:2px}}
+#atlas-root .atlas-alert[data-state=drift]{{border-color:var(--drift);background:var(--drift-soft)}}
+#atlas-root .atlas-alert[data-state=crit]{{border-color:var(--crit)}}
+#atlas-root .atlas-alert-state{{grid-row:span 2;font-size:12px;font-weight:500;color:var(--ok)}}
+#atlas-root .atlas-alert[data-state=drift] .atlas-alert-state{{color:var(--drift)}}
+#atlas-root .atlas-alert-title{{font-weight:500}}
+#atlas-root .atlas-alert-detail{{color:var(--muted);font-size:12px;overflow-wrap:anywhere}}
+#atlas-root .atlas-find-status{{margin:8px 0 0;color:var(--muted);font-size:12px}}
+#atlas-root .atlas-find-status:empty{{display:none}}
+#atlas-root .atlas-sheet{{position:relative;overflow:auto;padding:4px 0;touch-action:manipulation}}
+#atlas-root .atlas-sheet svg{{display:block;max-width:100%;height:auto;margin:0 auto}}
+#atlas-root .atlas-drawing.is-actual .atlas-sheet svg{{max-width:none!important}}
+#atlas-root .atlas-notes>p{{margin:0 0 8px;color:var(--muted)}}
+#atlas-root .atlas-notes ul{{margin:0;padding-left:18px}}
+#atlas-root .atlas-notes li{{margin:0 0 6px;max-width:90ch}}
+#atlas-root .atlas-notes figure{{margin:12px 0}}#atlas-root .atlas-notes img{{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:2px}}
+#atlas-root .atlas-notes figcaption{{color:var(--muted);font-size:12px;margin-top:4px}}
+#atlas-root .atlas-resources{{margin:12px 0 0;padding-top:8px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}}
+#atlas-root .atlas-source dl{{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:8px 10px;margin:0;font-size:13px}}
+#atlas-root .atlas-source dt{{color:var(--muted)}}
+#atlas-root .atlas-source dd{{margin:0;min-width:0;overflow-wrap:anywhere}}
+#atlas-root .atlas-source dd span{{color:var(--muted)}}
+#atlas-root .atlas-files{{display:grid;gap:2px}}
+#atlas-root .atlas-badge{{display:inline-block;padding:0 6px;border:1px solid var(--info);border-radius:2px;background:var(--info-soft);color:var(--info)!important;font-size:12px;font-weight:500}}
+#atlas-root .atlas-badge[data-state=ok]{{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)!important}}
+#atlas-root .atlas-badge[data-state=drift]{{border-color:var(--drift);background:var(--drift-soft);color:var(--drift)!important}}
+#atlas-root .atlas-dialog{{padding:12px;background:var(--panel);color:var(--text);border:1px solid var(--line-strong);border-radius:2px}}
+#atlas-root #atlas-zoom{{width:calc(100vw - 24px);max-width:none;height:calc(100vh - 24px);max-height:none}}
+#atlas-root .atlas-dialog::backdrop{{background:rgba(0,0,0,.55)}}
+#atlas-root .atlas-zoom-bar{{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:8px}}
+#atlas-root .atlas-pan{{display:flex;gap:4px;margin-left:auto}}
+#atlas-root #atlas-zoom-content{{--atlas-zoom-scale:1.5;overflow:auto;height:calc(100% - 40px);cursor:grab;touch-action:none;overscroll-behavior:contain;user-select:none;background:var(--panel)}}
+#atlas-root #atlas-zoom-content svg{{display:block;max-width:none!important;width:calc(var(--atlas-zoom-scale) * 100%)!important;height:auto!important}}
+#atlas-root #atlas-zoom-content svg.atlas-draft{{width:calc(var(--atlas-zoom-scale) * var(--atlas-natural, 100%))!important}}
+/* Drafted diagrams: flat boxes, gutter-routed edges, labels knocked out on the line. */
+#atlas-root .ad-zone{{fill:var(--ad-zone-fill);stroke:var(--ad-zone);stroke-width:1}}
+#atlas-root .ad-zone-title{{font:500 11.5px Roboto,'Segoe UI',system-ui,sans-serif;fill:var(--muted)}}
+#atlas-root .ad-knock{{fill:var(--panel)}}
+#atlas-root .ad-edge{{fill:none;stroke:var(--ad-line);stroke-width:1.4}}
+#atlas-root .ad-edge.ad-p{{stroke:var(--ad-primary);stroke-width:2.2}}
+#atlas-root .ad-edge.ad-c{{stroke-dasharray:5 4}}
+#atlas-root .ad-head{{fill:var(--ad-line)}}#atlas-root .ad-head.ad-p{{fill:var(--ad-primary)}}
+#atlas-root .ad-box{{fill:var(--pf);stroke:var(--ps);stroke-width:1.3}}
+#atlas-root .ad-key{{fill:none;stroke:var(--ps);stroke-width:1.3}}
+#atlas-root .ad-chip{{fill:var(--chip);stroke:var(--ps);stroke-opacity:.35}}
+#atlas-root .ad-name{{font:500 12.5px Roboto,'Segoe UI',system-ui,sans-serif;fill:var(--pt)}}
+#atlas-root .ad-sub{{font:10.5px Roboto,'Segoe UI',system-ui,sans-serif;fill:var(--pt);opacity:.85}}
+#atlas-root .ad-label text{{font:10px 'Roboto Mono',ui-monospace,monospace;fill:var(--text)}}
+/* Mermaid fallback: keep its light node classes, theme the lines and labels. */
+#atlas-root .atlas-sheet .nodeLabel div{{white-space:normal!important;overflow-wrap:anywhere;line-height:1.4}}
+#atlas-root svg.atlas-sequence-decorated{{display:block;width:100%!important;max-width:100%!important;height:auto}}
+#atlas-root .atlas-sequence-icon{{pointer-events:none}}
+#atlas-root .cluster rect{{rx:2px;ry:2px;fill:var(--ad-zone-fill)!important;stroke:var(--ad-zone)!important}}
+#atlas-root .cluster-label,#atlas-root .cluster-label span,#atlas-root .cluster-label text{{color:var(--muted)!important;fill:var(--muted)!important;font-weight:500}}
+#atlas-root[data-theme=dark] .flowchart-link{{stroke:var(--ad-line)!important}}
+#atlas-root[data-theme=dark] .marker,#atlas-root[data-theme=dark] marker path{{fill:var(--ad-line)!important;stroke:var(--ad-line)!important}}
+#atlas-root[data-theme=dark] .edgeLabel,#atlas-root[data-theme=dark] .edgeLabel p,#atlas-root[data-theme=dark] .edgeLabel span{{background:var(--panel)!important;color:var(--text)!important}}
+#atlas-root[data-theme=dark] .edgeLabel rect,#atlas-root[data-theme=dark] .labelBkg{{fill:var(--panel)!important;background:var(--panel)!important}}
+#atlas-root[data-theme=dark] .messageLine0,#atlas-root[data-theme=dark] .messageLine1,#atlas-root[data-theme=dark] .actor-line,#atlas-root[data-theme=dark] .loopLine{{stroke:var(--ad-line)!important}}
+#atlas-root[data-theme=dark] .messageText,#atlas-root[data-theme=dark] .loopText,#atlas-root[data-theme=dark] .loopText tspan,#atlas-root[data-theme=dark] .labelText,#atlas-root[data-theme=dark] .sequenceNumber{{fill:var(--text)!important;stroke:none!important}}
+#atlas-root[data-theme=dark] .labelBox{{fill:var(--info-soft)!important;stroke:var(--ad-line)!important}}
+#atlas-root[data-theme=dark] #arrowhead path,#atlas-root[data-theme=dark] #crosshead path,#atlas-root[data-theme=dark] #sequencenumber{{fill:var(--ad-line)!important;stroke:var(--ad-line)!important}}
+#atlas-root[data-theme=dark] .sequenceNumber{{fill:var(--panel)!important}}
+@media (prefers-reduced-motion:reduce){{#atlas-root *{{animation:none!important;transition:none!important;scroll-behavior:auto!important}}}}
+@media (max-width:1100px){{#atlas-root .atlas-span-4{{grid-column:span 8}}#atlas-root .atlas-span-10,#atlas-root .atlas-span-14{{grid-column:span 24}}}}
+@media (max-width:760px){{#atlas-root .atlas-panels>.atlas-panel{{grid-column:1/-1}}#atlas-root .atlas-stat.atlas-span-4{{grid-column:span 12}}#atlas-root .atlas-bar{{flex-wrap:wrap;gap:8px}}#atlas-root .atlas-find{{order:3;flex:1 1 100%}}#atlas-root .atlas-chip{{margin-left:auto}}#atlas-root .atlas-row{{scroll-margin-top:148px}}#atlas-root .atlas-row-meta{{margin-left:0;flex-basis:100%}}#atlas-root .atlas-panel-file{{display:none}}}}
+@media (max-width:480px){{#atlas-root .atlas-chip{{display:none}}#atlas-root .atlas-stat-value{{font-size:24px}}}}
+"""
+    + plane_css()
+)
+
+
 DASHBOARD_SCRIPT = r"""<script>
-(function(){var root=document.getElementById('atlas-root');if(!root)return;var q=function(s){return root.querySelector(s)},qa=function(s){return[].slice.call(root.querySelectorAll(s))};function decorateParticipants(){qa('.mermaid[data-atlas-participants]').forEach(function(host){var sheet=host.closest('.atlas-sheet'),svg=host.matches('svg')?host:host.querySelector('svg')||(sheet&&sheet.querySelector('svg'));if(!svg||svg.dataset.atlasDecorated)return;var assets;try{assets=JSON.parse(host.dataset.atlasParticipants||'{}')}catch(e){return}Object.keys(assets).forEach(function(id){svg.querySelectorAll('rect.actor[name="'+id+'"]').forEach(function(rect){var x=+rect.getAttribute('x'),y=+rect.getAttribute('y'),w=+rect.getAttribute('width'),image=document.createElementNS('http://www.w3.org/2000/svg','image');image.setAttribute('href','./assets/14-runbooks/14-runbooks-'+assets[id]+'.svg');image.setAttribute('x',String(x+(w-52)/2));image.setAttribute('y',String(y+1));image.setAttribute('width','52');image.setAttribute('height','52');svg.appendChild(image)})});svg.dataset.atlasDecorated='true'})}document.addEventListener('atlas:mermaid-rendered',decorateParticipants);var zoom=q('#atlas-zoom'),content=q('#atlas-zoom-content'),scale=1.75;function setZoom(v){scale=Math.max(.2,Math.min(4,v));content.style.setProperty('--atlas-zoom-scale',scale);var b=q('[data-zoom-action="reset"]');if(b)b.textContent=Math.round(scale*100)+'%'}function open(sheet){var source=sheet.querySelector('svg,pre');if(!source)return;content.replaceChildren(source.cloneNode(true));setZoom(1.75);zoom.showModal()}qa('.atlas-zoom').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();open(b.parentElement)})});qa('[data-zoom-action]').forEach(function(b){b.addEventListener('click',function(){setZoom(b.dataset.zoomAction==='in'?scale+.25:b.dataset.zoomAction==='out'?scale-.25:1)})});qa('[data-pan-action]').forEach(function(b){b.addEventListener('click',function(){content.scrollBy({left:(b.dataset.panAction==='right'?1:-1)*Math.max(180,content.clientWidth*.6)})})});qa('[data-close]').forEach(function(b){b.addEventListener('click',function(){q('#'+b.dataset.close).close()})});q('.atlas-skip-diagrams').addEventListener('click',function(e){e.preventDefault();q('#atlas-diagrams').scrollIntoView();var b=q('.atlas-zoom');if(b)b.focus()})})();
+(function(){var root=document.getElementById('atlas-root');if(!root)return;var q=function(s){return root.querySelector(s)},qa=function(s){return[].slice.call(root.querySelectorAll(s))};
+function decorateParticipants(){qa('.mermaid[data-atlas-participants]').forEach(function(host){var sheet=host.closest('.atlas-sheet'),svg=host.matches('svg')?host:host.querySelector('svg')||(sheet&&sheet.querySelector('svg'));if(!svg||svg.dataset.atlasDecorated)return;var assets;try{assets=JSON.parse(host.dataset.atlasParticipants||'{}')}catch(e){return}Object.keys(assets).forEach(function(id){svg.querySelectorAll('rect.actor[name="'+id+'"]').forEach(function(rect){var x=+rect.getAttribute('x'),y=+rect.getAttribute('y'),w=+rect.getAttribute('width'),image=document.createElementNS('http://www.w3.org/2000/svg','image');image.setAttribute('href','./assets/14-runbooks/14-runbooks-'+assets[id]+'.svg');image.setAttribute('x',String(x+(w-52)/2));image.setAttribute('y',String(y+1));image.setAttribute('width','52');image.setAttribute('height','52');svg.appendChild(image)})});svg.dataset.atlasDecorated='true'})}
+document.addEventListener('atlas:mermaid-rendered',decorateParticipants);
+function natural(svg){var vb=svg.viewBox&&svg.viewBox.baseVal;return vb&&vb.width?vb.width:svg.getBoundingClientRect().width}
+qa('.atlas-actual').forEach(function(b){b.addEventListener('click',function(){var panel=b.closest('.atlas-drawing'),on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(on));panel.classList.toggle('is-actual',on);var svg=panel.querySelector('.atlas-sheet svg');if(svg)svg.style.width=on?natural(svg)+'px':''})});
+var zoom=q('#atlas-zoom'),content=q('#atlas-zoom-content'),scale=1.5;function setZoom(v){scale=Math.max(.25,Math.min(4,v));content.style.setProperty('--atlas-zoom-scale',scale);var b=q('[data-zoom-action="reset"]');if(b)b.textContent=Math.round(scale*100)+'%'}
+function open(panel){var source=panel.querySelector('.atlas-sheet svg,.atlas-sheet pre');if(!source)return;var copy=source.cloneNode(true);copy.removeAttribute('style');if(copy.classList.contains('atlas-draft'))content.style.setProperty('--atlas-natural',natural(source)+'px');content.replaceChildren(copy);setZoom(1);zoom.showModal()}
+qa('.atlas-zoom').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();open(b.closest('.atlas-drawing'))})});
+qa('[data-zoom-action]').forEach(function(b){b.addEventListener('click',function(){setZoom(b.dataset.zoomAction==='in'?scale+.25:b.dataset.zoomAction==='out'?scale-.25:1)})});
+qa('[data-pan-action]').forEach(function(b){b.addEventListener('click',function(){content.scrollBy({left:(b.dataset.panAction==='right'?1:-1)*Math.max(180,content.clientWidth*.6)})})});
+var drag=null;content.addEventListener('pointerdown',function(e){drag={x:e.clientX,y:e.clientY,l:content.scrollLeft,t:content.scrollTop};content.setPointerCapture(e.pointerId)});content.addEventListener('pointermove',function(e){if(!drag)return;content.scrollLeft=drag.l-(e.clientX-drag.x);content.scrollTop=drag.t-(e.clientY-drag.y)});['pointerup','pointercancel'].forEach(function(t){content.addEventListener(t,function(){drag=null})});
+qa('[data-close]').forEach(function(b){b.addEventListener('click',function(){q('#'+b.dataset.close).close()})});
+qa('.atlas-row-toggle').forEach(function(b){b.addEventListener('click',function(){var on=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(on));b.closest('.atlas-row').querySelector('.atlas-panels').hidden=!on})});
+var find=q('#atlas-find'),status=q('.atlas-find-status'),rows=qa('.atlas-row.atlas-diagram'),jumps={};qa('.atlas-jump').forEach(function(a){jumps[a.dataset.target]=a});
+function applyFind(){var term=find.value.trim().toLowerCase(),shown=0;rows.forEach(function(row){var hit=!term||row.textContent.toLowerCase().indexOf(term)>=0||(row.querySelector('.atlas-sheet pre')||{textContent:''}).textContent.toLowerCase().indexOf(term)>=0;row.hidden=!hit;if(jumps[row.id])jumps[row.id].hidden=!hit;if(hit)shown++});status.textContent=term?shown+' of '+rows.length+' diagram rows match “'+find.value.trim()+'”':''}
+find.addEventListener('input',applyFind);find.addEventListener('keydown',function(e){if(e.key==='Escape'){find.value='';applyFind();find.blur()}});
+document.addEventListener('keydown',function(e){var t=e.target;if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))){e.preventDefault();find.focus();find.select()}});
+var bar=q('.atlas-jumps'),current=null;function mark(id){if(id===current||!jumps[id])return;if(current&&jumps[current])jumps[current].removeAttribute('aria-current');current=id;var a=jumps[id];a.setAttribute('aria-current','true');var l=a.offsetLeft-bar.offsetLeft,r=l+a.offsetWidth;if(l<bar.scrollLeft||r>bar.scrollLeft+bar.clientWidth)bar.scrollLeft=l-16}
+function spy(){var top=q('.atlas-top').getBoundingClientRect().bottom+48,best='atlas-overview';qa('.atlas-row').forEach(function(row){if(!row.hidden&&row.getBoundingClientRect().top<=top)best=row.id});mark(best)}
+window.addEventListener('scroll',spy,{passive:true});window.addEventListener('resize',spy);spy();
+q('.atlas-skip-diagrams').addEventListener('click',function(e){e.preventDefault();q('#atlas-diagrams').scrollIntoView();var b=q('.atlas-zoom');if(b)b.focus()})})();
 </script>"""
 
 
 def standalone(inner: str) -> str:
-    fonts = "<style>@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('./fonts/jetbrains-mono-latin.woff2') format('woff2')}@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 600;font-display:swap;src:url('./fonts/space-grotesk-latin.woff2') format('woff2')}</style>"
-    script = "<script>(function(){var r=document.getElementById('atlas-root'),saved;try{saved=localStorage.getItem('atlas-theme')}catch(e){}r.dataset.theme=saved||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var b=document.getElementById('atlas-theme');function themeState(){b.setAttribute('aria-pressed',String(r.dataset.theme==='dark'))}themeState();b.addEventListener('click',function(){r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';themeState();try{localStorage.setItem('atlas-theme',r.dataset.theme)}catch(e){}});mermaid.initialize({startOnLoad:false,securityLevel:'loose',flowchart:{htmlLabels:true,useMaxWidth:true},sequence:{useMaxWidth:true}});mermaid.run({nodes:document.querySelectorAll('.mermaid')}).then(function(){setTimeout(function(){document.dispatchEvent(new Event('atlas:mermaid-rendered'))},0)})})();</script>"
-    themed = (
-        inner.rsplit("</div>", 1)[0]
-        + '<button id="atlas-theme" type="button" aria-label="Toggle dark theme" aria-pressed="false">theme</button></div>'
-        + inner.rsplit("</div>", 1)[1]
+    faces = "".join(
+        f"@font-face{{font-family:'{family}';font-style:normal;font-weight:{weights};"
+        f"font-display:swap;src:url('./fonts/{name}') format('woff2')}}"
+        for family, weights, name in (
+            ("Roboto", "100 900", "roboto-latin.woff2"),
+            ("Roboto Mono", "100 700", "roboto-mono-latin.woff2"),
+        )
     )
-    return f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">{fonts}</head><body>{themed}<script src="./mermaid.min.js"></script>{script}</body></html>\n'
+    page = (
+        "html,body{margin:0;background:#f4f5f5}html[data-theme=dark],html[data-theme=dark] body"
+        "{background:#111217}@media (prefers-color-scheme:dark){html:not([data-theme]),"
+        "html:not([data-theme]) body{background:#111217}}"
+    )
+    script = (
+        "<script>(function(){var r=document.getElementById('atlas-root'),d=document.documentElement,"
+        "saved;try{saved=localStorage.getItem('atlas-theme')}catch(e){}function set(t){r.dataset.theme=t;"
+        "d.dataset.theme=t;b.setAttribute('aria-pressed',String(t==='dark'))}var b=document."
+        "getElementById('atlas-theme');set(saved||(matchMedia('(prefers-color-scheme: dark)').matches?"
+        "'dark':'light'));b.addEventListener('click',function(){set(r.dataset.theme==='dark'?'light':"
+        "'dark');try{localStorage.setItem('atlas-theme',r.dataset.theme)}catch(e){}});var nodes="
+        "document.querySelectorAll('.mermaid');if(!nodes.length||!window.mermaid)return;"
+        "mermaid.initialize({startOnLoad:false,securityLevel:'loose',fontFamily:'Roboto, system-ui, "
+        "sans-serif',flowchart:{htmlLabels:true,useMaxWidth:true},sequence:{useMaxWidth:true}});"
+        "mermaid.run({nodes:nodes}).then(function(){setTimeout(function(){document.dispatchEvent("
+        "new Event('atlas:mermaid-rendered'))},0)})})();</script>"
+    )
+    return (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" '
+        f'content="width=device-width, initial-scale=1"><link rel="icon" href="data:,"><style>{faces}{page}</style></head>'
+        f'<body>{inner}<script src="./mermaid.min.js"></script>{script}</body></html>\n'
+    )
 
 
 def write_if_changed(path: Path, content: str) -> bool:
@@ -572,7 +974,6 @@ def copy_if_changed(source: Path, target: Path) -> bool:
 
 def main() -> int:
     docs = load()
-    identities = load_identity_assets()
     evidence = stabilize_evidence(load_fixture_evidence(), embedded_evidence(OUT / "atlas.html"))
     inner = build(docs, evidence)
     vendored = REPO / "vendor" / "mermaid.min.js"

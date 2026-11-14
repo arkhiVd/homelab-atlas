@@ -44,7 +44,11 @@ def test_fixture_render_is_deterministic_and_stays_under_out():
             assert (out / "site" / "index.html").read_bytes() == first
         assert (out / "atlas.html").is_file()
         assert any((out / "site" / "assets").rglob("*.svg"))
-        assert (out / "site" / "fonts" / "space-grotesk-latin.woff2").is_file()
+        assert (out / "site" / "fonts" / "roboto-latin.woff2").is_file()
+        assert (out / "site" / "fonts" / "roboto-mono-latin.woff2").is_file()
+        site = (out / "site" / "index.html").read_text()
+        assert 'class="atlas-draft" data-diagram="02-ingress"' in site
+        assert "https://fonts.g" not in site
     finally:
         shutil.rmtree(out, ignore_errors=True)
 
@@ -96,5 +100,18 @@ def test_page_is_an_architecture_guide_without_snapshot_or_catalog_cards():
     assert "https://github.com/arkhiVd/agent-workbench" in html
     assert "https://github.com/arkhiVd/invest-pipeline" in html
     assert "https://github.com/arkhiVd/librarian" in html
-    assert '<section class="atlas-notes" aria-label="Notes">' in html
+    assert 'aria-label="Notes">' in html
     assert "<summary>Notes</summary>" not in html
+
+
+def test_page_uses_the_board_layout():
+    docs = renderer.load()
+    html = renderer.build(docs, renderer.load_fixture_evidence())
+    assert '<nav class="atlas-crumbs" aria-label="Breadcrumb">' in html
+    assert 'id="atlas-find"' in html and 'aria-keyshortcuts="/"' in html
+    assert html.count('class="atlas-jump"') == len(docs) + 1
+    assert html.count('class="atlas-row atlas-diagram"') == len(docs)
+    assert html.count("atlas-span-8 atlas-source") == len(docs)
+    assert html.count("atlas-span-16 atlas-notes") == len(docs)
+    assert "Findings and drift" in html and 'id="atlas-zoom"' in html
+    assert 'id="atlas-theme"' in html
