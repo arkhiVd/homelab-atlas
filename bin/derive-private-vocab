@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Derive the private-only vocabulary as salted hashes, written outside this repository.
+
+Usage: bin/derive-private-vocab PRIVATE_ATLAS_DIR [--dictionary WORDS] [--out FILE]
+
+Terms come from the private atlas content (diagrams, sidecars, fixtures, docs) minus every term in
+this repository's tracked-style text files and minus plain dictionary words. Only counts are
+printed; no term is written in clear text anywhere.
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import secrets
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parent
+_SPEC = importlib.util.spec_from_file_location("redaction", HERE / "redaction.py")
+redaction = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(redaction)
+
+TEXT_SUFFIXES = {".mmd", ".yaml", ".yml", ".md", ".json", ".txt", ".py", ".toml", ".html", ""}
+SKIP_DIRS = {".git", ".venv", "out", "vendor", "node_modules", "__pycache__", ".claude"}
+PRIVATE_CONTENT = ("src", "docs", "fixtures", "README.md", "SPEC.md", "ROADMAP.md", "TASKS.md")
+
+
+def text_files(root: Path, parts: tuple[str, ...] | None = None):
+    starts = [root / part for part in parts] if parts else [root]
+    for start in starts:
+        candidates = [start] if start.is_file() else sorted(start.rglob("*"))
+        for path in candidates:
+            if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
+                continue
+            if SKIP_DIRS & set(path.relative_to(root).parts):
+                continue
+            yield path.relative_to(root).as_posix()  # file names count as public text too
+            try:
+                yield path.read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                continue
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("private", type=Path, help="checkout of the private atlas")
+    parser.add_argument("--dictionary", type=Path, help="word list of common words to ignore")
+    parser.add_argument("--out", type=Path, default=redaction.vocab_path())
+    args = parser.parse_args()
+    private = args.private.resolve()
+    out = args.out.expanduser().resolve()
+    if private == REPO or REPO in out.parents:
+        print("ERROR: the vocabulary must come from another repo and live outside this one")
+        return 1
+    dictionary = set()
+    if args.dictionary:
+        dictionary = {w.strip().lower() for w in args.dictionary.read_text().splitlines()}
+    public_terms = set().union(*(redaction.terms(text) for text in text_files(REPO)))
+    public_terms |= {p.relative_to(REPO).as_posix().lower() for p in REPO.rglob("*")}
+    private_terms = set().union(
+        *(redaction.terms(text) for text in text_files(private, PRIVATE_CONTENT))
+    )
+    only = {t for t in private_terms - public_terms if redaction.keep(t, dictionary)}
+    salt = secrets.token_hex(16)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        f"salt {salt}\n" + "".join(f"{redaction.digest(salt, t)}\n" for t in sorted(only))
+    )
+    out.chmod(0o600)
+    print(
+        f"private terms: {len(private_terms)}; also public: {len(private_terms & public_terms)}; "
+        f"private-only kept: {len(only)}; wrote {len(only)} salted hashes"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
