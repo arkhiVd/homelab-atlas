@@ -18,5 +18,5 @@
 - [x] Apply the Board theme while keeping navigation, notes, sources, zoom, and theme toggle.
 - [x] Add the redaction check for generic markers and the hashed private vocabulary.
 - [x] Gate, render twice, and capture screenshots at 1440 px and 390 px in light and dark.
-- [ ] Owner approves the proof; convert the remaining flowcharts.
+- [x] Owner approves the proof; convert the remaining flowcharts.
 - [ ] Fix the missing `14-runbooks-overlay.svg` participant icon (404 that predates this phase).
