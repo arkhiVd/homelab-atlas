@@ -4,9 +4,10 @@
 flowchart TB
     subgraph entry["People and triggers"]
 
+        x_mcp_clients["<img src='./assets/08-ai-plane/mcp.svg' width='72' height='72' alt=''/><br/><b>MCP clients</b><br/>Claude Code · Desktop · Codex<br/>OpenCode · mobile device"]
+
         x_browser["<img src='./assets/08-ai-plane/user.svg' width='72' height='72' alt=''/><br/><b>User</b><br/>CloudOps browser"]
         x_telegram["<img src='./assets/08-ai-plane/telegram.svg' width='72' height='72' alt=''/><br/><b>Telegram</b><br/>gateway · Jobhunt bot"]
-        x_mcp_clients["<img src='./assets/08-ai-plane/mcp.svg' width='72' height='72' alt=''/><br/><b>MCP clients</b><br/>Claude Code · Desktop · Codex<br/>OpenCode · mobile device"]
         x_timers["<img src='./assets/08-ai-plane/timer.svg' width='72' height='72' alt=''/><br/><b>systemd timers</b><br/>Jobhunt discovery"]
     end
 
@@ -62,7 +63,6 @@ flowchart TB
         end
     end
 
-    entry ~~~ homelab_mcp
 
     mise -.->|"installs Pi"| pi
     mise -.->|"installs Herdr"| herdr

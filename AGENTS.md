@@ -9,7 +9,7 @@
 - A sidecar `layout:` block places a flowchart's nodes on `[column, row]` cells; `bin/atlas_draft.py` then draws it as static, gutter-routed SVG. The `.mmd` file stays the source of nodes, edges, and labels. Flowcharts without `layout:` and sequence diagrams still use the vendored Mermaid runtime.
 - `bin/render-artifact` generates the static dashboard below `out/`. A drafted diagram with geometry findings refuses to render.
 - `bin/redaction.py` scans generated output for private markers. `bin/derive-private-vocab PRIVATE_ATLAS_DIR --dictionary /usr/share/dict/words` writes salted hashes of private-only terms outside the repository (default `~/.config/homelab-atlas/private-vocab.sha256`, or `ATLAS_PRIVATE_VOCAB`); the tests check output against it when present and report a skip when not.
-- `vendor/fonts/` holds Roboto and Roboto Mono with their licenses and checksums.
+- `vendor/fonts/` holds Space Grotesk and JetBrains Mono; `vendor/fonts/manifest.yaml` records their checksums and license.
 - `out/` is generated. Never hand-edit it.
 
 ## Commands

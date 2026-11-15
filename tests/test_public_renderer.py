@@ -44,8 +44,8 @@ def test_fixture_render_is_deterministic_and_stays_under_out():
             assert (out / "site" / "index.html").read_bytes() == first
         assert (out / "atlas.html").is_file()
         assert any((out / "site" / "assets").rglob("*.svg"))
-        assert (out / "site" / "fonts" / "roboto-latin.woff2").is_file()
-        assert (out / "site" / "fonts" / "roboto-mono-latin.woff2").is_file()
+        assert (out / "site" / "fonts" / "space-grotesk-latin.woff2").is_file()
+        assert (out / "site" / "fonts" / "jetbrains-mono-latin.woff2").is_file()
         site = (out / "site" / "index.html").read_text()
         assert 'class="atlas-draft" data-diagram="02-ingress"' in site
         assert "https://fonts.g" not in site

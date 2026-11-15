@@ -4,7 +4,8 @@
 
 - Preserve hand-authored Mermaid topology and sidecar metadata as the dashboard source.
 - Generate a standalone static site under `out/site/`.
-- Provide the architecture dashboard layout, navigation, catalog, filters, inspector, zoom controls, responsive behavior, and theme handling.
+- Provide the architecture dashboard layout, navigation, zoom controls, and responsive behavior in the Board visual system shared with the private atlas (phase 2 below).
+- Provide light and dark themes that follow the system preference, with a toggle whose choice persists in the browser. This replaces the phase A deep-ocean, single-theme, loading-veil design.
 - Use only committed fixture evidence. Rendering must not inspect the host.
 - Load fonts, Mermaid, icons, and screenshots from local checked inputs.
 - Validate SVG checksums and reject active or externally loaded SVG content.
@@ -17,7 +18,7 @@
 - The page uses the "Board" ops-dashboard layout: a sticky top bar with a breadcrumb, a find box (`/` focuses it), and a fixture snapshot chip; a second bar with one jump button per diagram row, the visible row highlighted; an Overview row of stat panels with threshold colors; then one dashboard row per diagram on a 24-column panel grid.
 - Each diagram row holds a full-width drawing panel (source file in its header, an "Actual size" toggle, and the existing zoom dialog), a Notes panel (span 16), and a Source panel (span 8: file, state badge, check, revision, snapshot). Findings show in an alert-style list panel.
 - Panels are flat, with a 2px radius and 1px borders. Light (`#f4f5f5` page, `#fff` panels) and dark (`#111217` page, `#181b1f` panels) themes both work, follow the system preference, and keep the manual toggle.
-- Fonts are Roboto and Roboto Mono, vendored under `vendor/fonts/` with their licenses. No runtime remote assets.
+- The theme, tokens, and panel styling match the private atlas Board design: Space Grotesk and JetBrains Mono (vendored under `vendor/fonts/`, listed in `vendor/fonts/manifest.yaml`), an indigo accent, `#f4f5f5`/`#fff` light and `#080c0b`/`#0f1614` dark surfaces, dashed zone frames, and node planes from `src/style.md` with matching dark class colors. No runtime remote assets.
 - At 390 px the body never scrolls horizontally; the panel grid collapses to one column.
 
 ### Drafted diagrams
@@ -45,5 +46,4 @@
 
 ### Pinned inputs
 
-- Roboto variable, latin subset, `@fontsource-variable/roboto` 5.2.5, SIL OFL 1.1.
-- Roboto Mono variable, latin subset, `@fontsource-variable/roboto-mono` 5.1.0, Apache 2.0.
+- Space Grotesk and JetBrains Mono latin subsets, the existing local artifacts, SIL OFL 1.1 (`vendor/fonts/manifest.yaml`).

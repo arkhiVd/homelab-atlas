@@ -6,9 +6,22 @@ ruff format --check .
 ruff check .
 pytest -q -rs
 bin/render-artifact >/tmp/atlas-render-first.log
+python3 - <<'PY'
+import re
+import subprocess
+from pathlib import Path
+page = Path("out/site/index.html").read_text()
+scripts = re.findall(r"<script(?:[^>]*)>(.*?)</script>", page, re.DOTALL)
+if not scripts:
+    raise SystemExit("no generated inline scripts")
+for index, script in enumerate(scripts):
+    path = Path(f"/tmp/atlas-inline-{index}.js")
+    path.write_text(script)
+    subprocess.run(["node", "--check", path], check=True)
+PY
 first=$(sha256sum out/site/index.html out/atlas.html)
 bin/render-artifact >/tmp/atlas-render-second.log
 second=$(sha256sum out/site/index.html out/atlas.html)
 [[ "$first" == "$second" ]]
 git diff --check -- . ':(exclude)vendor/mermaid.min.js'
-printf 'PASS: format, lint, tests, drafted geometry, redaction, deterministic render, whitespace checks\n'
+printf 'PASS: format, lint, tests, drafted geometry, redaction, inline scripts, deterministic render, whitespace checks\n'

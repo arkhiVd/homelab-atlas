@@ -1,6 +1,6 @@
 # Homelab Atlas
 
-A static architecture atlas built from hand-authored Mermaid diagrams and machine-readable sidecars. The dashboard includes layered diagrams, a searchable service catalog, lifecycle and capability filters, service inspection, full-screen diagram zoom, and local theme persistence.
+A static architecture atlas built from hand-authored Mermaid diagrams and machine-readable sidecars. The dashboard uses the Board layout shared with the private atlas: a sticky bar with breadcrumb, find box, and row jumps; an overview row; and one row of panels per diagram, in light and dark themes. Flowcharts are hand-placed, gutter-routed SVG drawn by `bin/atlas_draft.py`; sequence diagrams use the vendored Mermaid runtime.
 
 The bundled evidence is deterministic. Rendering does not inspect the host.
 

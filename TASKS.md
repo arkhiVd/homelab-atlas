@@ -7,12 +7,13 @@
 - [x] Add deterministic evidence fixtures.
 - [x] Validate renderer containment and asset safety.
 - [ ] Complete browser review at desktop and mobile widths.
+- [x] Phase A: apply the deep-ocean UI, remove theme persistence, add loading recovery, and replace Mint identities with Debian.
 - [ ] Present the local candidate for owner inspection.
 
 ## Phase 2: Board dashboard and drafted diagrams
 
 - [x] Record the phase in SPEC, ROADMAP, and TASKS.
-- [x] Vendor Roboto and Roboto Mono with licenses.
+- [x] Match the private atlas Board theme and fonts (Space Grotesk, JetBrains Mono), replacing phase A's deep-ocean UI.
 - [x] Port the grid drafter with preservation, geometry, and determinism tests.
 - [x] Draft `02-ingress` as the proof diagram.
 - [x] Apply the Board theme while keeping navigation, notes, sources, zoom, and theme toggle.
