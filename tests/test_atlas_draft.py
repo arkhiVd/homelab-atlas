@@ -31,7 +31,7 @@ def words(text):
     return " ".join(text.split())
 
 
-def test_proof_diagram_is_drafted():
+def test_every_flowchart_is_drafted():
     assert {"00-context", "02-ingress", "03-containers", "08-ai-plane"} <= {
         p.id for p in laid_out()
     }

@@ -94,3 +94,29 @@ nodes:
   kind: concept
   label: Authenticated overlay Serve /health
   lifecycle: observed-live
+layout:
+  grid: {column: 410, node_width: 310, row: 150}
+  column_shift: {4: 70, 6: 70}
+  key: [promote_service, hc_receiver, source_policy]
+  nodes:
+    x_miband: [0, 0.6]
+    x_gadgetbridge: [1, 0.6]
+    x_health_connect: [1, 3.8]
+    syncthing: [2, 0.6]
+    gb_source: [3, 0.6]
+    promote_path: [4, 0.6]
+    promote_timer: [4, 1.6]
+    promote_service: [5, 1.1]
+    promotion_state: [5, 2.2]
+    gb_current: [6, 1.1]
+    gb_archive: [7, 1.1]
+    x_overlay_access: [2, 3.8]
+    hc_receiver: [3, 3.8]
+    hc_snapshot: [4, 3.4]
+    hc_source: [4, 4.6]
+    hc_backup_service: [5, 4.6]
+    hc_backup_timer: [4, 5.7]
+    hc_backups: [5, 5.7]
+    source_policy: [6, 3.4]
+    grafana: [7, 3.4]
+    x_health_ui: [7, 4.5]
