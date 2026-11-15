@@ -123,3 +123,33 @@ nodes:
   kind: external
   label: Internet
   identity: topology-cloud
+layout:
+  grid: {column: 290, node_width: 200, row: 150}
+  column_shift: {2: 110}
+  key: [host, overlay_host]
+  nodes:
+    workstation: [0, 0.5]
+    mobile_device: [0, 1.5]
+    overlay_host: [1, 1]
+    hostnet: [2, 0]
+    syncthing: [3, 0]
+    hbbs: [2, 1]
+    hbbr: [3, 1]
+    n_homelab: [2, 2.75]
+    gluetun: [2, 3.75]
+    gluetun_books: [2, 4.8]
+    x_homelab_members: [3, 3.75]
+    n_wger: [2, 6.2]
+    x_wger_members: [3, 6.2]
+    host: [4, 0]
+    x_hostproc: [4, 1.55]
+    x_docker_gw: [4, 2.75]
+    n_default: [4, 4.7]
+    watchtower: [4, 5.7]
+    x_net_bridge: [5, 4.7]
+    x_net_none: [5, 5.7]
+    x_internet: [4, -1.6]
+  edges:
+    - {from: x_internet, to: hostnet, source_port: [l, -14]}
+    - {from: gluetun, to: x_internet, target_port: [l, 10], label_at: last}
+    - {from: gluetun_books, to: x_internet, target_port: [l, 10]}

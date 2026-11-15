@@ -4,7 +4,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 ruff format --check .
 ruff check .
-pytest -q
+pytest -q -rs
 bin/render-artifact >/tmp/atlas-render-first.log
 python3 - <<'PY'
 import re
@@ -19,9 +19,9 @@ for index, script in enumerate(scripts):
     path.write_text(script)
     subprocess.run(["node", "--check", path], check=True)
 PY
-first=$(sha256sum out/site/index.html)
+first=$(sha256sum out/site/index.html out/atlas.html)
 bin/render-artifact >/tmp/atlas-render-second.log
-second=$(sha256sum out/site/index.html)
+second=$(sha256sum out/site/index.html out/atlas.html)
 [[ "$first" == "$second" ]]
 git diff --check -- . ':(exclude)vendor/mermaid.min.js'
-printf 'PASS: format, lint, tests, deterministic render, whitespace checks\n'
+printf 'PASS: format, lint, tests, drafted geometry, redaction, inline scripts, deterministic render, whitespace checks\n'

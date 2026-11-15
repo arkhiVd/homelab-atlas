@@ -82,3 +82,21 @@ nodes:
   kind: external
   label: AWS example-region-1 (cka-dojo)
   identity: aws
+layout:
+  grid: {column: 300, node_width: 200, row: 150}
+  key: [x_overlay_access, x_stack_homelab, x_agent_plane]
+  nodes:
+    x_user: [0, 1.5]
+    workstation: [1, 1]
+    mobile_device: [1, 2]
+    x_overlay_access: [2, 1.5]
+    x_lan: [2, 3.5]
+    x_agent_plane: [3, 1]
+    x_stack_homelab: [3, 2.5]
+    x_stack_rustdesk: [3, 3.8]
+    x_storage: [4, 3.8]
+    x_anthropic: [5, 0.2]
+    x_telegram: [5, 1.1]
+    x_aws: [5, 2]
+    x_vpn_egress: [5, 3]
+    x_content: [6, 3]

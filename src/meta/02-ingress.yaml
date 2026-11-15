@@ -76,3 +76,28 @@ nodes:
   kind: concept
   label: Mermaid node x_atlas
   lifecycle: observed-live
+layout:
+  grid: {column: 340, node_width: 210, row: 150}
+  column_shift: {2: 90, 3: 50}
+  key: [x_overlay_access, x_serve]
+  zone_titles_below: [door3]
+  nodes:
+    x_browser: [0, 1]
+    x_sshd: [0, 3.2]
+    x_slskd_p2p: [0, 4.2]
+    x_rustdesk_p: [0, 5.2]
+    x_overlay_access: [1, 1]
+    x_serve: [1, 4]
+    cloudops: [2, 0]
+    x_others: [2, 1]
+    x_mcp: [2, 2]
+    homepage: [2, 3]
+    x_atlas: [2, 4.2]
+    grafana: [2, 5.2]
+    cloudops_chat: [3, 0]
+    claude_bridge: [3, 1.3]
+    health_connect: [3, 6]
+    invest_dashboard: [3, 7]
+  edges:
+    - {from: cloudops, to: cloudops_chat, source_port: [r, -26], target_port: [l, -26]}
+    - {from: cloudops, to: cloudops_chat, source_port: [r, 26], target_port: [l, 26]}

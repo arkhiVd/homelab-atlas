@@ -69,3 +69,25 @@ nodes:
   kind: external
   label: Anna's Archive
   lifecycle: external-unverified
+layout:
+  grid: {column: 320, node_width: 200, row: 150}
+  column_shift: {2: 80}
+  key: [immich_server, bookportal]
+  nodes:
+    x_user_p: [0, 1]
+    immich_server: [1, 1]
+    v_upload: [2, 0]
+    immich_db: [2, 1]
+    v_immich_db: [3, 1]
+    immich_redis: [2, 2]
+    immich_machine_learning: [3, 2.6]
+    v_model: [4, 2.6]
+    x_user_b: [0, 4.9]
+    bookportal: [1, 4.9]
+    x_libgen: [2, 3.9]
+    gluetun_books: [2, 4.9]
+    x_annas: [3, 4.9]
+    v_books: [2, 5.9]
+    kavita: [3, 5.9]
+  edges:
+    - {from: immich_machine_learning, to: immich_db, target_port: [r, 22]}
